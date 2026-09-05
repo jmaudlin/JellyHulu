@@ -1,0 +1,333 @@
+/* ==========================================================================
+   JellyHulu — 11 · Video player OSD
+   Hulu's player chrome: a wide scrub bar that thickens on hover, a big
+   centred play/pause, and everything else demoted to the edges.
+   ========================================================================== */
+
+#videoOsdPage,
+.videoPlayerContainer {
+  background: #000 !important;
+}
+
+.videoPlayerContainer video,
+.htmlvideoplayer {
+  background: #000;
+}
+
+/* --------------------------------------------------------------------------
+   Top bar over the video
+   -------------------------------------------------------------------------- */
+.videoOsdTop,
+#videoOsdPage .skinHeader {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    transparent 100%
+  ) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom OSD
+   -------------------------------------------------------------------------- */
+.videoOsdBottom {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.94) 0%,
+    rgba(0, 0, 0, 0.72) 42%,
+    rgba(0, 0, 0, 0.18) 78%,
+    transparent 100%
+  ) !important;
+  padding: var(--jh-space-16) var(--jh-gutter) var(--jh-space-5) !important;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.videoOsdBottom-hidden {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+}
+
+.osdTextContainer {
+  margin-bottom: var(--jh-space-2);
+}
+
+.osdTitle,
+.osdTitle.osdTextContainer {
+  font-size: var(--jh-fs-2xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  color: var(--jh-text) !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.osdMediaInfo,
+.osdSecondaryMediaInfo {
+  color: var(--jh-ink-200) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-medium);
+  letter-spacing: var(--jh-ls-snug);
+}
+
+.osdTimeText,
+.osdPositionText,
+.osdDurationText {
+  color: var(--jh-ink-100) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Scrub bar
+   Jellyfin uses an MDL slider: a lower (played) track, an upper (remaining)
+   track, and a thumb. Hulu's is thin until you touch it.
+   -------------------------------------------------------------------------- */
+.videoOsdBottom .sliderContainer,
+.osdProgressInner {
+  padding-block: var(--jh-space-2);
+}
+
+.mdl-slider__background-flex {
+  height: 4px !important;
+  border-radius: var(--jh-radius-pill);
+  background: rgba(255, 255, 255, 0.24) !important;
+  transition: height var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.sliderContainer:hover .mdl-slider__background-flex,
+.mdl-slider:focus-visible ~ .mdl-slider__background-flex {
+  height: 7px !important;
+}
+
+.mdl-slider__background-lower {
+  background: var(--jh-accent) !important;
+  border-radius: var(--jh-radius-pill);
+}
+
+.mdl-slider__background-upper {
+  background: transparent !important;
+}
+
+/* Buffered-ahead segment. */
+.sliderBufferedRange,
+.mdl-slider-background-upper-buffer,
+.osdProgressBuffered {
+  background: rgba(255, 255, 255, 0.42) !important;
+  border-radius: var(--jh-radius-pill);
+}
+
+/* Thumb: hidden until interaction, Hulu-style. */
+.mdl-slider::-webkit-slider-thumb {
+  background: var(--jh-accent) !important;
+  border: 0 !important;
+  width: 14px;
+  height: 14px;
+  transform: scale(0);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring);
+  box-shadow: 0 0 0 4px rgba(28, 231, 131, 0.25);
+}
+
+.mdl-slider::-moz-range-thumb {
+  background: var(--jh-accent) !important;
+  border: 0 !important;
+  width: 14px;
+  height: 14px;
+}
+
+.sliderContainer:hover .mdl-slider::-webkit-slider-thumb,
+.mdl-slider:active::-webkit-slider-thumb,
+.mdl-slider:focus-visible::-webkit-slider-thumb {
+  transform: scale(1);
+}
+
+/* Chapter markers along the bar. */
+.sliderMarker,
+.chapterMarker {
+  background: rgba(255, 255, 255, 0.85) !important;
+  width: 2px;
+  border-radius: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Trickplay / chapter preview bubble
+   -------------------------------------------------------------------------- */
+.sliderBubble {
+  background: var(--jh-ink-950) !important;
+  border: 1px solid var(--jh-line-strong);
+  border-radius: var(--jh-radius-md);
+  box-shadow: var(--jh-shadow-lg);
+  padding: 0;
+  overflow: hidden;
+  color: var(--jh-text);
+}
+
+.sliderBubbleText,
+.chapterThumbText {
+  padding: 0.35rem var(--jh-space-2);
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: var(--jh-ink-950);
+}
+
+.chapterThumbContainer,
+.sliderBubble .chapterThumb {
+  border-radius: var(--jh-radius-md) var(--jh-radius-md) 0 0;
+  overflow: hidden;
+}
+
+.chapterThumbTextContainer {
+  background: var(--jh-ink-950);
+  color: var(--jh-text);
+}
+
+.chapterThumbName {
+  color: var(--jh-text);
+  font-weight: var(--jh-fw-semibold);
+}
+
+/* --------------------------------------------------------------------------
+   Transport controls
+   -------------------------------------------------------------------------- */
+.videoOsdBottom .buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-1);
+  padding-top: var(--jh-space-1);
+}
+
+.videoOsdBottom .paper-icon-button-light {
+  width: 2.9rem;
+  height: 2.9rem;
+  color: var(--jh-text) !important;
+}
+
+.videoOsdBottom .paper-icon-button-light:hover {
+  color: var(--jh-accent) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Play/pause is the anchor of the row. */
+.videoOsdBottom .btnPause,
+.videoOsdBottom .btnPlayPause {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.videoOsdBottom .btnPause:hover,
+.videoOsdBottom .btnPlayPause:hover {
+  background: var(--jh-accent-hover) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.videoOsdBottom .btnPause .material-icons { font-size: 2rem; }
+
+/* Volume. */
+.osdVolumeSliderContainer {
+  width: 7rem;
+  margin-inline: var(--jh-space-2);
+}
+
+/* Active toggles (subtitles on, audio track chosen). */
+.btnSubtitles.subtitleButton-active,
+.btnAudio.audioButton-active,
+.videoOsdBottom .paper-icon-button-light.is-active {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Skip intro / skip credits (Intro Skipper plugin and Jellyfin 10.11 native)
+   -------------------------------------------------------------------------- */
+.skipIntro,
+.skip-button,
+#skipIntro .skipIntro-button,
+button.skipIntro {
+  background: rgba(5, 6, 7, 0.72) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--jh-line-strong) !important;
+  border-radius: var(--jh-radius-pill) !important;
+  color: var(--jh-text) !important;
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-snug);
+  padding: 0.75rem 1.75rem !important;
+  box-shadow: var(--jh-shadow-lg);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.skipIntro:hover,
+.skip-button:hover,
+button.skipIntro:hover {
+  background: var(--jh-accent) !important;
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   Up-next / post-play card
+   -------------------------------------------------------------------------- */
+.upNextContainer,
+.upNextDialog {
+  background: rgba(5, 6, 7, 0.9) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-lg);
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.upNextDialog-countdownText,
+.upNextContainer .countdown {
+  color: var(--jh-accent) !important;
+  font-weight: var(--jh-fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Subtitles
+   Jellyfin's own subtitle appearance settings win over this; these are the
+   defaults for users who never open that page.
+   -------------------------------------------------------------------------- */
+.htmlvideoplayer::cue {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-family: var(--jh-font);
+  font-weight: var(--jh-fw-semibold);
+  line-height: 1.35;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.subtitleAppearanceOptions .subtitlePreview {
+  border-radius: var(--jh-radius-md);
+  border: 1px solid var(--jh-line);
+}
+
+/* --------------------------------------------------------------------------
+   Buffering spinner over the video
+   -------------------------------------------------------------------------- */
+.videoPlayerContainer .docspinner {
+  filter: drop-shadow(0 0 18px rgba(28, 231, 131, 0.5));
+}
+
+/* --------------------------------------------------------------------------
+   Picture-in-picture / mini player
+   -------------------------------------------------------------------------- */
+.videoPlayerContainer.pip,
+.miniPlayer {
+  border-radius: var(--jh-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--jh-shadow-xl);
+  border: 1px solid var(--jh-line);
+}

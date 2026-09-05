@@ -1,0 +1,198 @@
+/* ==========================================================================
+   JellyHulu — 21 · Accessibility & performance guards
+   Last in the cascade so these always win.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   The OS setting is honoured unconditionally. Users who want motion back can
+   still choose it explicitly in the settings panel, which sets
+   data-jh-motion="full" — an explicit opt-in overriding an OS default is
+   the one case where ignoring the media query is correct.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-jh-motion="full"]) *,
+  html:not([data-jh-motion="full"]) *::before,
+  html:not([data-jh-motion="full"]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html:not([data-jh-motion="full"]) {
+    --jh-card-scale: 1;
+    --jh-preview-display: none;
+  }
+
+  html:not([data-jh-motion="full"]) .jh-hero-slide.is-active .jh-hero-backdrop {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Forced colors (Windows high contrast)
+   Drop every decorative gradient and let the OS palette through.
+   -------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  .cardOverlayContainer,
+  .jh-hero-scrim,
+  .innerCardFooter,
+  #itemBackdrop::after {
+    background: none !important;
+  }
+
+  .cardScalable,
+  .dialog,
+  .actionSheet,
+  .listItem {
+    border: 1px solid CanvasText !important;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+
+  .jh-badge,
+  .indicator {
+    border: 1px solid CanvasText !important;
+    forced-color-adjust: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Increased contrast
+   -------------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+  :root {
+    --jh-text-secondary: #FFFFFF;
+    --jh-text-muted: #D5D9DE;
+    --jh-line: rgba(255, 255, 255, 0.28);
+    --jh-line-faint: rgba(255, 255, 255, 0.18);
+    --jh-line-strong: rgba(255, 255, 255, 0.45);
+    --jh-focus-width: 4px;
+  }
+
+  .cardScalable { box-shadow: 0 0 0 1px var(--jh-line-strong) inset; }
+
+  .cardOverlayContainer {
+    background: rgba(5, 6, 7, 0.86) !important;
+  }
+}
+
+/* Explicit user preference from the settings panel. */
+html[data-jh-contrast="high"] {
+  --jh-text-secondary: #FFFFFF;
+  --jh-text-muted: #D5D9DE;
+  --jh-line: rgba(255, 255, 255, 0.28);
+  --jh-line-faint: rgba(255, 255, 255, 0.18);
+  --jh-line-strong: rgba(255, 255, 255, 0.45);
+  --jh-focus-width: 4px;
+  --jh-glass-bg: rgba(8, 9, 11, 0.97);
+}
+
+/* --------------------------------------------------------------------------
+   Screen-reader-only text used by the JS companion's injected controls.
+   -------------------------------------------------------------------------- */
+.jh-sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — Jellyfin has none; a keyboard user otherwise tabs the whole
+   header on every page. Injected by the JS companion. */
+.jh-skip-link {
+  position: fixed;
+  top: var(--jh-space-2);
+  left: var(--jh-space-2);
+  z-index: var(--jh-z-tooltip);
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--jh-radius-md);
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+  font-weight: var(--jh-fw-bold);
+  transform: translateY(-200%);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-skip-link:focus {
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   Performance guards
+   -------------------------------------------------------------------------- */
+
+/* While a rail or grid is actively scrolling, the JS companion sets
+   .jh-scrolling on <html>. Suspending hover transitions during a scroll
+   keeps a fast flick smooth on a long grid — the pointer sweeps across
+   dozens of cards and each one would otherwise start an animation. */
+html.jh-scrolling .cardScalable,
+html.jh-scrolling .cardOverlayContainer,
+html.jh-scrolling .jh-card-info {
+  transition: none !important;
+}
+
+html.jh-scrolling .card:hover .cardScalable {
+  transform: none;
+}
+
+/* Never leave will-change set on an idle element — it costs memory per
+   layer and, kept permanently, makes things slower rather than faster. */
+.card:not(:hover):not(:focus-within) .cardScalable {
+  will-change: auto;
+}
+
+/* Off-screen rails do no paint work. Rails are wide and short, so a
+   generous intrinsic height avoids scroll-anchoring jumps.
+   The selector is a sibling combinator rather than :not(:first-of-type) —
+   :first-of-type matches on tag name, so it picks the wrong element as soon
+   as anything else (the hero, a notice) shares the container. */
+.verticalSection ~ .verticalSection {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
+}
+
+/* The hero must never be skipped — it is the first thing painted. */
+.jh-hero,
+.verticalSection.jh-no-cv {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
+/* Data-saver: drop previews and blur. */
+@media (prefers-reduced-data: reduce) {
+  :root {
+    --jh-preview-display: none;
+    --jh-glass-blur: 0px;
+    --jh-glass-bg: rgba(11, 12, 15, 0.96);
+  }
+
+  .jh-hero-video { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Transparency preference
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --jh-glass-bg: var(--jh-ink-900);
+    --jh-glass-blur: 0px;
+  }
+
+  .dialog,
+  .actionSheet,
+  .manualLoginForm {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: var(--jh-ink-850) !important;
+  }
+}

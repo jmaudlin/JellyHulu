@@ -1,0 +1,173 @@
+/* ==========================================================================
+   JellyHulu — 01 · Typography
+   The @font-face block for Figtree is injected above this file at build time
+   (see build.mjs). This module only *applies* the type system.
+
+   Jellyfin ships its own font-family declarations on html/body and again on
+   several component classes, so the family has to be re-asserted broadly.
+   ========================================================================== */
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+optgroup,
+.mainDrawer,
+.dialog,
+.actionSheet,
+.emby-input,
+.emby-textarea,
+.emby-select,
+.emby-button,
+.paper-icon-button-light,
+[class^="Mui"],
+[class*=" Mui"] {
+  font-family: var(--jh-font) !important;
+}
+
+html {
+  font-size: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Figtree is variable; ask for the optical niceties it supports. */
+  font-variant-ligatures: common-ligatures;
+  font-kerning: normal;
+}
+
+body {
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-regular);
+  line-height: var(--jh-lh-body);
+  letter-spacing: var(--jh-ls-snug);
+  color: var(--jh-text);
+}
+
+/* Tabular figures wherever numbers are compared column-wise: runtimes,
+   bitrates, the Live TV timeline, dashboard tables. Proportional digits
+   make those jitter as they tick. */
+.mediaInfoItem,
+.osdTimeText,
+.runtime,
+.itemMiscInfo,
+.guide-programGrid .timeslotHeader,
+.serverLogsTable td,
+.detailTable td,
+.activityLogEntry .listItemBodyText,
+.jh-numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+code,
+pre,
+kbd,
+samp,
+.code,
+textarea#txtCustomCss,
+.MuiInputBase-input[spellcheck="false"] {
+  font-family: var(--jh-font-mono) !important;
+  font-size: 0.9em;
+  letter-spacing: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Heading scale
+   Jellyfin's markup is inconsistent about which element carries a title, so
+   these are keyed off the classes it actually renders.
+   -------------------------------------------------------------------------- */
+h1, .sectionTitle, .pageTitle {
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-tight);
+  line-height: var(--jh-lh-tight);
+}
+
+h2, h3 {
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-tight);
+  line-height: var(--jh-lh-snug);
+}
+
+/* Rail headings — Hulu's are set noticeably heavier than the body and hug
+   the cards beneath them. */
+.sectionTitle,
+.sectionTitle-cards,
+.verticalSection > .sectionTitleContainer .sectionTitle {
+  font-size: var(--jh-fs-2xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  color: var(--jh-text);
+  margin: 0;
+}
+
+/* Page-level titles (library name, "Search results", dashboard sections). */
+.pageTitle,
+.sectionTitle.sectionTitle-primary,
+.dashboardSection > h2 {
+  font-size: var(--jh-fs-3xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+}
+
+/* Small caps eyebrow used above hero titles and on badges. */
+.jh-eyebrow,
+.jh-badge,
+.indicator.jh-indicator-text {
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+}
+
+/* Body copy — overviews read better a touch looser than UI text. */
+.overview-text,
+.detailSectionContent p,
+.itemOverview,
+p.overview {
+  font-size: var(--jh-fs-lg);
+  line-height: var(--jh-lh-loose);
+  color: var(--jh-text-secondary);
+  letter-spacing: 0;
+  max-width: 78ch;
+}
+
+/* Secondary metadata lines. */
+.secondary,
+.listItemBodyText.secondary,
+.cardText-secondary,
+.fieldDescription,
+.mediaInfoItem {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  letter-spacing: 0;
+}
+
+a,
+.textlink,
+.button-link {
+  color: var(--jh-accent);
+  text-decoration: none;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+a:hover,
+.textlink:hover {
+  color: var(--jh-accent-hover);
+  text-decoration: none;
+}
+
+/* Line clamping helper used by cards, overviews and the hero. */
+.jh-clamp-1,
+.jh-clamp-2,
+.jh-clamp-3,
+.jh-clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.jh-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1; }
+.jh-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+.jh-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+.jh-clamp-4 { -webkit-line-clamp: 4; line-clamp: 4; }

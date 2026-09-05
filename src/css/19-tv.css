@@ -1,0 +1,182 @@
+/* ==========================================================================
+   JellyHulu — 19 · TV / 10-foot mode
+   Applies when Jellyfin detects a TV layout (html.layout-tv) or when the
+   user turns it on in the settings panel (html[data-jh-tv="on"]).
+
+   Three things change at 10 feet: everything gets bigger, focus has to be
+   unmissable, and hover-only affordances must also respond to focus — a
+   remote never hovers.
+   ========================================================================== */
+
+html.layout-tv,
+html[data-jh-tv="on"] {
+  font-size: 118%;
+
+  --jh-header-height: var(--jh-header-height-tv);
+  --jh-gutter: clamp(2.5rem, 4vw, 5rem);
+  --jh-rail-gap: 1.25rem;
+  --jh-section-gap: 3.25rem;
+
+  --jh-card-w-portrait: 220px;
+  --jh-card-w-backdrop: 400px;
+  --jh-card-w-square: 232px;
+
+  --jh-rail-title-h: 3.6rem;
+
+  --jh-focus-width: 4px;
+  --jh-focus-offset: 4px;
+  --jh-card-scale: 1.12;
+
+  /* Blur is expensive on TV-class GPUs and browser sticks. */
+  --jh-glass-blur: 0px;
+  --jh-glass-bg: rgba(8, 9, 11, 0.94);
+}
+
+/* --------------------------------------------------------------------------
+   Focus is the cursor. It must be visible across any artwork.
+   -------------------------------------------------------------------------- */
+html.layout-tv .card:focus-within .cardScalable,
+html.layout-tv .card.focused .cardScalable,
+html[data-jh-tv="on"] .card:focus-within .cardScalable {
+  box-shadow:
+    0 0 0 4px var(--jh-accent),
+    0 0 0 8px rgba(5, 6, 7, 0.85),
+    var(--jh-shadow-card-hover);
+  outline: none;
+}
+
+html.layout-tv .emby-button:focus,
+html.layout-tv .listItem:focus,
+html.layout-tv .navMenuOption:focus,
+html.layout-tv .actionSheetMenuItem:focus,
+html.layout-tv .programCell:focus,
+html[data-jh-tv="on"] .emby-button:focus,
+html[data-jh-tv="on"] .listItem:focus,
+html[data-jh-tv="on"] .programCell:focus {
+  outline: var(--jh-focus-width) solid var(--jh-accent);
+  outline-offset: var(--jh-focus-offset);
+  background: var(--jh-surface-hover) !important;
+  color: var(--jh-text) !important;
+}
+
+/* Jellyfin's own remote-focus class. */
+html.layout-tv .focusable:focus,
+.focuscontainer-x > .focusable:focus {
+  outline: var(--jh-focus-width) solid var(--jh-accent);
+  outline-offset: var(--jh-focus-offset);
+}
+
+/* --------------------------------------------------------------------------
+   Hover-only UI must also open on focus. On a TV the "hover" state IS the
+   selected state, so these are promoted rather than duplicated.
+   -------------------------------------------------------------------------- */
+html.layout-tv .card:focus-within .cardOverlayContainer,
+html.layout-tv .card:focus-within .jh-card-info,
+html.layout-tv .card:focus-within .cardOverlayButton,
+html[data-jh-tv="on"] .card:focus-within .cardOverlayContainer,
+html[data-jh-tv="on"] .card:focus-within .jh-card-info {
+  opacity: 1;
+  transform: none;
+}
+
+html.layout-tv .sectionTitleContainer .emby-button,
+html[data-jh-tv="on"] .sectionTitleContainer .emby-button {
+  opacity: 1;
+  transform: none;
+}
+
+/* Rail scroll buttons are useless with a remote — the focus ring scrolls
+   the rail itself. */
+html.layout-tv .emby-scrollbuttons,
+html[data-jh-tv="on"] .emby-scrollbuttons {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Bigger hit targets and text
+   -------------------------------------------------------------------------- */
+html.layout-tv .emby-button,
+html.layout-tv .jh-btn,
+html[data-jh-tv="on"] .emby-button {
+  min-height: 3.1rem;
+  padding-inline: 1.9rem;
+  font-size: var(--jh-fs-lg);
+}
+
+html.layout-tv .paper-icon-button-light,
+html[data-jh-tv="on"] .paper-icon-button-light {
+  width: 3.1rem;
+  height: 3.1rem;
+}
+
+html.layout-tv .cardText,
+html[data-jh-tv="on"] .cardText {
+  font-size: var(--jh-fs-lg);
+}
+
+html.layout-tv .listItem,
+html[data-jh-tv="on"] .listItem {
+  padding: var(--jh-space-4) var(--jh-space-5);
+  min-height: 4.5rem;
+}
+
+html.layout-tv .emby-tab-button,
+html[data-jh-tv="on"] .emby-tab-button {
+  font-size: var(--jh-fs-lg) !important;
+  padding: 1.1rem var(--jh-space-6) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Overscan safety. Many TVs still crop 2–3% of the panel edges; content
+   flush to the edge disappears.
+   -------------------------------------------------------------------------- */
+html.layout-tv body,
+html[data-jh-tv="on"] body {
+  padding: 1.5vh 0;
+}
+
+html.layout-tv .skinHeader,
+html[data-jh-tv="on"] .skinHeader {
+  padding-top: 1.5vh;
+}
+
+/* --------------------------------------------------------------------------
+   Player OSD at 10 feet
+   -------------------------------------------------------------------------- */
+html.layout-tv .videoOsdBottom,
+html[data-jh-tv="on"] .videoOsdBottom {
+  padding-bottom: var(--jh-space-10) !important;
+}
+
+html.layout-tv .osdTitle,
+html[data-jh-tv="on"] .osdTitle {
+  font-size: var(--jh-fs-3xl) !important;
+}
+
+html.layout-tv .mdl-slider__background-flex,
+html[data-jh-tv="on"] .mdl-slider__background-flex {
+  height: 8px !important;
+}
+
+html.layout-tv .mdl-slider::-webkit-slider-thumb,
+html[data-jh-tv="on"] .mdl-slider::-webkit-slider-thumb {
+  transform: scale(1);
+  width: 20px;
+  height: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Previews are usually the wrong call on a TV: the remote moves focus fast
+   and each move would start a stream. Off unless explicitly enabled.
+   -------------------------------------------------------------------------- */
+html.layout-tv:not([data-jh-previews="on"]) {
+  --jh-preview-display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Spatial-navigation helper. The JS companion sets this on the element it
+   is about to scroll into view so the move reads as deliberate.
+   -------------------------------------------------------------------------- */
+.jh-spatial-target {
+  scroll-margin: calc(var(--jh-header-h) + 2rem) var(--jh-gutter);
+}

@@ -1,0 +1,6105 @@
+/*!
+ * JellyHulu v1.0.0 — a Hulu-inspired theme for Jellyfin (stylesheet, fonts served from /web/jellyhulu/fonts)
+ * https://github.com/jmaudlin/JellyHulu
+ * Released under the MIT License.
+ * Bundled font: Figtree, SIL Open Font License 1.1.
+ *
+ * Not affiliated with, endorsed by, or connected to Hulu, LLC,
+ * The Walt Disney Company, or the Jellyfin project.
+ */
+
+/* ==========================================================================
+   JellyHulu — 00 · Design Tokens
+   The single source of truth. Every other module reads from here; nothing
+   else should hard-code a colour, radius, duration or z-index.
+
+   Admins can override any token by adding their own :root block AFTER the
+   @import of this theme. The JS companion writes user overrides onto
+   <html data-jh-*> attributes and inline custom properties.
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------------
+     1 · Brand ramp — Hulu green
+     --------------------------------------------------------------------- */
+  --jh-green-100: #E6FFF3;
+  --jh-green-200: #A8F7D0;
+  --jh-green-300: #62F0AC;
+  --jh-green-400: #1CE783;  /* Hulu's signature green */
+  --jh-green-500: #17C46F;
+  --jh-green-600: #12A15B;
+  --jh-green-700: #0C7642;
+
+  /* Accent is aliased so the settings panel can recolour the whole UI by
+     rewriting three variables instead of hunting through the stylesheet. */
+  --jh-accent:         var(--jh-green-400);
+  --jh-accent-hover:   var(--jh-green-300);
+  --jh-accent-pressed: var(--jh-green-500);
+  --jh-accent-muted:   rgba(28, 231, 131, 0.16);
+  --jh-accent-faint:   rgba(28, 231, 131, 0.08);
+  /* Text that sits ON the accent. Hulu always pairs green with near-black. */
+  --jh-on-accent: #0B0C0F;
+
+  /* ---------------------------------------------------------------------
+     2 · Neutral ramp — the near-black Hulu ground
+     --------------------------------------------------------------------- */
+  --jh-ink-1000: #050607;
+  --jh-ink-950:  #08090B;
+  --jh-ink-900:  #0B0C0F;    /* app background */
+  --jh-ink-850:  #101216;
+  --jh-ink-800:  #151719;    /* raised surface / card */
+  --jh-ink-700:  #1C1E21;    /* card hover, input field */
+  --jh-ink-600:  #26292E;    /* borders on solids, dividers */
+  --jh-ink-500:  #3A3E45;
+  --jh-ink-400:  #565C66;
+  --jh-ink-300:  #7C838E;
+  --jh-ink-200:  #A9AFB8;
+  --jh-ink-100:  #D5D9DE;
+  --jh-ink-0:    #FFFFFF;
+
+  /* ---------------------------------------------------------------------
+     3 · Semantic surfaces
+     --------------------------------------------------------------------- */
+  --jh-bg:               var(--jh-ink-900);
+  --jh-bg-elevated:      var(--jh-ink-850);
+  --jh-surface:          var(--jh-ink-800);
+  --jh-surface-hover:    var(--jh-ink-700);
+  --jh-surface-active:   var(--jh-ink-600);
+  --jh-surface-sunken:   var(--jh-ink-950);
+  --jh-overlay-scrim:    rgba(5, 6, 7, 0.72);
+  --jh-overlay-scrim-hi: rgba(5, 6, 7, 0.90);
+
+  /* Glass surfaces — used for the header and floating chrome. The blur
+     radius is a token so the low-power path can zero it out. */
+  --jh-glass-bg:   rgba(11, 12, 15, 0.72);
+  --jh-glass-blur: 18px;
+  --jh-glass-saturate: 140%;
+
+  /* ---------------------------------------------------------------------
+     4 · Semantic text
+     --------------------------------------------------------------------- */
+  --jh-text:           var(--jh-ink-0);
+  --jh-text-secondary: var(--jh-ink-100);
+  --jh-text-muted:     var(--jh-ink-300);
+  --jh-text-disabled:  var(--jh-ink-400);
+  --jh-text-inverse:   var(--jh-ink-900);
+
+  /* ---------------------------------------------------------------------
+     5 · Lines
+     --------------------------------------------------------------------- */
+  --jh-line:        rgba(255, 255, 255, 0.10);
+  --jh-line-strong: rgba(255, 255, 255, 0.18);
+  --jh-line-faint:  rgba(255, 255, 255, 0.06);
+  --jh-line-accent: var(--jh-accent);
+
+  /* ---------------------------------------------------------------------
+     6 · Status
+     --------------------------------------------------------------------- */
+  --jh-success: #1CE783;
+  --jh-info:    #4DA3FF;
+  --jh-warn:    #FFB020;
+  --jh-danger:  #FF4D4F;
+  --jh-danger-hover: #FF6B6D;
+  --jh-live:    #FF3B5C;   /* Live TV "on air" red */
+
+  /* ---------------------------------------------------------------------
+     7 · Typography
+     Hulu's Graphik is proprietary; Figtree is the closest OFL-licensed
+     geometric grotesque (wide apertures, tall x-height, tight caps).
+     --------------------------------------------------------------------- */
+  --jh-font-stack: "Figtree", "Graphik", "Inter", -apple-system,
+                   BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+                   Arial, "Noto Sans", sans-serif;
+  --jh-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono",
+                  Menlo, Consolas, monospace;
+  --jh-font: var(--jh-font-stack);
+
+  --jh-fw-light:     300;
+  --jh-fw-regular:   400;
+  --jh-fw-medium:    500;
+  --jh-fw-semibold:  600;
+  --jh-fw-bold:      700;
+  --jh-fw-black:     800;
+
+  /* Fluid type scale. clamp() keeps headings readable from a phone to a TV
+     without a stack of breakpoints. */
+  --jh-fs-2xs: 0.6875rem;                              /* 11px  badges */
+  --jh-fs-xs:  0.75rem;                                /* 12px  meta */
+  --jh-fs-sm:  0.8125rem;                              /* 13px  captions */
+  --jh-fs-md:  0.875rem;                               /* 14px  body */
+  --jh-fs-lg:  1rem;                                   /* 16px  emphasis */
+  --jh-fs-xl:  clamp(1.0625rem, 0.95rem + 0.4vw, 1.25rem);
+  --jh-fs-2xl: clamp(1.25rem, 1.05rem + 0.8vw, 1.625rem);   /* rail titles */
+  --jh-fs-3xl: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);     /* page titles */
+  --jh-fs-4xl: clamp(1.875rem, 1.1rem + 3.4vw, 3.5rem);     /* item titles */
+  --jh-fs-hero: clamp(2.25rem, 1.1rem + 5.2vw, 5rem);       /* hero */
+
+  --jh-lh-tight: 1.1;
+  --jh-lh-snug:  1.3;
+  --jh-lh-body:  1.55;
+  --jh-lh-loose: 1.7;
+
+  /* Hulu sets rail titles and buttons slightly tight; body stays neutral. */
+  --jh-ls-tight: -0.02em;
+  --jh-ls-snug:  -0.01em;
+  --jh-ls-wide:  0.04em;
+  --jh-ls-caps:  0.08em;
+
+  /* ---------------------------------------------------------------------
+     8 · Space — 4px base, named so intent survives refactors
+     --------------------------------------------------------------------- */
+  --jh-space-1:  0.25rem;
+  --jh-space-2:  0.5rem;
+  --jh-space-3:  0.75rem;
+  --jh-space-4:  1rem;
+  --jh-space-5:  1.25rem;
+  --jh-space-6:  1.5rem;
+  --jh-space-8:  2rem;
+  --jh-space-10: 2.5rem;
+  --jh-space-12: 3rem;
+  --jh-space-16: 4rem;
+  --jh-space-20: 5rem;
+
+  /* Horizontal page inset. Hulu keeps content flush-ish to the edge on
+     desktop so rails can bleed off-screen and imply "more to the right". */
+  --jh-gutter: clamp(1rem, 0.4rem + 2.2vw, 3.5rem);
+  --jh-rail-gap: clamp(0.5rem, 0.25rem + 0.6vw, 0.875rem);
+  --jh-section-gap: clamp(1.75rem, 1rem + 2vw, 3rem);
+
+  /* ---------------------------------------------------------------------
+     9 · Radii — Hulu is mostly square with a small softening
+     --------------------------------------------------------------------- */
+  --jh-radius-xs:   2px;
+  --jh-radius-sm:   4px;
+  --jh-radius-md:   6px;
+  --jh-radius-lg:   10px;
+  --jh-radius-xl:   16px;
+  --jh-radius-pill: 999px;
+  --jh-radius-card: var(--jh-radius-sm);
+
+  /* ---------------------------------------------------------------------
+     10 · Elevation
+     --------------------------------------------------------------------- */
+  --jh-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --jh-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --jh-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --jh-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.65);
+  --jh-shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.7);
+  --jh-glow-accent: 0 0 0 2px var(--jh-accent),
+                    0 0 20px rgba(28, 231, 131, 0.35);
+
+  /* ---------------------------------------------------------------------
+     11 · Motion
+     Two durations and two curves cover the whole theme. Keeping the set
+     this small is what makes the interactions feel like one system.
+     --------------------------------------------------------------------- */
+  --jh-dur-instant: 90ms;
+  --jh-dur-fast:    160ms;
+  --jh-dur-base:    240ms;
+  --jh-dur-slow:    400ms;
+  --jh-dur-hero:    700ms;
+
+  --jh-ease-out:   cubic-bezier(0.22, 0.61, 0.36, 1);
+  --jh-ease-inout: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --jh-ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+
+  /* Hover-expand geometry. --jh-card-scale is re-declared per density. */
+  --jh-card-scale: 1.14;
+  --jh-card-hover-delay: 260ms;
+  --jh-preview-delay: 900ms;   /* before a trailer starts */
+
+  /* How long the hero holds each slide. The JS companion rewrites this from
+     the user's setting; the default keeps the animation correct without JS. */
+  --jh-hero-dwell: 9s;
+  /* Fill fraction for progress bars, set per element. */
+  --jh-pct: 0%;
+
+  /* ---------------------------------------------------------------------
+     12 · Focus — must read at 10 feet as well as 10 inches
+     --------------------------------------------------------------------- */
+  --jh-focus-width: 3px;
+  --jh-focus-color: var(--jh-accent);
+  --jh-focus-offset: 3px;
+  --jh-focus-ring: 0 0 0 var(--jh-focus-width) var(--jh-focus-color);
+
+  /* ---------------------------------------------------------------------
+     13 · Layout metrics
+     --------------------------------------------------------------------- */
+  /* --jh-header-height is the configured minimum, and is what the header
+     sizes itself from. --jh-header-h is what everything else offsets by: the
+     companion measures the rendered header and writes it here, so a tab row
+     or a wrapped toolbar is accounted for exactly. They must stay separate —
+     writing a measurement into the value the header sizes from is a loop. */
+  --jh-header-height: 62px;
+  --jh-header-height-tv: 88px;
+  --jh-header-h: var(--jh-header-height);
+  --jh-drawer-width: 260px;
+  --jh-nowplaying-height: 74px;
+  /* Height of a rail's heading row — the scroll buttons start below it. */
+  --jh-rail-title-h: 2.9rem;
+  --jh-hero-height: clamp(360px, 56vh, 720px);
+  --jh-hero-height-compact: clamp(280px, 42vh, 460px);
+
+  /* Card widths per density. 09-grids/06-cards read these. */
+  --jh-card-w-portrait: 168px;
+  --jh-card-w-backdrop: 300px;
+  --jh-card-w-square:   180px;
+
+  /* ---------------------------------------------------------------------
+     14 · Z-index — one ordered scale, no magic numbers elsewhere
+     --------------------------------------------------------------------- */
+  --jh-z-base:        0;
+  --jh-z-raised:      10;
+  --jh-z-card-hover:  60;
+  --jh-z-rail-button: 70;
+  --jh-z-header:      1000;
+  --jh-z-drawer:      1050;
+  --jh-z-nowplaying:  1100;
+  --jh-z-dialog:      1200;
+  --jh-z-toast:       1300;
+  --jh-z-settings:    1400;
+  --jh-z-tooltip:     1500;
+
+  /* ---------------------------------------------------------------------
+     15 · Feature switches
+     Booleans-as-display-values, so a single attribute flip in the settings
+     panel can hide a whole feature without a second stylesheet.
+     --------------------------------------------------------------------- */
+  --jh-hero-display: block;
+  --jh-preview-display: block;
+  --jh-badge-display: flex;
+}
+
+/* --------------------------------------------------------------------------
+   Density presets — written by the settings panel onto <html data-jh-density>
+   -------------------------------------------------------------------------- */
+html[data-jh-density="compact"] {
+  --jh-card-w-portrait: 132px;
+  --jh-card-w-backdrop: 236px;
+  --jh-card-w-square:   140px;
+  --jh-rail-gap: 0.5rem;
+  --jh-section-gap: 1.5rem;
+  --jh-card-scale: 1.10;
+  --jh-hero-height: var(--jh-hero-height-compact);
+}
+
+html[data-jh-density="cinematic"] {
+  --jh-card-w-portrait: 210px;
+  --jh-card-w-backdrop: 380px;
+  --jh-card-w-square:   224px;
+  --jh-rail-gap: 1rem;
+  --jh-section-gap: 3.5rem;
+  --jh-card-scale: 1.18;
+}
+
+/* --------------------------------------------------------------------------
+   Motion levels
+   -------------------------------------------------------------------------- */
+html[data-jh-motion="subtle"] {
+  --jh-card-scale: 1.04;
+  --jh-dur-base: 140ms;
+  --jh-dur-slow: 200ms;
+  --jh-preview-display: none;
+}
+
+html[data-jh-motion="off"],
+html[data-jh-motion="none"] {
+  --jh-card-scale: 1;
+  --jh-dur-instant: 1ms;
+  --jh-dur-fast: 1ms;
+  --jh-dur-base: 1ms;
+  --jh-dur-slow: 1ms;
+  --jh-dur-hero: 1ms;
+  --jh-preview-display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Low-power mode. Auto-engaged by the JS companion on weak devices, and
+   selectable by hand. Drops every compositing-expensive effect.
+   -------------------------------------------------------------------------- */
+html[data-jh-power="low"] {
+  --jh-glass-blur: 0px;
+  --jh-glass-bg: rgba(11, 12, 15, 0.96);
+  --jh-shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.6);
+  --jh-shadow-xl: var(--jh-shadow-lg);
+  --jh-card-scale: 1.06;
+  --jh-preview-display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Feature toggles from the settings panel
+   -------------------------------------------------------------------------- */
+html[data-jh-hero="off"]     { --jh-hero-display: none; }
+html[data-jh-previews="off"] { --jh-preview-display: none; }
+html[data-jh-badges="off"]   { --jh-badge-display: none; }
+
+/* ==========================================================================
+   JellyHulu — Figtree (SIL Open Font License 1.1)
+   Figtree by Erik D. Kennedy — https://github.com/erikdkennedy/figtree
+   Full licence text: fonts/Figtree-OFL.txt
+   Loaded from /web/jellyhulu/fonts — copy the files in fonts/ to that path.
+   
+   ========================================================================== */
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/web/jellyhulu/fonts/figtree-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: normal;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/web/jellyhulu/fonts/figtree-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: italic;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/web/jellyhulu/fonts/figtree-italic-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Figtree";
+  font-style: italic;
+  font-weight: 300 900;
+  font-display: swap;
+  src: url("/web/jellyhulu/fonts/figtree-italic-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+
+/* ── 01-typography.css ───────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 01 · Typography
+   The @font-face block for Figtree is injected above this file at build time
+   (see build.mjs). This module only *applies* the type system.
+
+   Jellyfin ships its own font-family declarations on html/body and again on
+   several component classes, so the family has to be re-asserted broadly.
+   ========================================================================== */
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+optgroup,
+.mainDrawer,
+.dialog,
+.actionSheet,
+.emby-input,
+.emby-textarea,
+.emby-select,
+.emby-button,
+.paper-icon-button-light,
+[class^="Mui"],
+[class*=" Mui"] {
+  font-family: var(--jh-font) !important;
+}
+
+html {
+  font-size: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Figtree is variable; ask for the optical niceties it supports. */
+  font-variant-ligatures: common-ligatures;
+  font-kerning: normal;
+}
+
+body {
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-regular);
+  line-height: var(--jh-lh-body);
+  letter-spacing: var(--jh-ls-snug);
+  color: var(--jh-text);
+}
+
+/* Tabular figures wherever numbers are compared column-wise: runtimes,
+   bitrates, the Live TV timeline, dashboard tables. Proportional digits
+   make those jitter as they tick. */
+.mediaInfoItem,
+.osdTimeText,
+.runtime,
+.itemMiscInfo,
+.guide-programGrid .timeslotHeader,
+.serverLogsTable td,
+.detailTable td,
+.activityLogEntry .listItemBodyText,
+.jh-numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+code,
+pre,
+kbd,
+samp,
+.code,
+textarea#txtCustomCss,
+.MuiInputBase-input[spellcheck="false"] {
+  font-family: var(--jh-font-mono) !important;
+  font-size: 0.9em;
+  letter-spacing: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Heading scale
+   Jellyfin's markup is inconsistent about which element carries a title, so
+   these are keyed off the classes it actually renders.
+   -------------------------------------------------------------------------- */
+h1, .sectionTitle, .pageTitle {
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-tight);
+  line-height: var(--jh-lh-tight);
+}
+
+h2, h3 {
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-tight);
+  line-height: var(--jh-lh-snug);
+}
+
+/* Rail headings — Hulu's are set noticeably heavier than the body and hug
+   the cards beneath them. */
+.sectionTitle,
+.sectionTitle-cards,
+.verticalSection > .sectionTitleContainer .sectionTitle {
+  font-size: var(--jh-fs-2xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  color: var(--jh-text);
+  margin: 0;
+}
+
+/* Page-level titles (library name, "Search results", dashboard sections). */
+.pageTitle,
+.sectionTitle.sectionTitle-primary,
+.dashboardSection > h2 {
+  font-size: var(--jh-fs-3xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+}
+
+/* Small caps eyebrow used above hero titles and on badges. */
+.jh-eyebrow,
+.jh-badge,
+.indicator.jh-indicator-text {
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+}
+
+/* Body copy — overviews read better a touch looser than UI text. */
+.overview-text,
+.detailSectionContent p,
+.itemOverview,
+p.overview {
+  font-size: var(--jh-fs-lg);
+  line-height: var(--jh-lh-loose);
+  color: var(--jh-text-secondary);
+  letter-spacing: 0;
+  max-width: 78ch;
+}
+
+/* Secondary metadata lines. */
+.secondary,
+.listItemBodyText.secondary,
+.cardText-secondary,
+.fieldDescription,
+.mediaInfoItem {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  letter-spacing: 0;
+}
+
+a,
+.textlink,
+.button-link {
+  color: var(--jh-accent);
+  text-decoration: none;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+a:hover,
+.textlink:hover {
+  color: var(--jh-accent-hover);
+  text-decoration: none;
+}
+
+/* Line clamping helper used by cards, overviews and the hero. */
+.jh-clamp-1,
+.jh-clamp-2,
+.jh-clamp-3,
+.jh-clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.jh-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1; }
+.jh-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+.jh-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+.jh-clamp-4 { -webkit-line-clamp: 4; line-clamp: 4; }
+
+
+/* ── 02-base.css ─────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 02 · Base & global surfaces
+   Repaints Jellyfin's ground, scrollbars, selection and the page shell.
+   Custom CSS is appended last by Jellyfin, so most of this wins on source
+   order; !important appears only where a built-in theme sets the same
+   property with equal-or-higher specificity.
+   ========================================================================== */
+
+html {
+  background-color: var(--jh-bg);
+  color-scheme: dark;
+  scrollbar-color: var(--jh-ink-500) transparent;
+  scrollbar-width: thin;
+  /* Anchors sticky headers below the app header when jumping to a section. */
+  scroll-padding-top: calc(var(--jh-header-h) + var(--jh-space-4));
+}
+
+body,
+.skinBody,
+.backgroundContainer,
+.backgroundContainer.withBackdrop {
+  background-color: var(--jh-bg) !important;
+  color: var(--jh-text);
+}
+
+/* Jellyfin paints a blurred item backdrop behind the whole app on detail
+   pages. Hulu's equivalent is a tighter, darker vignette, so the built-in
+   one is dimmed here and re-created deliberately in 09-detail. */
+.backdropContainer,
+.backgroundContainer.withBackdrop::before {
+  opacity: 0.28;
+}
+
+.backdropImage {
+  filter: saturate(115%) contrast(104%);
+}
+
+/* The page canvas itself. */
+.mainAnimatedPages,
+.mainAnimatedPage,
+.page,
+.libraryPage {
+  background-color: transparent;
+  color: var(--jh-text);
+}
+
+/* Jellyfin pads every page for its own header. Ours is a different height
+   and the hero needs to bleed under it, so the inset is re-declared. */
+.mainAnimatedPages {
+  padding-top: 0 !important;
+}
+
+.page {
+  padding-top: var(--jh-header-h);
+}
+
+/* Library pages add a tab row inside the fixed header, which makes it taller
+   than --jh-header-height. The companion measures the header and rewrites
+   that token exactly; this :has() rule is the no-JS fallback and covers the
+   common case on its own. */
+body:has(.skinHeader .headerTabs:not(.hide)) .page:not(.jh-has-hero) {
+  padding-top: calc(var(--jh-header-h) + 3.25rem);
+}
+
+/* Pages that open with a full-bleed hero or backdrop must start at y=0.
+   The header floats over them as translucent glass. */
+.page.jh-has-hero,
+#indexPage,
+#itemDetailPage,
+#videoOsdPage,
+#loginPage,
+#selectServerPage {
+  padding-top: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Selection & caret
+   -------------------------------------------------------------------------- */
+::selection {
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+}
+
+input,
+textarea {
+  caret-color: var(--jh-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbars
+   Thin, dark, and only visibly coloured on hover — Hulu never draws
+   attention to a scrollbar.
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--jh-ink-600);
+  border-radius: var(--jh-radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--jh-ink-400);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Horizontal rails hide their scrollbar entirely — navigation is by the
+   arrow buttons, drag, or the keyboard. */
+.emby-scroller,
+.itemsContainer.scrollSlider,
+.scrollSlider,
+.scrollX {
+  scrollbar-width: none;
+}
+
+.emby-scroller::-webkit-scrollbar,
+.itemsContainer.scrollSlider::-webkit-scrollbar,
+.scrollX::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Focus
+   Jellyfin removes outlines in several places. Restore one ring, everywhere,
+   keyboard-only — then 19-tv makes it bigger for the couch.
+   -------------------------------------------------------------------------- */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: var(--jh-focus-width) solid var(--jh-focus-color);
+  outline-offset: var(--jh-focus-offset);
+  border-radius: var(--jh-radius-sm);
+}
+
+/* Jellyfin's own "focused by remote/keyboard" class. */
+.focusable:focus-visible,
+.emby-button:focus-visible,
+.card:focus-visible .cardBox {
+  outline: var(--jh-focus-width) solid var(--jh-focus-color);
+  outline-offset: var(--jh-focus-offset);
+}
+
+/* --------------------------------------------------------------------------
+   Images
+   Jellyfin lazy-loads card art; fading it in removes the "pop" that reads as
+   jank on a long grid.
+   -------------------------------------------------------------------------- */
+.cardImage,
+.listItemImage,
+.detailImageContainer .card,
+.blurhash-canvas + img {
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+}
+
+img.lazy-image-fadein-fast,
+img.lazy-image-fadein {
+  animation-duration: var(--jh-dur-base) !important;
+}
+
+/* Blurhash placeholders are Jellyfin's own; soften the handoff. */
+.blurhash-canvas {
+  transition: opacity var(--jh-dur-slow) var(--jh-ease-out);
+  filter: saturate(120%);
+}
+
+/* --------------------------------------------------------------------------
+   Dividers & rules
+   -------------------------------------------------------------------------- */
+hr,
+.paperList > .listItem + .listItem,
+.detailSection + .detailSection {
+  border-color: var(--jh-line);
+}
+
+/* --------------------------------------------------------------------------
+   Loading indicators — repainted from Jellyfin's blue-grey to Hulu green.
+   -------------------------------------------------------------------------- */
+.docspinner .mdl-spinner__layer-1,
+.docspinner .mdl-spinner__layer-2,
+.docspinner .mdl-spinner__layer-3,
+.docspinner .mdl-spinner__layer-4,
+.mdl-spinner__layer {
+  border-color: var(--jh-accent) !important;
+}
+
+.mdlProgress,
+progress {
+  accent-color: var(--jh-accent);
+}
+
+/* A calmer full-page loading state than the default centred spinner. */
+.docspinner {
+  filter: drop-shadow(0 0 12px rgba(28, 231, 131, 0.35));
+}
+
+/* --------------------------------------------------------------------------
+   Text-selection-free chrome. Dragging a rail shouldn't highlight titles.
+   -------------------------------------------------------------------------- */
+.skinHeader,
+.mainDrawer,
+.sectionTitleContainer,
+.emby-scrollbuttons,
+.cardOverlayContainer,
+.videoOsdBottom {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+
+/* ── 03-layout.css ───────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 03 · App shell & layout
+   Page rhythm, gutters, section spacing and the containers Jellyfin uses to
+   lay out every view.
+   ========================================================================== */
+
+/* Jellyfin's default page padding is generous on the left and stops content
+   from bleeding. Hulu runs rails to the viewport edge, so the gutter is
+   applied per-section instead of once on the page. */
+.padded-left   { padding-left: var(--jh-gutter) !important; }
+.padded-right  { padding-right: var(--jh-gutter) !important; }
+.padded-top    { padding-top: var(--jh-space-6) !important; }
+.padded-bottom { padding-bottom: var(--jh-space-6) !important; }
+
+.readOnlyContent,
+.detailPageContent,
+.dashboardSections,
+.padded-left.padded-right {
+  max-width: 1720px;
+}
+
+/* --------------------------------------------------------------------------
+   Vertical sections (each rail or grid block on the home page)
+   -------------------------------------------------------------------------- */
+.verticalSection {
+  position: relative;   /* containing block for the rail's scroll buttons */
+  margin-bottom: var(--jh-section-gap);
+  /* Paint/layout containment: a home page with 15 rails re-layouts far less
+     when a card animates inside one of them. */
+  contain: layout style;
+}
+
+.verticalSection:last-child {
+  margin-bottom: var(--jh-space-16);
+}
+
+.sectionTitleContainer {
+  display: flex;
+  align-items: baseline;
+  gap: var(--jh-space-3);
+  padding-inline: var(--jh-gutter);
+  margin-bottom: var(--jh-space-3);
+  min-height: 2rem;
+}
+
+/* Hulu puts a small green tick to the left of every rail heading. */
+.verticalSection > .sectionTitleContainer .sectionTitle::before,
+.verticalSection > .sectionTitle::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 0.85em;
+  margin-right: 0.6rem;
+  vertical-align: -0.03em;
+  border-radius: var(--jh-radius-xs);
+  background: var(--jh-accent);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transform-origin: center;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-spring);
+}
+
+.verticalSection:hover > .sectionTitleContainer .sectionTitle::before,
+.verticalSection:focus-within > .sectionTitleContainer .sectionTitle::before,
+.verticalSection:hover > .sectionTitle::before,
+.verticalSection:focus-within > .sectionTitle::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* "See all" style links that sit beside a rail title. */
+.sectionTitleContainer .emby-button,
+.sectionTitleContainer .sectionTitleIconButton,
+.sectionTitleTextButton {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.verticalSection:hover .sectionTitleContainer .emby-button,
+.verticalSection:focus-within .sectionTitleContainer .emby-button,
+.sectionTitleContainer .emby-button:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.sectionTitleContainer .emby-button:hover {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Content wrappers
+   -------------------------------------------------------------------------- */
+.itemsContainer.padded-left.padded-right,
+.itemsContainer.vertical-wrap {
+  padding-inline: var(--jh-gutter);
+}
+
+/* Jellyfin's "no items" empty states. */
+.noItemsMessage,
+.centerMessage {
+  color: var(--jh-text-muted);
+  text-align: center;
+  padding: var(--jh-space-16) var(--jh-gutter);
+  font-size: var(--jh-fs-lg);
+}
+
+.noItemsMessage::before {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--jh-space-4);
+  border-radius: var(--jh-radius-lg);
+  background: var(--jh-surface);
+  border: 1px solid var(--jh-line);
+  /* A film-frame glyph, drawn rather than shipped as an asset. */
+  background-image:
+    linear-gradient(var(--jh-ink-600) 0 0),
+    linear-gradient(var(--jh-ink-600) 0 0);
+  background-size: 10px 10px, 10px 10px;
+  background-position: 10px 16px, 10px 38px;
+  background-repeat: repeat-y, repeat-y;
+}
+
+/* --------------------------------------------------------------------------
+   Floating action button (Jellyfin uses one for "add" on several pages)
+   -------------------------------------------------------------------------- */
+.fab,
+.emby-button.fab {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  box-shadow: var(--jh-shadow-lg);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.fab:hover {
+  background: var(--jh-accent-hover) !important;
+  transform: scale(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   Page transitions. Jellyfin animates page swaps; a short fade-and-rise
+   reads more like a streaming app than the default slide.
+   -------------------------------------------------------------------------- */
+.mainAnimatedPage {
+  animation: jh-page-in var(--jh-dur-base) var(--jh-ease-out) both;
+}
+
+@keyframes jh-page-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton shimmer, used by the JS companion while a rail's data loads.
+   -------------------------------------------------------------------------- */
+.jh-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--jh-surface);
+  border-radius: var(--jh-radius-card);
+}
+
+.jh-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  animation: jh-shimmer 1.4s var(--jh-ease-inout) infinite;
+}
+
+@keyframes jh-shimmer {
+  to { transform: translateX(100%); }
+}
+
+
+/* ── 04-navigation.css ───────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 04 · Header, tabs & drawer
+   Hulu's chrome is a translucent bar that is fully transparent over a hero
+   and turns to solid glass the moment you scroll. The JS companion adds
+   .jh-scrolled to <html>; without JS the bar stays glass, which still looks
+   correct — the transparency is progressive enhancement, not a dependency.
+   ========================================================================== */
+
+.skinHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--jh-z-header);
+  min-height: var(--jh-header-height);
+  background: var(--jh-glass-bg) !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  border-bottom: 1px solid var(--jh-line-faint);
+  box-shadow: none;
+  transition: background-color var(--jh-dur-base) var(--jh-ease-out),
+              border-color var(--jh-dur-base) var(--jh-ease-out),
+              box-shadow var(--jh-dur-base) var(--jh-ease-out);
+  contain: layout style;
+}
+
+/* Jellyfin adds .skinHeader-withBackground on scroll for some layouts;
+   .jh-scrolled is ours and covers the rest. */
+html.jh-scrolled .skinHeader,
+.skinHeader.skinHeader-withBackground {
+  background: var(--jh-glass-bg) !important;
+  border-bottom-color: var(--jh-line);
+  box-shadow: var(--jh-shadow-md);
+}
+
+/* Fully transparent while sitting on top of a hero or a detail backdrop. */
+html:not(.jh-scrolled) .skinHeader.jh-over-hero {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 6, 7, 0.85) 0%,
+    rgba(5, 6, 7, 0.45) 55%,
+    rgba(5, 6, 7, 0) 100%
+  ) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
+.skinHeader.semiTransparent,
+.skinHeader-blurred {
+  background: var(--jh-glass-bg) !important;
+}
+
+.headerTop {
+  padding: 0 var(--jh-gutter);
+  min-height: var(--jh-header-height);
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+}
+
+.headerLeft,
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-1);
+}
+
+.headerLeft { flex: 1 1 auto; min-width: 0; }
+.headerRight { flex: 0 0 auto; }
+
+/* Jellyfin puts the current library's name in the header as an <h3.pageTitle>.
+   The page-title rules in 01-typography would size it like a page heading —
+   and an h3's default 1em margins would then set the header's height from it.
+   Inside the header it is a label, not a heading. */
+.skinHeader .pageTitle,
+.headerTop .pageTitle,
+.skinHeader .pageTitleWithLogo {
+  font-size: var(--jh-fs-xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  line-height: 1.2;
+  margin: 0 0 0 var(--jh-space-2) !important;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Header buttons
+   -------------------------------------------------------------------------- */
+.headerButton,
+.headerRight .paper-icon-button-light,
+.headerLeft .paper-icon-button-light {
+  color: var(--jh-text-secondary) !important;
+  border-radius: var(--jh-radius-pill);
+  transition: color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.headerButton:hover,
+.headerRight .paper-icon-button-light:hover,
+.headerLeft .paper-icon-button-light:hover {
+  color: var(--jh-text) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.headerButton:active {
+  transform: scale(0.94);
+}
+
+/* The Jellyfin logo/home button. Hulu's wordmark is green; recolouring the
+   built-in mark keeps the brand consistent without shipping an image. */
+.headerHomeButton .material-icons,
+.pageTitleWithLogo,
+.pageTitleWithDefaultLogo {
+  color: var(--jh-accent) !important;
+}
+
+.pageTitleWithLogo,
+.pageTitleWithDefaultLogo {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(48%)
+          saturate(1200%) hue-rotate(93deg) brightness(102%) contrast(96%);
+}
+
+/* --------------------------------------------------------------------------
+   Header tabs — the primary nav on library pages.
+   Hulu renders these as flat, wide-tracking uppercase labels with a green
+   underline on the active one.
+   -------------------------------------------------------------------------- */
+.headerTabs,
+.emby-tabs-slider {
+  background: transparent !important;
+}
+
+.headerTabs {
+  padding-inline: var(--jh-gutter);
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.emby-tab-button {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm) !important;
+  font-weight: var(--jh-fw-semibold) !important;
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  padding: 0.85rem var(--jh-space-4) !important;
+  border: 0;
+  position: relative;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.emby-tab-button:hover {
+  color: var(--jh-text) !important;
+}
+
+.emby-tab-button::after {
+  content: "";
+  position: absolute;
+  left: var(--jh-space-4);
+  right: var(--jh-space-4);
+  bottom: 0;
+  height: 3px;
+  border-radius: var(--jh-radius-pill) var(--jh-radius-pill) 0 0;
+  background: var(--jh-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--jh-dur-base) var(--jh-ease-spring);
+}
+
+.emby-tab-button-active,
+.emby-tab-button.is-active {
+  color: var(--jh-text) !important;
+}
+
+.emby-tab-button-active::after,
+.emby-tab-button.is-active::after {
+  transform: scaleX(1);
+}
+
+/* Jellyfin's own sliding indicator is redundant next to ours. */
+.emby-tabs-slider > .emby-tab-button-indicator,
+.emby-tab-indicator {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   User avatar in the header — Hulu shows a rounded-square profile tile.
+   -------------------------------------------------------------------------- */
+.headerUserButton .headerUserButtonRound,
+.headerRight .headerUserButtonRound {
+  border-radius: var(--jh-radius-md) !important;
+  border: 2px solid transparent;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.headerUserButton:hover .headerUserButtonRound {
+  border-color: var(--jh-accent);
+  transform: scale(1.05);
+}
+
+/* --------------------------------------------------------------------------
+   Main drawer (Jellyfin's left nav)
+   -------------------------------------------------------------------------- */
+.mainDrawer,
+.drawer-open .mainDrawer {
+  width: var(--jh-drawer-width);
+  background: var(--jh-ink-950) !important;
+  border-right: 1px solid var(--jh-line-faint);
+  box-shadow: var(--jh-shadow-xl);
+  z-index: var(--jh-z-drawer);
+}
+
+.mainDrawer-scrollContainer {
+  padding-top: var(--jh-space-3);
+}
+
+.navMenuOption,
+.navMenuOption.emby-button {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-3);
+  margin: 2px var(--jh-space-2);
+  padding: 0.7rem var(--jh-space-3) !important;
+  border-radius: var(--jh-radius-md);
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-medium);
+  letter-spacing: var(--jh-ls-snug);
+  position: relative;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              padding-left var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.navMenuOption:hover {
+  background-color: var(--jh-surface) !important;
+  color: var(--jh-text) !important;
+  padding-left: calc(var(--jh-space-3) + 4px) !important;
+}
+
+.navMenuOptionIcon {
+  color: var(--jh-text-muted) !important;
+  font-size: 1.4rem;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.navMenuOption:hover .navMenuOptionIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* Active library / page. */
+.navMenuOption-selected,
+.navMenuOption.navMenuOption-selected {
+  background: linear-gradient(
+    90deg,
+    var(--jh-accent-muted) 0%,
+    transparent 100%
+  ) !important;
+  color: var(--jh-text) !important;
+  font-weight: var(--jh-fw-semibold);
+}
+
+.navMenuOption-selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: var(--jh-radius-pill);
+  background: var(--jh-accent);
+}
+
+.navMenuOption-selected .navMenuOptionIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* Section dividers inside the drawer. */
+.navMenuDivider,
+.mainDrawer .sectionTitle {
+  border-color: var(--jh-line-faint);
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-2xs) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding: var(--jh-space-5) var(--jh-space-4) var(--jh-space-2);
+  margin: 0;
+}
+
+/* Drawer scrim. */
+.mainDrawerHandle,
+.dialogBackdrop,
+.backdrop-visible {
+  background-color: var(--jh-overlay-scrim) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Cast / SyncPlay indicators in the header get the accent when active.
+   -------------------------------------------------------------------------- */
+.headerCastButton.castButton-active,
+.headerSyncButton.syncPlayButton-active,
+.btnCast.is-active {
+  color: var(--jh-accent) !important;
+}
+
+
+/* ── 05-hero.css ─────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 05 · Hero carousel
+
+   Jellyfin has no hero on the home page, so the JS companion builds one from
+   Continue Watching / Next Up / Recently Added and injects this markup:
+
+     .jh-hero
+       .jh-hero-slides
+         .jh-hero-slide[.is-active]
+           .jh-hero-media  > img.jh-hero-backdrop, video.jh-hero-video
+           .jh-hero-scrim
+           .jh-hero-content
+             .jh-hero-eyebrow / .jh-hero-logo | .jh-hero-title
+             .jh-hero-meta > span
+             .jh-hero-overview
+             .jh-hero-actions > .jh-btn
+             .jh-hero-progress > i[style="--jh-pct:…"]
+       .jh-hero-dots > .jh-hero-dot[.is-active] > i
+       .jh-hero-nav.jh-hero-prev / .jh-hero-next
+
+   Everything below degrades to a single static slide if JS is absent.
+   ========================================================================== */
+
+.jh-hero {
+  display: var(--jh-hero-display);
+  position: relative;
+  width: 100%;
+  height: var(--jh-hero-height);
+  min-height: 320px;
+  margin-bottom: var(--jh-section-gap);
+  overflow: hidden;
+  background: var(--jh-ink-950);
+  isolation: isolate;
+  contain: layout paint style;
+}
+
+/* --------------------------------------------------------------------------
+   Slides — cross-faded, never translated. A slide is only composited while
+   it is active or leaving, so a 10-slide hero costs one layer, not ten.
+   -------------------------------------------------------------------------- */
+.jh-hero-slides {
+  position: absolute;
+  inset: 0;
+}
+
+.jh-hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--jh-dur-hero) var(--jh-ease-out),
+              visibility 0s linear var(--jh-dur-hero);
+}
+
+.jh-hero-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--jh-dur-hero) var(--jh-ease-out),
+              visibility 0s;
+  z-index: 1;
+}
+
+.jh-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.jh-hero-backdrop,
+.jh-hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+}
+
+/* A very slow push-in while a slide is on screen. Two frames of transform,
+   no layout, so it stays on the compositor. */
+.jh-hero-slide.is-active .jh-hero-backdrop {
+  animation: jh-hero-drift 18s var(--jh-ease-inout) both;
+}
+
+@keyframes jh-hero-drift {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.10); }
+}
+
+/* Trailer layer sits over the still and fades in once it can actually play. */
+.jh-hero-video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--jh-dur-slow) var(--jh-ease-out);
+}
+
+.jh-hero-slide.jh-preview-playing .jh-hero-video { opacity: 1; }
+.jh-hero-slide.jh-preview-playing .jh-hero-backdrop { opacity: 0; }
+
+/* --------------------------------------------------------------------------
+   Scrim — two gradients: a left-to-right wash for the text column and a
+   bottom fade that blends the hero into the first rail.
+   -------------------------------------------------------------------------- */
+.jh-hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to right,
+      rgba(5, 6, 7, 0.95) 0%,
+      rgba(5, 6, 7, 0.80) 28%,
+      rgba(5, 6, 7, 0.25) 62%,
+      rgba(5, 6, 7, 0.05) 100%
+    ),
+    linear-gradient(
+      to top,
+      var(--jh-bg) 0%,
+      rgba(11, 12, 15, 0.85) 12%,
+      rgba(11, 12, 15, 0) 45%
+    );
+}
+
+/* --------------------------------------------------------------------------
+   Content column
+   -------------------------------------------------------------------------- */
+.jh-hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--jh-space-3);
+  padding: 0 var(--jh-gutter) clamp(2rem, 6vh, 4.5rem);
+  max-width: min(46rem, 58%);
+}
+
+.jh-hero-slide.is-active .jh-hero-content > * {
+  animation: jh-hero-rise var(--jh-dur-slow) var(--jh-ease-out) both;
+}
+
+/* Staggered entrance, cheapest possible: no JS timers, just delays. */
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(1) { animation-delay: 60ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(2) { animation-delay: 120ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(3) { animation-delay: 180ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(4) { animation-delay: 240ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(5) { animation-delay: 300ms; }
+
+@keyframes jh-hero-rise {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+.jh-hero-eyebrow {
+  color: var(--jh-accent);
+  margin: 0;
+}
+
+.jh-hero-logo {
+  max-width: min(24rem, 70%);
+  max-height: clamp(70px, 13vh, 150px);
+  object-fit: contain;
+  object-position: left bottom;
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.7));
+}
+
+.jh-hero-title {
+  margin: 0;
+  font-size: var(--jh-fs-hero);
+  font-weight: var(--jh-fw-black);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+}
+
+.jh-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-3);
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text-secondary);
+  letter-spacing: var(--jh-ls-wide);
+}
+
+/* Dot separators without extra elements. */
+.jh-hero-meta > span + span::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: var(--jh-space-3);
+  vertical-align: 0.22em;
+  border-radius: 50%;
+  background: var(--jh-ink-400);
+}
+
+.jh-hero-meta .jh-hero-rating,
+.jh-hero-meta .jh-rating-chip {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--jh-line-strong);
+  border-radius: var(--jh-radius-xs);
+  font-size: var(--jh-fs-2xs);
+  letter-spacing: var(--jh-ls-caps);
+}
+
+.jh-hero-overview {
+  margin: 0;
+  font-size: var(--jh-fs-lg);
+  line-height: var(--jh-lh-body);
+  color: var(--jh-text-secondary);
+  letter-spacing: 0;
+  max-width: 42rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+.jh-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-3);
+  margin-top: var(--jh-space-2);
+}
+
+/* Resume bar for a Continue Watching hero slide. */
+.jh-hero-progress {
+  width: min(22rem, 60%);
+  height: 4px;
+  border-radius: var(--jh-radius-pill);
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.jh-hero-progress > i {
+  display: block;
+  height: 100%;
+  width: var(--jh-pct, 0%);
+  background: var(--jh-accent);
+  border-radius: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination dots. The active dot stretches into a bar that fills over the
+   dwell time — Hulu's tell that the carousel is about to advance.
+   -------------------------------------------------------------------------- */
+.jh-hero-dots {
+  position: absolute;
+  z-index: 3;
+  right: var(--jh-gutter);
+  bottom: clamp(2rem, 6vh, 4.5rem);
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+}
+
+.jh-hero-dot {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  width: 10px;
+  height: 4px;
+  border-radius: var(--jh-radius-pill);
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+  transition: width var(--jh-dur-base) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-hero-dot:hover { background: rgba(255, 255, 255, 0.5); }
+
+.jh-hero-dot.is-active {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.jh-hero-dot > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--jh-accent);
+}
+
+.jh-hero-dot.is-active > i {
+  animation: jh-hero-dot-fill var(--jh-hero-dwell, 9s) linear both;
+}
+
+/* Pausing the carousel (hover, focus, tab hidden) freezes the fill too. */
+.jh-hero.is-paused .jh-hero-dot.is-active > i {
+  animation-play-state: paused;
+}
+
+@keyframes jh-hero-dot-fill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* --------------------------------------------------------------------------
+   Prev / next affordances — invisible until the hero is hovered.
+   -------------------------------------------------------------------------- */
+.jh-hero-nav {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  width: clamp(48px, 5vw, 76px);
+  border: 0;
+  cursor: pointer;
+  color: var(--jh-text);
+  background: linear-gradient(to right, rgba(5, 6, 7, 0.6), transparent);
+  opacity: 0;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.jh-hero-prev { left: 0; }
+.jh-hero-next {
+  right: 0;
+  background: linear-gradient(to left, rgba(5, 6, 7, 0.6), transparent);
+}
+
+.jh-hero:hover .jh-hero-nav,
+.jh-hero:focus-within .jh-hero-nav {
+  opacity: 1;
+}
+
+.jh-hero-nav:hover { color: var(--jh-accent); }
+
+/* --------------------------------------------------------------------------
+   Narrow viewports: centre the content and let the image sit behind it.
+   -------------------------------------------------------------------------- */
+@media (max-width: 800px) {
+  .jh-hero {
+    height: clamp(300px, 48vh, 420px);
+  }
+  .jh-hero-content {
+    max-width: 100%;
+    text-align: left;
+    padding-bottom: var(--jh-space-6);
+  }
+  .jh-hero-overview { -webkit-line-clamp: 2; line-clamp: 2; }
+  .jh-hero-scrim {
+    background: linear-gradient(
+      to top,
+      var(--jh-bg) 0%,
+      rgba(11, 12, 15, 0.9) 30%,
+      rgba(11, 12, 15, 0.3) 75%,
+      rgba(11, 12, 15, 0.15) 100%
+    );
+  }
+  .jh-hero-nav { display: none; }
+  .jh-hero-dots { left: var(--jh-gutter); right: auto; bottom: var(--jh-space-3); }
+}
+
+
+/* ── 06-buttons.css ──────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 06 · Buttons
+   One button system, applied to Jellyfin's .emby-button family, the MUI
+   buttons used on 10.10+/10.11 dashboard pages, and our own .jh-btn.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Shared shape
+   -------------------------------------------------------------------------- */
+.jh-btn,
+.emby-button,
+.emby-button.raised,
+.MuiButton-root {
+  --jh-btn-bg: transparent;
+  --jh-btn-fg: var(--jh-text);
+  --jh-btn-border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jh-space-2);
+  border: 1px solid var(--jh-btn-border);
+  border-radius: var(--jh-radius-pill);
+  background-color: var(--jh-btn-bg);
+  color: var(--jh-btn-fg);
+  font-family: var(--jh-font);
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-snug);
+  text-transform: none;
+  padding: 0.6rem 1.35rem;
+  min-height: 2.5rem;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.jh-btn:active,
+.emby-button:active,
+.MuiButton-root:active {
+  transform: scale(0.97);
+}
+
+.jh-btn:disabled,
+.emby-button:disabled,
+.emby-button[disabled],
+.MuiButton-root.Mui-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   Primary — Hulu green with near-black text. Used for Play and Submit.
+   -------------------------------------------------------------------------- */
+.jh-btn-primary,
+.emby-button.button-submit,
+.emby-button.raised.button-submit,
+.button-submit,
+.MuiButton-containedPrimary,
+.MuiButton-contained:not(.MuiButton-containedError):not(.MuiButton-containedSecondary) {
+  --jh-btn-bg: var(--jh-accent);
+  --jh-btn-fg: var(--jh-on-accent);
+  --jh-btn-border: transparent;
+  background-color: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  font-weight: var(--jh-fw-bold);
+}
+
+.jh-btn-primary:hover,
+.emby-button.button-submit:hover,
+.button-submit:hover,
+.MuiButton-containedPrimary:hover {
+  background-color: var(--jh-accent-hover) !important;
+  box-shadow: 0 0 20px rgba(28, 231, 131, 0.28);
+}
+
+.jh-btn-primary:active,
+.button-submit:active {
+  background-color: var(--jh-accent-pressed) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Secondary — translucent white fill. Hulu's "More info".
+   -------------------------------------------------------------------------- */
+.jh-btn-secondary,
+.emby-button.raised:not(.button-submit):not(.button-delete):not(.button-cancel):not(.fab) {
+  --jh-btn-bg: rgba(255, 255, 255, 0.14);
+  --jh-btn-fg: var(--jh-text);
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: var(--jh-text) !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.jh-btn-secondary:hover,
+.emby-button.raised:not(.button-submit):not(.button-delete):not(.button-cancel):not(.fab):hover {
+  background-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Ghost / outline
+   -------------------------------------------------------------------------- */
+.jh-btn-ghost,
+.MuiButton-outlined {
+  --jh-btn-bg: transparent;
+  --jh-btn-border: var(--jh-line-strong);
+  --jh-btn-fg: var(--jh-text);
+  border-color: var(--jh-line-strong) !important;
+  color: var(--jh-text) !important;
+  background-color: transparent !important;
+}
+
+.jh-btn-ghost:hover,
+.MuiButton-outlined:hover {
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-accent) !important;
+  background-color: var(--jh-accent-faint) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Flat / text
+   -------------------------------------------------------------------------- */
+.jh-btn-flat,
+.emby-button.button-flat,
+.button-flat,
+.MuiButton-text {
+  background: transparent !important;
+  color: var(--jh-text-secondary) !important;
+  border-color: transparent !important;
+  padding-inline: var(--jh-space-3);
+}
+
+.jh-btn-flat:hover,
+.emby-button.button-flat:hover,
+.MuiButton-text:hover {
+  color: var(--jh-text) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Destructive
+   -------------------------------------------------------------------------- */
+.jh-btn-danger,
+.emby-button.button-delete,
+.button-delete,
+.MuiButton-containedError,
+.MuiButton-colorError {
+  background-color: transparent !important;
+  color: var(--jh-danger) !important;
+  border-color: var(--jh-danger) !important;
+}
+
+.jh-btn-danger:hover,
+.emby-button.button-delete:hover,
+.MuiButton-containedError:hover {
+  background-color: var(--jh-danger) !important;
+  color: #fff !important;
+  border-color: var(--jh-danger) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Icon buttons
+   -------------------------------------------------------------------------- */
+.jh-btn-icon,
+.paper-icon-button-light,
+.MuiIconButton-root {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--jh-text-secondary) !important;
+  border: 0;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.jh-btn-icon:hover,
+.paper-icon-button-light:hover,
+.MuiIconButton-root:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: var(--jh-text) !important;
+}
+
+.jh-btn-icon:active,
+.paper-icon-button-light:active {
+  transform: scale(0.92);
+}
+
+/* Circular outline icon button — Hulu's "+ watchlist" affordance. */
+.jh-btn-icon-outline {
+  border: 2px solid var(--jh-line-strong);
+  color: var(--jh-text) !important;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.jh-btn-icon-outline:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Sizes
+   -------------------------------------------------------------------------- */
+.jh-btn-lg {
+  font-size: var(--jh-fs-lg);
+  padding: 0.85rem 2.1rem;
+  min-height: 3rem;
+}
+
+.jh-btn-sm {
+  font-size: var(--jh-fs-sm);
+  padding: 0.4rem 0.9rem;
+  min-height: 2rem;
+}
+
+/* The hero's Play button is the largest affordance in the app. */
+.jh-hero-actions .jh-btn-primary {
+  font-size: var(--jh-fs-lg);
+  font-weight: var(--jh-fw-bold);
+  padding: 0.9rem 2.4rem;
+  min-height: 3.1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Detail-page action buttons (.detailButton) — Jellyfin renders these as
+   large stacked icon+label blocks. Hulu keeps them as pills in a row.
+   -------------------------------------------------------------------------- */
+.mainDetailButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-2);
+  margin: var(--jh-space-5) 0;
+}
+
+.detailButton,
+.emby-button.detailButton {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--jh-text) !important;
+  border-radius: var(--jh-radius-pill);
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.detailButton:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.detailButton-content {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+  padding: 0.6rem 1.2rem;
+  flex-direction: row;
+}
+
+.detailButton-icon { font-size: 1.25rem; }
+
+.detailButton-text {
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-semibold);
+  text-transform: none;
+  letter-spacing: var(--jh-ls-snug);
+  margin: 0;
+}
+
+/* The first detail button is Play — promote it to the accent. */
+.mainDetailButtons > .detailButton:first-child,
+.mainDetailButtons > .btnPlay,
+.btnPlay.detailButton {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.mainDetailButtons > .detailButton:first-child:hover,
+.btnPlay.detailButton:hover {
+  background: var(--jh-accent-hover) !important;
+}
+
+/* Icon-only detail buttons (favourite, watched, more) collapse to circles. */
+.detailButton.jh-icon-only .detailButton-text,
+.btnUserRating .detailButton-text {
+  display: none;
+}
+
+/* Favourite / watched active states. */
+.btnUserRating.ratedButton .material-icons,
+.ratingbutton-icon-withrating,
+.btnUserData[data-favorite="true"] .material-icons {
+  color: var(--jh-danger) !important;
+}
+
+.playstatebutton-icon-played,
+.btnUserData[data-played="true"] .material-icons {
+  color: var(--jh-accent) !important;
+}
+
+
+/* ── 07-cards.css ────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 07 · Cards
+
+   Design note on the hover-expand: the card scales in place with
+   `transform` and an overlay fades in *inside* it. Nothing below the card
+   moves. The alternative — an expanded panel that pushes siblings — reflows
+   the whole rail on every hover and is the single biggest cause of jank in
+   Netflix-style themes, so it is deliberately avoided.
+
+   Clipping: rails are `overflow-x: auto`, and CSS forbids `overflow-y:
+   visible` on a scroll container, so the scaled card is given room by
+   padding the scroller (see 08-rails). Cards at the first/last position
+   would still be cut off horizontally, so the JS companion tags them
+   .jh-edge-start / .jh-edge-end and the transform-origin shifts to that
+   side. Without JS, cards simply scale from the centre.
+   ========================================================================== */
+
+.card {
+  position: relative;
+  contain: layout style;
+}
+
+.cardBox,
+.cardBox-bottompadded {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   The scalable frame — everything visual lives here.
+   -------------------------------------------------------------------------- */
+.cardScalable {
+  position: relative;
+  border-radius: var(--jh-radius-card);
+  overflow: hidden;
+  background: var(--jh-surface);
+  box-shadow: 0 0 0 1px var(--jh-line-faint) inset;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform var(--jh-dur-base) var(--jh-ease-out),
+              box-shadow var(--jh-dur-base) var(--jh-ease-out),
+              border-radius var(--jh-dur-base) var(--jh-ease-out);
+  /* `paint` keeps the preview video and overlay from spilling; it also lets
+     the browser skip painting off-screen cards in long grids. */
+  contain: paint;
+}
+
+.cardImageContainer,
+.cardContent,
+.cardContent-shadow {
+  background-color: var(--jh-surface) !important;
+  border-radius: inherit;
+  box-shadow: none !important;
+}
+
+.cardImage {
+  border-radius: inherit;
+  transition: transform var(--jh-dur-slow) var(--jh-ease-out),
+              filter var(--jh-dur-base) var(--jh-ease-out);
+}
+
+/* Placeholder art for items with no image. */
+.cardImageContainer > .cardImageIcon,
+.cardImageIcon {
+  color: var(--jh-ink-500) !important;
+  font-size: 3rem;
+}
+
+/* --------------------------------------------------------------------------
+   Hover / focus state
+   -------------------------------------------------------------------------- */
+.card:hover,
+.card:focus-within,
+.card.jh-card-open {
+  z-index: var(--jh-z-card-hover);
+}
+
+.card:hover .cardScalable,
+.card:focus-within .cardScalable,
+.card.jh-card-open .cardScalable {
+  transform: scale(var(--jh-card-scale));
+  border-radius: var(--jh-radius-md);
+  box-shadow: var(--jh-shadow-card-hover), 0 0 0 1px var(--jh-line-strong) inset;
+  /* Promoted only while hovered, so a 500-card grid keeps one extra layer
+     rather than five hundred. */
+  will-change: transform;
+}
+
+.card:hover .cardImage,
+.card:focus-within .cardImage {
+  filter: brightness(0.92);
+}
+
+/* Keyboard/remote focus draws the accent ring on the frame, not the anchor. */
+.card:focus-visible .cardScalable,
+.card .itemAction:focus-visible ~ .cardScalable,
+.card.jh-focused .cardScalable {
+  box-shadow: var(--jh-shadow-card-hover), var(--jh-glow-accent);
+  outline: none;
+}
+
+/* Edge cards scale inward so the rail never clips them. */
+.card.jh-edge-start .cardScalable { transform-origin: left center; }
+.card.jh-edge-end   .cardScalable { transform-origin: right center; }
+
+/* --------------------------------------------------------------------------
+   Hover preview video (injected by the JS companion)
+   -------------------------------------------------------------------------- */
+.jh-card-preview {
+  display: var(--jh-preview-display);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--jh-dur-slow) var(--jh-ease-out);
+  z-index: 1;
+}
+
+.card.jh-preview-playing .jh-card-preview { opacity: 1; }
+.card.jh-preview-playing .cardImage { opacity: 0; }
+
+/* A muted-audio hint, mirroring Hulu's speaker toggle on previews. */
+.jh-preview-mute {
+  position: absolute;
+  top: var(--jh-space-2);
+  right: var(--jh-space-2);
+  z-index: 4;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: none;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--jh-line-strong);
+  background: rgba(5, 6, 7, 0.6);
+  color: var(--jh-text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.card.jh-preview-playing .jh-preview-mute { display: grid; }
+.jh-preview-mute:hover { border-color: var(--jh-accent); color: var(--jh-accent); }
+
+/* --------------------------------------------------------------------------
+   Overlay — Jellyfin's own .cardOverlayContainer, restyled into Hulu's
+   bottom-gradient action strip.
+   -------------------------------------------------------------------------- */
+.cardOverlayContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: linear-gradient(
+    to top,
+    rgba(5, 6, 7, 0.94) 0%,
+    rgba(5, 6, 7, 0.66) 34%,
+    rgba(5, 6, 7, 0.08) 62%,
+    transparent 100%
+  ) !important;
+  opacity: 0;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.card:hover .cardOverlayContainer,
+.card:focus-within .cardOverlayContainer,
+.card.jh-card-open .cardOverlayContainer {
+  opacity: 1;
+}
+
+.cardOverlayButton-br,
+.cardOverlayButton {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-radius: 50% !important;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--jh-shadow-md);
+  transform: translate3d(0, 8px, 0) scale(0.85);
+  opacity: 0;
+  transition: transform var(--jh-dur-base) var(--jh-ease-spring),
+              opacity var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.card:hover .cardOverlayButton,
+.card:focus-within .cardOverlayButton {
+  transform: none;
+  opacity: 1;
+}
+
+.cardOverlayButton:hover {
+  background: var(--jh-accent-hover) !important;
+}
+
+/* Secondary overlay buttons (favourite, mark played, menu) stay ghosted so
+   only Play carries the accent. */
+.cardOverlayButton.cardOverlayButton-hover:not(.cardOverlayButton-br),
+.cardOverlayButtonIcon:not(.cardOverlayButtonIcon-play) {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: var(--jh-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   In-card metadata (injected by JS) — title, year, rating, quick actions
+   revealed with the overlay.
+   -------------------------------------------------------------------------- */
+.jh-card-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: var(--jh-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+  pointer-events: none;
+}
+
+.card:hover .jh-card-info,
+.card:focus-within .jh-card-info {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.jh-card-info-title {
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-bold);
+  line-height: var(--jh-lh-snug);
+  color: var(--jh-text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.jh-card-info-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  color: var(--jh-ink-200);
+  text-transform: uppercase;
+}
+
+.jh-card-info-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+  margin-top: 0.15rem;
+}
+
+.jh-card-info-actions .jh-btn-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--jh-line-strong);
+  background: rgba(5, 6, 7, 0.5);
+  font-size: 1rem;
+}
+
+/* Small cards can't fit the metadata block; hide it rather than crush it. */
+html[data-jh-density="compact"] .jh-card-info-meta,
+.card.smallBackdropCard .jh-card-info-meta {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Badges — Top 10, New, Live, 4K. `--jh-badge-display` lets the settings
+   panel switch the whole set off.
+   -------------------------------------------------------------------------- */
+.jh-badge {
+  display: var(--jh-badge-display);
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--jh-radius-xs);
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.jh-badge-corner {
+  position: absolute;
+  top: var(--jh-space-2);
+  left: var(--jh-space-2);
+  z-index: 3;
+}
+
+.jh-badge-new  { background: var(--jh-accent); }
+.jh-badge-live { background: var(--jh-live); color: #fff; }
+.jh-badge-4k   { background: rgba(5, 6, 7, 0.78); color: var(--jh-text);
+                 border: 1px solid var(--jh-line-strong); }
+.jh-badge-hd   { background: rgba(5, 6, 7, 0.78); color: var(--jh-text-muted);
+                 border: 1px solid var(--jh-line); }
+
+/* The oversized outlined numeral on a ranked rail.
+   It sits *inside* the tile rather than hanging off its left edge: the card
+   frame is `overflow: hidden` (it has to be, to clip the preview video and
+   the rounded corners), so anything positioned outside it is simply cut off. */
+.jh-badge-top10 {
+  position: absolute;
+  left: 0.04em;
+  bottom: 0;
+  z-index: 3;
+  display: var(--jh-badge-display);
+  font-size: clamp(3.5rem, 5.5vw, 6rem);
+  font-weight: var(--jh-fw-black);
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+  color: transparent;
+  -webkit-text-stroke: 3px rgba(255, 255, 255, 0.92);
+  paint-order: stroke fill;
+  pointer-events: none;
+  /* Keeps the outline readable over bright artwork. */
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85));
+  transition: -webkit-text-stroke-color var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.card:hover .jh-badge-top10 {
+  -webkit-text-stroke-color: var(--jh-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Indicators — Jellyfin's unplayed count, played tick, episode count.
+   -------------------------------------------------------------------------- */
+.cardIndicators {
+  top: var(--jh-space-2);
+  right: var(--jh-space-2);
+  z-index: 3;
+  gap: 0.3rem;
+}
+
+.indicator,
+.countIndicator,
+.playedIndicator {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-radius: var(--jh-radius-pill);
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-bold);
+  box-shadow: var(--jh-shadow-sm);
+}
+
+.videoIndicator,
+.missingIndicator {
+  background: var(--jh-ink-700) !important;
+  color: var(--jh-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Resume progress bar
+   -------------------------------------------------------------------------- */
+.cardProgressBar,
+.innerCardFooter .itemProgressBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-radius: 0;
+}
+
+.itemProgressBar,
+.itemProgressBarForeground {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 0;
+  height: 3px;
+}
+
+.itemProgressBarForeground,
+.itemProgressBarForeground-recording {
+  background: var(--jh-accent) !important;
+}
+
+.itemProgressBarForeground-recording {
+  background: var(--jh-live) !important;
+}
+
+/* Jellyfin's translucent footer strip inside a card. */
+.innerCardFooter,
+.cardFooter.innerCardFooter {
+  background: linear-gradient(to top, rgba(5, 6, 7, 0.92), transparent) !important;
+  border-radius: 0 0 var(--jh-radius-card) var(--jh-radius-card);
+}
+
+/* --------------------------------------------------------------------------
+   Card text beneath the image
+   -------------------------------------------------------------------------- */
+.cardText {
+  padding: 0.45rem 0.15rem 0 !important;
+  font-size: var(--jh-fs-sm);
+  line-height: var(--jh-lh-snug);
+  letter-spacing: var(--jh-ls-snug);
+  color: var(--jh-text-secondary);
+  text-align: left;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.cardText-first,
+.cardText:first-of-type {
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+}
+
+.cardText-secondary,
+.cardText.cardText-secondary {
+  padding-top: 0.1rem !important;
+  font-size: var(--jh-fs-xs);
+  color: var(--jh-text-muted) !important;
+}
+
+.card:hover .cardText-first {
+  color: var(--jh-accent);
+}
+
+/* Hulu left-aligns card captions; Jellyfin centres them by default. */
+.cardTextCentered { text-align: left !important; }
+
+/* --------------------------------------------------------------------------
+   Card shapes
+   -------------------------------------------------------------------------- */
+.cardPadder-portrait,
+.cardPadder-overflowPortrait { padding-bottom: 150%; }
+
+.cardPadder-backdrop,
+.cardPadder-overflowBackdrop { padding-bottom: 56.25%; }
+
+.cardPadder-square,
+.cardPadder-overflowSquare { padding-bottom: 100%; }
+
+.cardPadder-banner { padding-bottom: 18.5%; }
+
+/* Person / cast cards read better as circles. */
+.card.personCard .cardScalable,
+.card.overflowPortraitCard[data-type="Person"] .cardScalable,
+.personCard .cardImageContainer {
+  border-radius: 50%;
+}
+
+.personCard .cardText { text-align: center !important; }
+
+/* --------------------------------------------------------------------------
+   Reduced motion: no scale, no preview. Keep the overlay so the card is
+   still interactive.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .card:hover .cardScalable,
+  .card:focus-within .cardScalable {
+    transform: none;
+  }
+  .jh-card-preview { display: none; }
+}
+
+
+/* ── 08-rails.css ────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 08 · Horizontal rails
+   Jellyfin renders these as .emby-scroller > .scrollSlider.itemsContainer
+   with a sibling .emby-scrollbuttons.
+   ========================================================================== */
+
+.emby-scroller,
+.itemsContainer.scrollSlider,
+.scrollX {
+  position: relative;
+  /* Vertical room for the hover scale. Without this the scroller clips the
+     top and bottom of an expanded card — see the note in 07-cards. */
+  padding-block: calc((var(--jh-card-scale) - 1) * var(--jh-card-w-portrait) * 0.85);
+  /* Bleed to the viewport edge so a rail visibly continues off-screen. */
+  padding-inline: var(--jh-gutter);
+  margin-inline: 0;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--jh-gutter);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Jellyfin's own focus-scale padding classes double up with ours. */
+.padded-top-focusscale    { padding-top: 0 !important; }
+.padded-bottom-focusscale { padding-bottom: 0 !important; }
+
+.scrollSlider,
+.itemsContainer.scrollSlider {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--jh-rail-gap);
+  padding-block: 0;
+}
+
+/* Jellyfin sizes overflow cards with percentage widths tuned for its own
+   layout. Fixed widths per density give a predictable Hulu rhythm and stop
+   card size drifting between rails. */
+.scrollSlider > .card,
+.itemsContainer.scrollSlider > .card {
+  margin: 0 !important;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.scrollSlider > .overflowPortraitCard,
+.scrollSlider > .portraitCard   { width: var(--jh-card-w-portrait); }
+
+.scrollSlider > .overflowBackdropCard,
+.scrollSlider > .backdropCard,
+.scrollSlider > .overflowSmallBackdropCard { width: var(--jh-card-w-backdrop); }
+
+.scrollSlider > .overflowSquareCard,
+.scrollSlider > .squareCard     { width: var(--jh-card-w-square); }
+
+.scrollSlider > .bannerCard     { width: calc(var(--jh-card-w-backdrop) * 1.6); }
+
+/* Snap is opt-in: it feels great with a trackpad and awful with a mouse
+   wheel on some browsers, so the JS companion enables it per input type. */
+html[data-jh-snap="on"] .emby-scroller,
+html[data-jh-snap="on"] .itemsContainer.scrollSlider {
+  scroll-snap-type: x mandatory;
+}
+
+/* --------------------------------------------------------------------------
+   Scroll buttons — Hulu's are full-height gradient chevrons that only
+   appear while the rail is hovered.
+   -------------------------------------------------------------------------- */
+/* The buttons are absolutely positioned over the rail (their containing
+   block is .verticalSection, see 03-layout). Jellyfin inserts this element
+   either beside the scroller or inside the title row depending on version,
+   so it is anchored to the section rather than to a sibling — that works in
+   both cases. The top padding keeps the gradients clear of the heading. */
+.emby-scrollbuttons {
+  position: absolute;
+  inset: 0;
+  padding-top: var(--jh-rail-title-h) !important;
+  z-index: var(--jh-z-rail-button);
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  padding-inline: 0 !important;
+  margin: 0 !important;
+}
+
+.emby-scrollbuttons .emby-scrollbuttons-button,
+.emby-scrollbuttons .paper-icon-button-light,
+.emby-scrollbuttons button {
+  pointer-events: auto;
+  width: clamp(40px, 3.4vw, 60px);
+  height: 100%;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  /* These buttons carry a Material Icons ligature. If that font hasn't
+     loaded — offline, blocked, or still fetching — the literal word
+     "chevron_left" renders at icon size and overflows the button by a couple
+     of hundred pixels. Overflowing inline content is still hit-testable, so
+     an unclipped button silently swallows hover and clicks across half the
+     rail. Clipping costs nothing and removes the failure mode. */
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  color: var(--jh-text) !important;
+  font-size: 1.9rem;
+  opacity: 0;
+  transform: none;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+  background: linear-gradient(to right, rgba(5, 6, 7, 0.88), rgba(5, 6, 7, 0)) !important;
+}
+
+.emby-scrollbuttons button:last-child,
+.emby-scrollbuttons .scrollButtonsRight {
+  background: linear-gradient(to left, rgba(5, 6, 7, 0.88), rgba(5, 6, 7, 0)) !important;
+}
+
+.verticalSection:hover .emby-scrollbuttons button,
+.emby-scroller:hover ~ .emby-scrollbuttons button,
+.emby-scrollbuttons button:focus-visible {
+  opacity: 1;
+}
+
+.emby-scrollbuttons button:hover {
+  color: var(--jh-accent) !important;
+}
+
+.emby-scrollbuttons button:disabled,
+.emby-scrollbuttons button.hide {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* Touch devices get no buttons — the rail is swipeable. */
+@media (hover: none) {
+  .emby-scrollbuttons { display: none !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Rails our JS builds (Top 10, Because You Watched, Continue Watching).
+   Same skeleton as Jellyfin's so nothing here is a special case.
+   -------------------------------------------------------------------------- */
+.jh-rail {
+  position: relative;
+  margin-bottom: var(--jh-section-gap);
+  contain: layout style;
+}
+
+.jh-rail-track {
+  display: flex;
+  gap: var(--jh-rail-gap);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-inline: var(--jh-gutter);
+  padding-block: calc((var(--jh-card-scale) - 1) * var(--jh-card-w-portrait) * 0.85);
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+}
+
+.jh-rail-track::-webkit-scrollbar { display: none; }
+
+/* Ranked rails breathe a little more so the numerals don't crowd. */
+.jh-rail-top10 .jh-rail-track,
+.jh-rail-top10 .scrollSlider {
+  gap: calc(var(--jh-rail-gap) * 1.6);
+}
+
+
+/* ── 09-grids.css ────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 09 · Library grids, filters & pagination
+   This is where a large library is won or lost: the grid is the only view
+   that can hold thousands of cards at once.
+   ========================================================================== */
+
+.itemsContainer.vertical-wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--jh-card-w-portrait), 1fr));
+  gap: clamp(1rem, 0.6rem + 1vw, 1.75rem) var(--jh-rail-gap);
+  align-items: start;
+  /* Room for the hover scale, sized from the same formula the rails use, so
+     a scaled card at the top or bottom row isn't clipped by the section. A
+     flat 1rem is not enough at cinematic density. */
+  padding-block: calc((var(--jh-card-scale) - 1) * var(--jh-card-w-portrait) * 0.85);
+}
+
+/* Shape-specific column sizing. Jellyfin sets a class on the container for
+   the dominant card shape in the view. */
+.itemsContainer.vertical-wrap:has(> .backdropCard),
+.itemsContainer.vertical-wrap:has(> .overflowBackdropCard) {
+  grid-template-columns: repeat(auto-fill, minmax(var(--jh-card-w-backdrop), 1fr));
+}
+
+.itemsContainer.vertical-wrap:has(> .squareCard),
+.itemsContainer.vertical-wrap:has(> .overflowSquareCard) {
+  grid-template-columns: repeat(auto-fill, minmax(var(--jh-card-w-square), 1fr));
+}
+
+/* Jellyfin gives grid cards percentage widths and margins for its own
+   float-ish layout; grid supersedes both. */
+.itemsContainer.vertical-wrap > .card {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Off-screen work avoidance.
+   `content-visibility: auto` lets the browser skip layout and paint for
+   cards outside the viewport. `contain-intrinsic-size` supplies a placeholder
+   height so the scrollbar doesn't jump as they're skipped.
+
+   Only applied in grids, and only above a size where it pays for itself —
+   in a short rail the bookkeeping costs more than it saves.
+   -------------------------------------------------------------------------- */
+.itemsContainer.vertical-wrap > .card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
+/* A hovered card must be fully rendered, and its scaled overflow must not be
+   clipped by its own containment. */
+.itemsContainer.vertical-wrap > .card:hover,
+.itemsContainer.vertical-wrap > .card:focus-within {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
+html[data-jh-power="low"] .itemsContainer.vertical-wrap > .card {
+  contain-intrinsic-size: auto 260px;
+}
+
+/* --------------------------------------------------------------------------
+   Vertical list views (episodes, playlist items, search results)
+   -------------------------------------------------------------------------- */
+.itemsContainer.vertical-list,
+.paperList,
+.itemsContainer.vertical-list.paperList {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: var(--jh-radius-lg);
+  overflow: hidden;
+}
+
+.listItem,
+.listItem-border {
+  background: transparent !important;
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+  padding: var(--jh-space-3) var(--jh-space-4);
+  border-radius: var(--jh-radius-md);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.listItem:hover,
+.listItem.focusable:hover {
+  background: var(--jh-surface) !important;
+}
+
+.listItem:last-child { border-bottom: 0 !important; }
+
+.listItemImage,
+.listItemImage-large {
+  border-radius: var(--jh-radius-sm);
+  background-color: var(--jh-surface);
+}
+
+.listItemBodyText {
+  color: var(--jh-text);
+  font-size: var(--jh-fs-md);
+  line-height: var(--jh-lh-snug);
+}
+
+.listItemBodyText.secondary {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+}
+
+.listItemIndexNumber {
+  color: var(--jh-text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--jh-fw-semibold);
+  min-width: 2.2ch;
+}
+
+.listItem.playlistIndexIndicatorImage,
+.listItem .playedIndicator { background: var(--jh-accent) !important; }
+
+/* Currently-playing row in a queue or album. */
+.listItem.playing,
+.listItem.is-playing .listItemBodyText {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Filter / sort bar
+   -------------------------------------------------------------------------- */
+.filterButton,
+.btnFilter,
+.btnSort,
+.btnSelectView,
+.paging .emby-button {
+  border-radius: var(--jh-radius-pill);
+  border: 1px solid var(--jh-line);
+  background: transparent !important;
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  padding: 0.4rem 0.9rem;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.filterButton:hover,
+.btnFilter:hover,
+.btnSort:hover,
+.btnSelectView:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint) !important;
+}
+
+/* Jellyfin marks an active filter with .filterButton-active or a dot. */
+.filterButton.filterButton-active,
+.btnFilter.filterActive {
+  border-color: var(--jh-accent);
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.filterActiveIndicator {
+  background: var(--jh-accent) !important;
+}
+
+/* Alpha picker down the right edge of a large library. */
+.alphaPicker,
+.alphaPicker-vertical {
+  background: transparent;
+}
+
+.alphaPickerButton {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  padding: 0.08rem 0.3rem;
+  border-radius: var(--jh-radius-xs);
+  transition: color var(--jh-dur-instant) var(--jh-ease-out),
+              background-color var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.alphaPickerButton:hover {
+  color: var(--jh-on-accent) !important;
+  background: var(--jh-accent) !important;
+}
+
+.alphaPickerButton-selected,
+.alphaPickerButton.selected {
+  color: var(--jh-accent) !important;
+  font-weight: var(--jh-fw-bold);
+}
+
+/* --------------------------------------------------------------------------
+   Pagination — a large library leans on this constantly.
+   -------------------------------------------------------------------------- */
+.paging,
+.listPaging {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--jh-space-2);
+  padding: var(--jh-space-4) var(--jh-gutter);
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.paging .btnPreviousPage,
+.paging .btnNextPage {
+  border-radius: 50%;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--jh-line);
+}
+
+.paging .btnPreviousPage:hover,
+.paging .btnNextPage:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Multi-select mode (bulk-editing a big library)
+   -------------------------------------------------------------------------- */
+.itemSelectionPanel {
+  border: 2px solid var(--jh-accent) !important;
+  border-radius: var(--jh-radius-card);
+  background: rgba(28, 231, 131, 0.10) !important;
+}
+
+.chkItemSelect:checked + .checkboxOutline,
+.selectionCommandsPanel {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.selectionCommandsPanel {
+  border-radius: var(--jh-radius-pill);
+  box-shadow: var(--jh-shadow-lg);
+}
+
+
+/* ── 10-detail.css ───────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 10 · Item detail page
+   Jellyfin lays this out as a poster beside a text column. Hulu instead
+   opens with a full-bleed backdrop, the title treatment low-left, and the
+   metadata beneath. That's what this module rebuilds.
+   ========================================================================== */
+
+#itemDetailPage,
+.detailPage {
+  padding-top: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Backdrop
+   Jellyfin's #itemBackdrop is a fixed, heavily dimmed layer. Here it becomes
+   a real cinematic header: full width, cropped to a wide band, with the page
+   fading up out of it.
+   -------------------------------------------------------------------------- */
+#itemBackdrop,
+.itemBackdrop {
+  position: relative;
+  height: clamp(340px, 52vh, 640px);
+  background-position: center 20%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 1 !important;
+  margin-bottom: calc(var(--jh-space-8) * -1);
+  /* Feathers the image into the page without a second element. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 45%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 45%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+#itemBackdrop::after,
+.itemBackdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      to right,
+      rgba(5, 6, 7, 0.9) 0%,
+      rgba(5, 6, 7, 0.5) 45%,
+      rgba(5, 6, 7, 0.1) 100%
+    ),
+    linear-gradient(to top, var(--jh-bg) 0%, rgba(11, 12, 15, 0) 55%);
+}
+
+/* Jellyfin's page-wide blurred backdrop is redundant now. */
+#itemDetailPage .backdropContainer,
+.detailPage .backdropContainer {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Primary block — poster + title column, pulled up over the backdrop.
+   -------------------------------------------------------------------------- */
+.detailPagePrimaryContainer,
+.detailPageWrapperContainer > .detailPagePrimaryContainer {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(1.25rem, 2.5vw, 2.75rem);
+  padding-inline: var(--jh-gutter) !important;
+  margin-top: clamp(-16rem, -22vh, -9rem);
+  padding-bottom: var(--jh-space-6);
+}
+
+.detailImageContainer {
+  flex: 0 0 auto;
+  width: clamp(140px, 15vw, 232px);
+  margin: 0 !important;
+}
+
+.detailImageContainer .card,
+.detailImageContainer .cardScalable {
+  border-radius: var(--jh-radius-md);
+  box-shadow: var(--jh-shadow-xl), 0 0 0 1px var(--jh-line-strong) inset;
+  overflow: hidden;
+}
+
+/* The poster shouldn't grow on hover here — it isn't a link target. */
+.detailImageContainer .card:hover .cardScalable {
+  transform: none;
+  box-shadow: var(--jh-shadow-xl), 0 0 0 1px var(--jh-line-strong) inset;
+}
+
+.detailPagePrimaryContent,
+.detailPagePrimaryContainer > .flex-grow {
+  min-width: 0;
+  padding-bottom: var(--jh-space-2);
+}
+
+/* --------------------------------------------------------------------------
+   Title treatment
+   -------------------------------------------------------------------------- */
+.detailLogo {
+  max-width: min(30rem, 72%);
+  max-height: clamp(72px, 12vh, 132px);
+  background-position: left bottom;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-bottom: var(--jh-space-3);
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.75));
+}
+
+.itemName,
+.itemName.infoText {
+  font-size: var(--jh-fs-4xl) !important;
+  font-weight: var(--jh-fw-black) !important;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: var(--jh-text);
+  margin: 0 0 var(--jh-space-2);
+  text-wrap: balance;
+  text-shadow: 0 2px 22px rgba(0, 0, 0, 0.55);
+}
+
+.parentName,
+.parentName.infoText {
+  display: block;
+  font-size: var(--jh-fs-md) !important;
+  font-weight: var(--jh-fw-semibold) !important;
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  color: var(--jh-accent) !important;
+  margin-bottom: var(--jh-space-1);
+}
+
+/* --------------------------------------------------------------------------
+   Metadata row
+   -------------------------------------------------------------------------- */
+.itemMiscInfo,
+.itemMiscInfo-primary,
+.itemMiscInfo-secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-3);
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  margin: var(--jh-space-2) 0;
+}
+
+.mediaInfoItem {
+  color: inherit !important;
+  margin: 0 !important;
+  padding: 0;
+}
+
+.mediaInfoItem + .mediaInfoItem::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: var(--jh-space-3);
+  vertical-align: 0.22em;
+  border-radius: 50%;
+  background: var(--jh-ink-400);
+}
+
+.mediaInfoOfficialRating,
+.mediaInfoText {
+  border: 1px solid var(--jh-line-strong) !important;
+  border-radius: var(--jh-radius-xs);
+  padding: 0.08rem 0.4rem !important;
+  font-size: var(--jh-fs-2xs);
+  letter-spacing: var(--jh-ls-caps);
+  background: transparent !important;
+}
+
+.mediaInfoOfficialRating + .mediaInfoItem::before,
+.mediaInfoText + .mediaInfoItem::before { margin-left: 0; }
+
+.mediaInfoCriticRating,
+.mediaInfoCriticRatingFresh {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-radius: var(--jh-radius-xs);
+  padding: 0.08rem 0.4rem;
+  font-weight: var(--jh-fw-bold);
+}
+
+.mediaInfoCriticRatingRotten {
+  background: var(--jh-danger) !important;
+  color: #fff !important;
+}
+
+.starRatingContainer,
+.starIcon {
+  color: var(--jh-warn) !important;
+  gap: 0.25rem;
+}
+
+/* "Ends at 9:41 PM" style endsAt chip. */
+.endsAt {
+  color: var(--jh-text-muted) !important;
+  font-weight: var(--jh-fw-regular);
+}
+
+/* Genres render as tappable pills. */
+.genreItems,
+.itemGenres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--jh-space-2);
+  margin: var(--jh-space-3) 0;
+}
+
+.genreItems > a,
+.itemGenres > a,
+.textActionButton {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--jh-radius-pill);
+  border: 1px solid var(--jh-line);
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.genreItems > a:hover,
+.itemGenres > a:hover,
+.textActionButton:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Overview
+   -------------------------------------------------------------------------- */
+.detailSectionContent .overview-text,
+#itemDetailPage .overview-text,
+.detail-clamp {
+  font-size: var(--jh-fs-lg);
+  line-height: var(--jh-lh-loose);
+  color: var(--jh-text-secondary);
+  max-width: 68ch;
+}
+
+/* --------------------------------------------------------------------------
+   Track selections (version / audio / subtitles)
+   -------------------------------------------------------------------------- */
+.trackSelections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--jh-space-4);
+  margin: var(--jh-space-5) 0;
+  max-width: 60rem;
+}
+
+.trackSelections .selectContainer {
+  flex: 1 1 15rem;
+  margin: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Detail sections beneath the fold
+   -------------------------------------------------------------------------- */
+.detailSection,
+.verticalSection.detailVerticalSection {
+  padding-inline: var(--jh-gutter);
+  margin-bottom: var(--jh-section-gap);
+}
+
+.detailSectionHeader,
+.detailSection > h2,
+#castCollapsible > .sectionTitleContainer,
+#similarCollapsible > .sectionTitleContainer {
+  font-size: var(--jh-fs-2xl);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-tight);
+  margin-bottom: var(--jh-space-3);
+}
+
+/* Key/value grid (Director, Writers, Studios, Media info). */
+.detailSectionContent {
+  color: var(--jh-text-secondary);
+}
+
+.detailSectionContent > div,
+.mediaInfoStream {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.mediaInfoStreamType,
+.detailSectionContent .label {
+  color: var(--jh-text-muted);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  font-size: var(--jh-fs-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Season / episode list
+   -------------------------------------------------------------------------- */
+#childrenCollapsible .listItem,
+.childrenItemsContainer .listItem {
+  align-items: flex-start;
+  gap: var(--jh-space-4);
+  padding: var(--jh-space-4);
+  border-radius: var(--jh-radius-md);
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+}
+
+#childrenCollapsible .listItemImage,
+.childrenItemsContainer .listItemImage {
+  width: clamp(120px, 14vw, 210px);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: var(--jh-radius-sm);
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Play affordance over an episode thumbnail. */
+#childrenCollapsible .listItem:hover .listItemImage::after,
+.childrenItemsContainer .listItem:hover .listItemImage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 6, 7, 0.45);
+  /* A triangle drawn with borders — no icon font dependency. */
+  background-image: none;
+}
+
+#childrenCollapsible .listItemBody,
+.childrenItemsContainer .listItemBody {
+  padding-block: 0;
+}
+
+.listItemBodyText.listItemBodyText-lines {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  line-height: var(--jh-lh-body);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+/* Season selector. */
+#selectSeason,
+.selectSeason {
+  max-width: 18rem;
+}
+
+/* --------------------------------------------------------------------------
+   Collapsible sections — Jellyfin's expander chevrons.
+   -------------------------------------------------------------------------- */
+.collapseContent {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.emby-collapse .emby-button,
+.collapsibleHeader {
+  color: var(--jh-text) !important;
+  border-bottom: 1px solid var(--jh-line-faint);
+  border-radius: 0;
+  padding-inline: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Person page
+   -------------------------------------------------------------------------- */
+#personPage .detailImageContainer .cardScalable,
+.personPage .detailImageContainer .cardScalable {
+  border-radius: 50%;
+}
+
+
+/* ── 11-player.css ───────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 11 · Video player OSD
+   Hulu's player chrome: a wide scrub bar that thickens on hover, a big
+   centred play/pause, and everything else demoted to the edges.
+   ========================================================================== */
+
+#videoOsdPage,
+.videoPlayerContainer {
+  background: #000 !important;
+}
+
+.videoPlayerContainer video,
+.htmlvideoplayer {
+  background: #000;
+}
+
+/* --------------------------------------------------------------------------
+   Top bar over the video
+   -------------------------------------------------------------------------- */
+.videoOsdTop,
+#videoOsdPage .skinHeader {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    transparent 100%
+  ) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom OSD
+   -------------------------------------------------------------------------- */
+.videoOsdBottom {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.94) 0%,
+    rgba(0, 0, 0, 0.72) 42%,
+    rgba(0, 0, 0, 0.18) 78%,
+    transparent 100%
+  ) !important;
+  padding: var(--jh-space-16) var(--jh-gutter) var(--jh-space-5) !important;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.videoOsdBottom-hidden {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+}
+
+.osdTextContainer {
+  margin-bottom: var(--jh-space-2);
+}
+
+.osdTitle,
+.osdTitle.osdTextContainer {
+  font-size: var(--jh-fs-2xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  color: var(--jh-text) !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.osdMediaInfo,
+.osdSecondaryMediaInfo {
+  color: var(--jh-ink-200) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-medium);
+  letter-spacing: var(--jh-ls-snug);
+}
+
+.osdTimeText,
+.osdPositionText,
+.osdDurationText {
+  color: var(--jh-ink-100) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Scrub bar
+   Jellyfin uses an MDL slider: a lower (played) track, an upper (remaining)
+   track, and a thumb. Hulu's is thin until you touch it.
+   -------------------------------------------------------------------------- */
+.videoOsdBottom .sliderContainer,
+.osdProgressInner {
+  padding-block: var(--jh-space-2);
+}
+
+.mdl-slider__background-flex {
+  height: 4px !important;
+  border-radius: var(--jh-radius-pill);
+  background: rgba(255, 255, 255, 0.24) !important;
+  transition: height var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.sliderContainer:hover .mdl-slider__background-flex,
+.mdl-slider:focus-visible ~ .mdl-slider__background-flex {
+  height: 7px !important;
+}
+
+.mdl-slider__background-lower {
+  background: var(--jh-accent) !important;
+  border-radius: var(--jh-radius-pill);
+}
+
+.mdl-slider__background-upper {
+  background: transparent !important;
+}
+
+/* Buffered-ahead segment. */
+.sliderBufferedRange,
+.mdl-slider-background-upper-buffer,
+.osdProgressBuffered {
+  background: rgba(255, 255, 255, 0.42) !important;
+  border-radius: var(--jh-radius-pill);
+}
+
+/* Thumb: hidden until interaction, Hulu-style. */
+.mdl-slider::-webkit-slider-thumb {
+  background: var(--jh-accent) !important;
+  border: 0 !important;
+  width: 14px;
+  height: 14px;
+  transform: scale(0);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring);
+  box-shadow: 0 0 0 4px rgba(28, 231, 131, 0.25);
+}
+
+.mdl-slider::-moz-range-thumb {
+  background: var(--jh-accent) !important;
+  border: 0 !important;
+  width: 14px;
+  height: 14px;
+}
+
+.sliderContainer:hover .mdl-slider::-webkit-slider-thumb,
+.mdl-slider:active::-webkit-slider-thumb,
+.mdl-slider:focus-visible::-webkit-slider-thumb {
+  transform: scale(1);
+}
+
+/* Chapter markers along the bar. */
+.sliderMarker,
+.chapterMarker {
+  background: rgba(255, 255, 255, 0.85) !important;
+  width: 2px;
+  border-radius: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Trickplay / chapter preview bubble
+   -------------------------------------------------------------------------- */
+.sliderBubble {
+  background: var(--jh-ink-950) !important;
+  border: 1px solid var(--jh-line-strong);
+  border-radius: var(--jh-radius-md);
+  box-shadow: var(--jh-shadow-lg);
+  padding: 0;
+  overflow: hidden;
+  color: var(--jh-text);
+}
+
+.sliderBubbleText,
+.chapterThumbText {
+  padding: 0.35rem var(--jh-space-2);
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: var(--jh-ink-950);
+}
+
+.chapterThumbContainer,
+.sliderBubble .chapterThumb {
+  border-radius: var(--jh-radius-md) var(--jh-radius-md) 0 0;
+  overflow: hidden;
+}
+
+.chapterThumbTextContainer {
+  background: var(--jh-ink-950);
+  color: var(--jh-text);
+}
+
+.chapterThumbName {
+  color: var(--jh-text);
+  font-weight: var(--jh-fw-semibold);
+}
+
+/* --------------------------------------------------------------------------
+   Transport controls
+   -------------------------------------------------------------------------- */
+.videoOsdBottom .buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-1);
+  padding-top: var(--jh-space-1);
+}
+
+.videoOsdBottom .paper-icon-button-light {
+  width: 2.9rem;
+  height: 2.9rem;
+  color: var(--jh-text) !important;
+}
+
+.videoOsdBottom .paper-icon-button-light:hover {
+  color: var(--jh-accent) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Play/pause is the anchor of the row. */
+.videoOsdBottom .btnPause,
+.videoOsdBottom .btnPlayPause {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.videoOsdBottom .btnPause:hover,
+.videoOsdBottom .btnPlayPause:hover {
+  background: var(--jh-accent-hover) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.videoOsdBottom .btnPause .material-icons { font-size: 2rem; }
+
+/* Volume. */
+.osdVolumeSliderContainer {
+  width: 7rem;
+  margin-inline: var(--jh-space-2);
+}
+
+/* Active toggles (subtitles on, audio track chosen). */
+.btnSubtitles.subtitleButton-active,
+.btnAudio.audioButton-active,
+.videoOsdBottom .paper-icon-button-light.is-active {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Skip intro / skip credits (Intro Skipper plugin and Jellyfin 10.11 native)
+   -------------------------------------------------------------------------- */
+.skipIntro,
+.skip-button,
+#skipIntro .skipIntro-button,
+button.skipIntro {
+  background: rgba(5, 6, 7, 0.72) !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--jh-line-strong) !important;
+  border-radius: var(--jh-radius-pill) !important;
+  color: var(--jh-text) !important;
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-snug);
+  padding: 0.75rem 1.75rem !important;
+  box-shadow: var(--jh-shadow-lg);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.skipIntro:hover,
+.skip-button:hover,
+button.skipIntro:hover {
+  background: var(--jh-accent) !important;
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   Up-next / post-play card
+   -------------------------------------------------------------------------- */
+.upNextContainer,
+.upNextDialog {
+  background: rgba(5, 6, 7, 0.9) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-lg);
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.upNextDialog-countdownText,
+.upNextContainer .countdown {
+  color: var(--jh-accent) !important;
+  font-weight: var(--jh-fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Subtitles
+   Jellyfin's own subtitle appearance settings win over this; these are the
+   defaults for users who never open that page.
+   -------------------------------------------------------------------------- */
+.htmlvideoplayer::cue {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-family: var(--jh-font);
+  font-weight: var(--jh-fw-semibold);
+  line-height: 1.35;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.subtitleAppearanceOptions .subtitlePreview {
+  border-radius: var(--jh-radius-md);
+  border: 1px solid var(--jh-line);
+}
+
+/* --------------------------------------------------------------------------
+   Buffering spinner over the video
+   -------------------------------------------------------------------------- */
+.videoPlayerContainer .docspinner {
+  filter: drop-shadow(0 0 18px rgba(28, 231, 131, 0.5));
+}
+
+/* --------------------------------------------------------------------------
+   Picture-in-picture / mini player
+   -------------------------------------------------------------------------- */
+.videoPlayerContainer.pip,
+.miniPlayer {
+  border-radius: var(--jh-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--jh-shadow-xl);
+  border: 1px solid var(--jh-line);
+}
+
+
+/* ── 12-forms.css ────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 12 · Forms, dialogs, menus & toasts
+   Covers Jellyfin's own .emby-* controls and the MUI controls used on the
+   React dashboard pages in 10.10+.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Text inputs
+   -------------------------------------------------------------------------- */
+.emby-input,
+.emby-textarea,
+.emby-select,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+textarea,
+select,
+.MuiInputBase-input,
+.MuiOutlinedInput-input {
+  background: var(--jh-ink-700) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-md) !important;
+  font-family: var(--jh-font) !important;
+  font-size: var(--jh-fs-md);
+  padding: 0.65rem 0.85rem;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out),
+              box-shadow var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.emby-input:hover,
+.emby-textarea:hover,
+.emby-select:hover {
+  border-color: var(--jh-line-strong) !important;
+}
+
+.emby-input:focus,
+.emby-textarea:focus,
+.emby-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--jh-accent) !important;
+  background: var(--jh-ink-800) !important;
+  box-shadow: 0 0 0 3px var(--jh-accent-faint) !important;
+  outline: none;
+}
+
+.emby-input::placeholder,
+.emby-textarea::placeholder,
+input::placeholder {
+  color: var(--jh-text-disabled);
+}
+
+/* Chrome paints autofilled fields a hard blue. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--jh-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--jh-ink-700) inset;
+  caret-color: var(--jh-accent);
+  transition: background-color 9999s ease-out;
+}
+
+/* MUI's outlined input draws its border in a pseudo-element. */
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--jh-line) !important;
+}
+
+.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--jh-accent) !important;
+  border-width: 1px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Labels & help text
+   -------------------------------------------------------------------------- */
+.inputLabel,
+.selectLabel,
+.textareaLabel,
+.MuiFormLabel-root,
+.MuiInputLabel-root {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.inputLabelFocused,
+.selectLabelFocused,
+.MuiFormLabel-root.Mui-focused {
+  color: var(--jh-accent) !important;
+}
+
+.fieldDescription,
+.MuiFormHelperText-root {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  line-height: var(--jh-lh-body);
+  margin-top: 0.35rem;
+}
+
+.inputContainer,
+.selectContainer,
+.checkboxContainer {
+  margin-bottom: var(--jh-space-5);
+}
+
+/* --------------------------------------------------------------------------
+   Selects
+   -------------------------------------------------------------------------- */
+.emby-select,
+select {
+  appearance: none;
+  padding-right: 2.25rem;
+  /* Chevron drawn with two gradients — no SVG asset needed. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--jh-text-muted) 50%),
+    linear-gradient(135deg, var(--jh-text-muted) 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 18px) calc(50% + 2px),
+    calc(100% - 12px) calc(50% + 2px) !important;
+  background-size: 6px 6px, 6px 6px !important;
+  background-repeat: no-repeat !important;
+  background-color: var(--jh-ink-700) !important;
+}
+
+.emby-select option,
+select option {
+  background: var(--jh-ink-800);
+  color: var(--jh-text);
+}
+
+.selectArrowContainer,
+.selectArrow { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   Checkboxes & radios
+   -------------------------------------------------------------------------- */
+.emby-checkbox + span,
+.checkboxLabel,
+.MuiFormControlLabel-label {
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-md);
+}
+
+.checkboxOutline {
+  border-color: var(--jh-ink-400) !important;
+  border-radius: var(--jh-radius-xs);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.emby-checkbox:checked + span .checkboxOutline,
+.emby-checkbox:checked + .checkboxOutline {
+  background: var(--jh-accent) !important;
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.emby-checkbox:focus-visible + span .checkboxOutline {
+  box-shadow: 0 0 0 3px var(--jh-accent-faint);
+}
+
+.MuiCheckbox-root.Mui-checked,
+.MuiRadio-root.Mui-checked,
+.MuiSwitch-switchBase.Mui-checked {
+  color: var(--jh-accent) !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background-color: var(--jh-accent) !important;
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: var(--jh-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Sliders (settings pages, volume, subtitle size)
+   -------------------------------------------------------------------------- */
+.emby-slider,
+input[type="range"] {
+  accent-color: var(--jh-accent);
+}
+
+.emby-slider-background-lower {
+  background: var(--jh-accent) !important;
+}
+
+.emby-slider-background-upper {
+  background: var(--jh-ink-600) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Dialogs
+   -------------------------------------------------------------------------- */
+.dialog,
+.formDialog,
+.dialogContainer > .dialog,
+.MuiDialog-paper,
+.MuiPaper-root.MuiDialog-paper {
+  background: var(--jh-ink-850) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-xl) !important;
+  box-shadow: var(--jh-shadow-xl) !important;
+  overflow: hidden;
+}
+
+.dialogBackdrop,
+.dialogBackdropOpened,
+.MuiBackdrop-root {
+  background: var(--jh-overlay-scrim) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.formDialogHeader,
+.MuiDialogTitle-root {
+  background: transparent !important;
+  border-bottom: 1px solid var(--jh-line-faint);
+  padding: var(--jh-space-5) var(--jh-space-6) !important;
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-3);
+}
+
+.formDialogHeaderTitle,
+.MuiDialogTitle-root {
+  font-size: var(--jh-fs-xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  margin: 0;
+}
+
+.formDialogContent,
+.MuiDialogContent-root {
+  padding: var(--jh-space-6) !important;
+  background: transparent !important;
+}
+
+.formDialogFooter,
+.MuiDialogActions-root {
+  border-top: 1px solid var(--jh-line-faint);
+  padding: var(--jh-space-4) var(--jh-space-6) !important;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--jh-space-2);
+  background: var(--jh-ink-900) !important;
+}
+
+.formDialogFooterItem {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+/* --------------------------------------------------------------------------
+   Action sheets (the "…" context menus)
+   -------------------------------------------------------------------------- */
+.actionSheet,
+.actionSheetContent,
+.MuiMenu-paper,
+.MuiPopover-paper {
+  background: var(--jh-ink-850) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-lg) !important;
+  box-shadow: var(--jh-shadow-xl) !important;
+  padding: var(--jh-space-2) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.actionSheetTitle {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding: var(--jh-space-2) var(--jh-space-3);
+}
+
+.actionSheetMenuItem,
+.MuiMenuItem-root,
+.MuiListItemButton-root {
+  border-radius: var(--jh-radius-md) !important;
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-md) !important;
+  padding: 0.6rem var(--jh-space-3) !important;
+  margin: 1px 0;
+  transition: background-color var(--jh-dur-instant) var(--jh-ease-out),
+              color var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.actionSheetMenuItem:hover,
+.MuiMenuItem-root:hover,
+.MuiListItemButton-root:hover {
+  background: var(--jh-surface) !important;
+  color: var(--jh-text) !important;
+}
+
+.actionSheetMenuItem.selected,
+.MuiMenuItem-root.Mui-selected {
+  background: var(--jh-accent-muted) !important;
+  color: var(--jh-accent) !important;
+}
+
+.actionsheetMenuItemIcon,
+.MuiListItemIcon-root {
+  color: var(--jh-text-muted) !important;
+  min-width: 2rem;
+}
+
+.actionSheetMenuItem:hover .actionsheetMenuItemIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Toasts & snackbars
+   -------------------------------------------------------------------------- */
+.toast,
+.MuiSnackbarContent-root,
+.MuiAlert-root {
+  background: var(--jh-ink-850) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-left: 3px solid var(--jh-accent) !important;
+  border-radius: var(--jh-radius-md) !important;
+  box-shadow: var(--jh-shadow-lg) !important;
+  font-size: var(--jh-fs-md);
+  padding: var(--jh-space-3) var(--jh-space-4);
+  z-index: var(--jh-z-toast);
+}
+
+.MuiAlert-standardError,
+.MuiAlert-filledError { border-left-color: var(--jh-danger) !important; }
+.MuiAlert-standardWarning,
+.MuiAlert-filledWarning { border-left-color: var(--jh-warn) !important; }
+.MuiAlert-standardInfo,
+.MuiAlert-filledInfo { border-left-color: var(--jh-info) !important; }
+
+.MuiAlert-icon { color: inherit !important; }
+
+/* --------------------------------------------------------------------------
+   Tooltips
+   -------------------------------------------------------------------------- */
+.MuiTooltip-tooltip,
+.tooltip {
+  background: var(--jh-ink-950) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-sm) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-family: var(--jh-font) !important;
+  padding: 0.35rem 0.6rem !important;
+  box-shadow: var(--jh-shadow-md);
+}
+
+.MuiTooltip-arrow { color: var(--jh-ink-950) !important; }
+
+/* --------------------------------------------------------------------------
+   Chips / tags
+   -------------------------------------------------------------------------- */
+.MuiChip-root {
+  background: var(--jh-surface) !important;
+  color: var(--jh-text-secondary) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-pill) !important;
+  font-family: var(--jh-font) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-weight: var(--jh-fw-semibold);
+}
+
+.MuiChip-root.MuiChip-colorPrimary {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-color: transparent !important;
+}
+
+.MuiChip-deleteIcon { color: var(--jh-text-muted) !important; }
+
+/* --------------------------------------------------------------------------
+   Progress bars & linear indicators
+   -------------------------------------------------------------------------- */
+.MuiLinearProgress-root {
+  background: var(--jh-ink-600) !important;
+  border-radius: var(--jh-radius-pill);
+  height: 4px;
+}
+
+.MuiLinearProgress-bar,
+.MuiCircularProgress-circle {
+  background-color: var(--jh-accent) !important;
+  color: var(--jh-accent) !important;
+  stroke: var(--jh-accent) !important;
+}
+
+
+/* ── 13-search.css ───────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 13 · Search
+   Hulu's search is a single wide field pinned under the header, with results
+   grouped into labelled rails.
+   ========================================================================== */
+
+#searchPage { padding-top: var(--jh-header-h) !important; }
+
+.searchFields {
+  position: sticky;
+  top: var(--jh-header-h);
+  z-index: var(--jh-z-raised);
+  padding: var(--jh-space-4) var(--jh-gutter);
+  background: var(--jh-glass-bg);
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur));
+  backdrop-filter: blur(var(--jh-glass-blur));
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.searchFieldsInner {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-3);
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 var(--jh-space-4);
+  background: var(--jh-ink-700);
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-pill);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              box-shadow var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.searchFieldsInner:focus-within {
+  border-color: var(--jh-accent);
+  box-shadow: 0 0 0 3px var(--jh-accent-faint);
+}
+
+.searchfields-icon,
+.searchFieldsInner .material-icons {
+  color: var(--jh-text-muted);
+  font-size: 1.4rem;
+}
+
+.searchFieldsInner:focus-within .searchfields-icon { color: var(--jh-accent); }
+
+.searchfields-txtSearch,
+.searchFields .emby-input {
+  flex: 1;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: var(--jh-fs-xl);
+  font-weight: var(--jh-fw-medium);
+  padding: 0.85rem 0 !important;
+}
+
+.searchfields-txtSearch:focus {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Result groups reuse the rail treatment from 08. */
+#searchResults .verticalSection,
+.searchResults .verticalSection {
+  margin-bottom: var(--jh-section-gap);
+}
+
+.searchSuggestions,
+.searchSuggestionsList {
+  padding-inline: var(--jh-gutter);
+}
+
+.searchSuggestions .emby-button,
+.searchSuggestionItem {
+  border-radius: var(--jh-radius-pill);
+  border: 1px solid var(--jh-line);
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  margin: 0.2rem;
+}
+
+.searchSuggestions .emby-button:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+}
+
+
+/* ── 14-livetv.css ───────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 14 · Live TV, guide & DVR
+   Hulu is a live-TV product too, so the EPG gets first-class treatment
+   rather than being left as stock Jellyfin.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Guide grid
+   -------------------------------------------------------------------------- */
+.guide-programGrid,
+.programGrid,
+.guideVerticalScroller {
+  background: var(--jh-bg) !important;
+}
+
+/* Timeline header stays pinned while the grid scrolls under it. */
+.timeslotHeaders,
+.guide-headerTimeslots,
+.programGridHeaders {
+  position: sticky;
+  top: 0;
+  z-index: var(--jh-z-raised);
+  background: var(--jh-glass-bg) !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur));
+  backdrop-filter: blur(var(--jh-glass-blur));
+  border-bottom: 1px solid var(--jh-line);
+}
+
+.timeslotHeader {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--jh-line-faint);
+  padding-left: var(--jh-space-2);
+}
+
+/* Channel column. */
+.channelsContainer,
+.guide-channelHeaders {
+  background: var(--jh-ink-950) !important;
+  border-right: 1px solid var(--jh-line);
+}
+
+.channelHeaderCell,
+.guide-channelHeaderCell {
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  padding: var(--jh-space-2) var(--jh-space-3);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.channelHeaderCell:hover,
+.guide-channelHeaderCell:hover {
+  background: var(--jh-surface) !important;
+  color: var(--jh-text) !important;
+}
+
+.guideChannelNumber,
+.channelNumber {
+  color: var(--jh-text-muted) !important;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--jh-fs-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Programme cells
+   -------------------------------------------------------------------------- */
+.programCell,
+.guide-programCell {
+  background: var(--jh-surface) !important;
+  border: 1px solid var(--jh-bg) !important;
+  border-radius: var(--jh-radius-sm);
+  color: var(--jh-text-secondary) !important;
+  padding: var(--jh-space-2) var(--jh-space-3) !important;
+  overflow: hidden;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.programCell:hover,
+.guide-programCell:hover {
+  background: var(--jh-ink-600) !important;
+  color: var(--jh-text) !important;
+}
+
+.programCell:focus-visible {
+  outline: var(--jh-focus-width) solid var(--jh-accent);
+  outline-offset: -2px;
+  z-index: var(--jh-z-raised);
+}
+
+.guideProgramName,
+.programCellInner > .guideProgramName {
+  font-weight: var(--jh-fw-semibold);
+  font-size: var(--jh-fs-sm);
+  color: inherit;
+}
+
+.programSecondaryTitle,
+.guide-programSecondaryInfo {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+}
+
+/* Jellyfin's genre accents — recoloured onto the Hulu ramp. */
+.programAccent-movie   { border-left: 3px solid var(--jh-info) !important; }
+.programAccent-sports  { border-left: 3px solid var(--jh-warn) !important; }
+.programAccent-news    { border-left: 3px solid var(--jh-ink-300) !important; }
+.programAccent-kids    { border-left: 3px solid #B57BFF !important; }
+.programAccent-series  { border-left: 3px solid var(--jh-accent) !important; }
+
+/* Currently airing. */
+.programCell.active,
+.programCell-active,
+.guide-programCell.is-live {
+  background: var(--jh-accent-muted) !important;
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-text) !important;
+}
+
+/* The "now" playhead down the grid. */
+.timeslotHeader.timeslotHeader-current::after,
+.guide-currentTimeIndicator {
+  background: var(--jh-live) !important;
+  width: 2px;
+  box-shadow: 0 0 8px var(--jh-live);
+}
+
+/* Recording indicators. */
+.guide-programTextIcon,
+.programIcon-recording,
+.recordingIcon,
+.timerIcon {
+  color: var(--jh-live) !important;
+}
+
+.programIcon-seriesRecording,
+.seriesTimerIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Guide date tabs
+   -------------------------------------------------------------------------- */
+.guide-date-tab-button,
+.guideDateTabsSlider .emby-button {
+  border-radius: var(--jh-radius-pill);
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  padding: 0.4rem 1rem;
+  border: 1px solid transparent;
+}
+
+.guide-date-tab-button:hover {
+  color: var(--jh-text) !important;
+  border-color: var(--jh-line);
+}
+
+.guide-date-tab-button.emby-tab-button-active {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.guide-date-tab-button.emby-tab-button-active::after { display: none; }
+
+/* --------------------------------------------------------------------------
+   Channel cards on the Live TV home
+   -------------------------------------------------------------------------- */
+.card.channelCard .cardScalable,
+.channelCard .cardImageContainer {
+  background: var(--jh-ink-800) !important;
+  /* Channel logos are usually transparent PNGs designed for light grounds. */
+  padding: var(--jh-space-3);
+}
+
+.card.channelCard .cardImage {
+  object-fit: contain;
+}
+
+/* Live badge on a currently-airing card. */
+.card.jh-live .jh-badge-live::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: jh-live-pulse 2s var(--jh-ease-inout) infinite;
+}
+
+@keyframes jh-live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* --------------------------------------------------------------------------
+   DVR / recordings & timers
+   -------------------------------------------------------------------------- */
+.recordingFields,
+.recordingButton {
+  color: var(--jh-live) !important;
+}
+
+.recordingFields .emby-button.recordingIcon-active,
+.btnRecord.is-recording {
+  background: var(--jh-live) !important;
+  color: #fff !important;
+}
+
+#liveTvSeriesTimerPage .listItem .listItemIcon,
+.seriesTimerIcon {
+  color: var(--jh-accent) !important;
+}
+
+
+/* ── 15-music.css ────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 15 · Music, now-playing bar & lyrics
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Now-playing bar — Hulu-flavoured: glass, thin scrub line on top.
+   -------------------------------------------------------------------------- */
+.nowPlayingBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--jh-z-nowplaying);
+  min-height: var(--jh-nowplaying-height);
+  background: var(--jh-glass-bg) !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  border-top: 1px solid var(--jh-line);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  padding-inline: var(--jh-gutter);
+  contain: layout style;
+}
+
+.nowPlayingBarTop {
+  align-items: center;
+  gap: var(--jh-space-3);
+}
+
+/* The scrub bar rides the very top edge of the bar. */
+.nowPlayingBarPositionContainer,
+.nowPlayingBar .sliderContainer {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  padding: 0;
+  height: 3px;
+}
+
+.nowPlayingBarPositionSlider,
+.nowPlayingBar .mdl-slider__background-flex {
+  height: 3px !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.nowPlayingBar .mdl-slider__background-lower {
+  background: var(--jh-accent) !important;
+}
+
+.nowPlayingImage {
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: var(--jh-radius-sm);
+  box-shadow: var(--jh-shadow-md);
+  background-size: cover;
+  flex: 0 0 auto;
+}
+
+.nowPlayingBarText {
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.nowPlayingBarText > div:first-child {
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nowPlayingBarSecondaryText,
+.nowPlayingBarText .secondary {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+}
+
+.nowPlayingBar .paper-icon-button-light {
+  color: var(--jh-text-secondary) !important;
+}
+
+.nowPlayingBar .paper-icon-button-light:hover {
+  color: var(--jh-accent) !important;
+}
+
+.nowPlayingBar .btnPause,
+.nowPlayingBar .btnPlayPause {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.nowPlayingBar .btnPause:hover {
+  background: var(--jh-accent-hover) !important;
+}
+
+/* Repeat / shuffle when engaged. */
+.nowPlayingBar .repeatButton-active,
+.nowPlayingBar .btnShuffleQueue.shuffleQueue-active,
+.nowPlayingBar .buttonActive {
+  color: var(--jh-accent) !important;
+}
+
+/* Anything that scrolls behind the bar needs clearance. */
+body:has(.nowPlayingBar:not(.hide)) .mainAnimatedPages {
+  padding-bottom: var(--jh-nowplaying-height);
+}
+
+/* --------------------------------------------------------------------------
+   Full-screen now-playing page
+   -------------------------------------------------------------------------- */
+#nowPlayingPage,
+.nowPlayingPage {
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(28, 231, 131, 0.10) 0%,
+      transparent 62%
+    ),
+    var(--jh-bg) !important;
+}
+
+.nowPlayingPageImage,
+.nowPlayingPageImageContainer img {
+  border-radius: var(--jh-radius-lg);
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.nowPlayingPageTitle {
+  font-size: var(--jh-fs-3xl);
+  font-weight: var(--jh-fw-black);
+  letter-spacing: var(--jh-ls-tight);
+}
+
+/* --------------------------------------------------------------------------
+   Album / artist pages
+   -------------------------------------------------------------------------- */
+.albumCell,
+.trackList .listItem {
+  border-radius: var(--jh-radius-md);
+}
+
+.listItem .listItemIcon.trackIndex,
+.listItemIndexNumber {
+  color: var(--jh-text-muted);
+}
+
+.listItem:hover .listItemIndexNumber { color: var(--jh-accent); }
+
+/* Disc / album section headers. */
+.trackList .listGroupHeader,
+.albumDiscHeader {
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding: var(--jh-space-4) 0 var(--jh-space-2);
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Lyrics (Jellyfin 10.9+)
+   -------------------------------------------------------------------------- */
+.lyricsContainer,
+#lyricsPage .lyrics {
+  padding-inline: var(--jh-gutter);
+  text-align: center;
+}
+
+.lyricsLine,
+.lyrics .lyric {
+  color: var(--jh-text-disabled);
+  font-size: clamp(1.1rem, 0.8rem + 1vw, 1.75rem);
+  font-weight: var(--jh-fw-semibold);
+  line-height: 1.9;
+  letter-spacing: var(--jh-ls-tight);
+  transition: color var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.lyricsLine.current,
+.lyrics .lyric.current,
+.lyricsLine-current {
+  color: var(--jh-accent) !important;
+  transform: scale(1.03);
+}
+
+/* --------------------------------------------------------------------------
+   Playlists & queue
+   -------------------------------------------------------------------------- */
+.playlistIndexIndicatorImage,
+.playlist .listItem.playing {
+  color: var(--jh-accent) !important;
+}
+
+.queue .listItem[draggable="true"]:hover {
+  background: var(--jh-surface) !important;
+  cursor: grab;
+}
+
+.listItemDragHandle { color: var(--jh-text-disabled) !important; }
+
+
+/* ── 16-features.css ─────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 16 · Jellyfin-specific features
+   SyncPlay, collections, playlists, books, photos, subtitle/metadata editors
+   and the plugin surfaces. These are the parts a generic streaming skin
+   usually leaves looking stock.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   SyncPlay
+   -------------------------------------------------------------------------- */
+.syncPlayGroupList .listItem,
+.syncPlaySettings .listItem {
+  border-radius: var(--jh-radius-md);
+}
+
+.syncPlayIcon-active,
+.headerSyncButton.syncPlayIcon-active,
+.btnSyncPlay.is-active .material-icons {
+  color: var(--jh-accent) !important;
+}
+
+/* A visible marker that playback is group-synced. */
+html.jh-syncplay-active .skinHeader {
+  box-shadow: inset 0 -2px 0 0 var(--jh-accent);
+}
+
+.syncPlayGroupName {
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+}
+
+/* --------------------------------------------------------------------------
+   Collections & playlists
+   -------------------------------------------------------------------------- */
+.card.collectionCard .cardScalable,
+.collectionCard .cardImageContainer {
+  /* Collections read as stacks: a hint of the cards behind. */
+  box-shadow:
+    var(--jh-shadow-sm),
+    6px -6px 0 -3px var(--jh-ink-700),
+    12px -12px 0 -6px var(--jh-ink-800);
+}
+
+.card.collectionCard:hover .cardScalable {
+  box-shadow:
+    var(--jh-shadow-card-hover),
+    6px -6px 0 -3px var(--jh-ink-600),
+    12px -12px 0 -6px var(--jh-ink-700);
+}
+
+#collectionsPage .verticalSection,
+#playlistsPage .verticalSection {
+  margin-bottom: var(--jh-section-gap);
+}
+
+/* Playlist reorder affordances. */
+.playlistItemMoveButton,
+.btnPlaylistMove {
+  color: var(--jh-text-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Books
+   -------------------------------------------------------------------------- */
+#bookPlayer,
+.bookPlayerContainer {
+  background: var(--jh-ink-950) !important;
+}
+
+.bookPlayerContainer .epub-container,
+#bookPlayer iframe {
+  background: #F3F0E7;   /* a paper ground reads far better for long text */
+  border-radius: var(--jh-radius-md);
+}
+
+.bookPlayerButton,
+#bookPlayer .paper-icon-button-light {
+  color: var(--jh-text) !important;
+}
+
+.bookProgressBar .itemProgressBarForeground {
+  background: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Photos & slideshow
+   -------------------------------------------------------------------------- */
+.slideshowContainer,
+.slideshowSwiperContainer {
+  background: #000 !important;
+}
+
+.slideshowImage {
+  border-radius: 0;
+}
+
+.slideshowButton,
+.slideshowBottomBar .paper-icon-button-light {
+  color: var(--jh-text) !important;
+  background: rgba(5, 6, 7, 0.5) !important;
+  border-radius: 50%;
+}
+
+.slideshowBottomBar {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent) !important;
+}
+
+/* Photo grids are square and want tighter gaps than media posters. */
+#photosPage .itemsContainer.vertical-wrap,
+.photoGrid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 4px;
+}
+
+#photosPage .cardScalable { border-radius: var(--jh-radius-xs); }
+
+/* --------------------------------------------------------------------------
+   Metadata editor
+   -------------------------------------------------------------------------- */
+.metadataEditorPage .inputContainer,
+#metadataEditorPage .inputContainer {
+  margin-bottom: var(--jh-space-4);
+}
+
+.editorTabs .emby-tab-button { font-size: var(--jh-fs-sm) !important; }
+
+.identifyResult,
+.searchImage,
+.imageEditorCard {
+  border-radius: var(--jh-radius-md);
+  border: 1px solid var(--jh-line);
+  overflow: hidden;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.identifyResult:hover,
+.searchImage:hover {
+  border-color: var(--jh-accent);
+  transform: translateY(-2px);
+}
+
+/* Image type labels in the image editor. */
+.imageEditor-imageType,
+.cardFooter .imageType {
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-xs);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Subtitle editor / download
+   -------------------------------------------------------------------------- */
+.subtitleSearchResult,
+#subtitleResults .listItem {
+  border-radius: var(--jh-radius-md);
+}
+
+.subtitleSearchResult .listItemIcon.downloadedIcon,
+.subtitle-downloaded {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Trickplay & chapter strips on the detail page
+   -------------------------------------------------------------------------- */
+.chapterCard .cardScalable,
+#chaptersContent .card .cardScalable {
+  border-radius: var(--jh-radius-sm);
+}
+
+.chapterCard .cardText { font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   Cast / remote-control ("Play on" another device)
+   -------------------------------------------------------------------------- */
+.remoteControlPage .nowPlayingPageImage,
+#remoteControlPage .nowPlayingPageImage {
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.sessionNowPlayingContent,
+.sessionCard {
+  border-radius: var(--jh-radius-lg);
+  border: 1px solid var(--jh-line);
+  background: var(--jh-surface) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Quick Connect
+   -------------------------------------------------------------------------- */
+#quickConnectSettingsPage .quickConnectCode,
+.quickConnectCode {
+  font-family: var(--jh-font-mono) !important;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: 0.28em;
+  color: var(--jh-accent);
+  text-align: center;
+  padding: var(--jh-space-6);
+  background: var(--jh-surface);
+  border: 1px dashed var(--jh-line-strong);
+  border-radius: var(--jh-radius-lg);
+}
+
+/* --------------------------------------------------------------------------
+   User profile pictures & multi-user
+   -------------------------------------------------------------------------- */
+.userProfileImage,
+.userImage,
+#userProfilePage .cardImageContainer {
+  border-radius: var(--jh-radius-md);
+  border: 2px solid var(--jh-line);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.userProfileImage:hover { border-color: var(--jh-accent); }
+
+
+/* ── 17-login.css ────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 17 · Login, user select & server select
+   Hulu's "who's watching" screen: a centred grid of profile tiles on a dark
+   gradient ground.
+   ========================================================================== */
+
+#loginPage,
+#selectServerPage,
+#forgotPasswordPage,
+#forgotPasswordPinPage,
+#wizardStartPage {
+  padding-top: 0 !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    radial-gradient(
+      100% 70% at 50% 0%,
+      rgba(28, 231, 131, 0.12) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--jh-ink-900) 0%, var(--jh-ink-1000) 100%) !important;
+}
+
+/* The header is noise on a login screen. */
+#loginPage ~ .skinHeader,
+body:has(#loginPage:not(.hide)) .skinHeader,
+body:has(#selectServerPage:not(.hide)) .skinHeader {
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom: 0 !important;
+}
+
+#loginPage .readOnlyContent,
+#selectServerPage .readOnlyContent,
+.loginContent {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: var(--jh-space-8) var(--jh-gutter);
+  text-align: center;
+}
+
+#loginPage h1,
+#selectServerPage h1,
+.loginContent h1 {
+  font-size: var(--jh-fs-3xl);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-tight);
+  margin-bottom: var(--jh-space-8);
+}
+
+/* --------------------------------------------------------------------------
+   User tiles
+   -------------------------------------------------------------------------- */
+#divUsers,
+.visualLoginForm #divUsers,
+.userItemsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: 0;
+}
+
+#divUsers .card,
+.userItemsContainer .card {
+  width: clamp(120px, 13vw, 172px) !important;
+  margin: 0 !important;
+}
+
+#divUsers .cardScalable,
+.userItemsContainer .cardScalable {
+  border-radius: var(--jh-radius-lg);
+  border: 3px solid transparent;
+  box-shadow: var(--jh-shadow-md);
+  transition: border-color var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+#divUsers .card:hover .cardScalable,
+#divUsers .card:focus-within .cardScalable,
+.userItemsContainer .card:hover .cardScalable {
+  border-color: var(--jh-accent);
+  transform: scale(1.06);
+  box-shadow: var(--jh-shadow-lg), 0 0 28px rgba(28, 231, 131, 0.25);
+}
+
+#divUsers .cardText,
+.userItemsContainer .cardText {
+  text-align: center !important;
+  font-size: var(--jh-fs-lg);
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text-secondary);
+  padding-top: var(--jh-space-3) !important;
+}
+
+#divUsers .card:hover .cardText { color: var(--jh-text); }
+
+/* Users with no avatar get the accent initial rather than a grey glyph. */
+#divUsers .cardImageIcon,
+.userItemsContainer .cardImageIcon {
+  color: var(--jh-accent) !important;
+  opacity: 0.75;
+}
+
+/* --------------------------------------------------------------------------
+   Manual login form
+   -------------------------------------------------------------------------- */
+.manualLoginForm,
+#loginPage form {
+  max-width: 24rem;
+  margin: 0 auto;
+  text-align: left;
+  padding: var(--jh-space-8);
+  background: rgba(21, 23, 25, 0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-xl);
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.manualLoginForm .emby-input {
+  background: var(--jh-ink-800) !important;
+}
+
+.manualLoginForm .button-submit,
+#loginPage .button-submit {
+  width: 100%;
+  margin-top: var(--jh-space-4);
+  min-height: 3rem;
+  font-size: var(--jh-fs-lg);
+}
+
+/* Quick Connect entry point on the login page. */
+#loginPage .btnQuick,
+.btnQuickConnect {
+  width: 100%;
+  margin-top: var(--jh-space-3);
+}
+
+/* --------------------------------------------------------------------------
+   Server select / connect
+   -------------------------------------------------------------------------- */
+#selectServerPage .serverItem,
+.serversContainer .card {
+  border-radius: var(--jh-radius-lg);
+  border: 1px solid var(--jh-line);
+  background: var(--jh-surface) !important;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+#selectServerPage .serverItem:hover { border-color: var(--jh-accent); }
+
+/* --------------------------------------------------------------------------
+   Setup wizard — first-run should look like the theme too.
+   -------------------------------------------------------------------------- */
+.wizardContent,
+#wizardStartPage .readOnlyContent {
+  max-width: 44rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+
+/* ── 18-dashboard.css ────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 18 · Admin dashboard & plugin pages
+   Jellyfin 10.10+ renders large parts of the dashboard in React + MUI while
+   older pages are still the .emby-* markup, so both are covered here.
+   ========================================================================== */
+
+.dashboardDocument,
+body.dashboardDocument,
+.type-interior {
+  background: var(--jh-bg) !important;
+}
+
+.type-interior,
+.dashboardDocument .page {
+  padding-top: var(--jh-header-h);
+}
+
+/* --------------------------------------------------------------------------
+   Admin drawer
+   -------------------------------------------------------------------------- */
+.adminDrawerLogo {
+  border-bottom: 1px solid var(--jh-line-faint);
+  padding: var(--jh-space-4);
+}
+
+.adminDrawerLogo img,
+.adminDrawerLogo svg {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(48%)
+          saturate(1200%) hue-rotate(93deg) brightness(102%) contrast(96%);
+  max-height: 28px;
+}
+
+/* --------------------------------------------------------------------------
+   Dashboard sections & cards
+   -------------------------------------------------------------------------- */
+.dashboardSections {
+  padding-inline: var(--jh-gutter);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--jh-space-6);
+  align-items: start;
+}
+
+.dashboardSection,
+.MuiCard-root,
+.MuiPaper-root:not(.MuiDialog-paper):not(.MuiMenu-paper):not(.MuiPopover-paper):not(.MuiAppBar-root):not(.MuiDrawer-paper) {
+  background: var(--jh-surface) !important;
+  background-image: none !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-lg) !important;
+  box-shadow: var(--jh-shadow-sm) !important;
+}
+
+.dashboardSection {
+  padding: var(--jh-space-5);
+}
+
+.dashboardSection > h2,
+.MuiCardHeader-title {
+  font-size: var(--jh-fs-lg) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  margin: 0 0 var(--jh-space-3);
+  color: var(--jh-text) !important;
+}
+
+.MuiCardHeader-subheader,
+.MuiTypography-body2 {
+  color: var(--jh-text-muted) !important;
+}
+
+.MuiTypography-root {
+  font-family: var(--jh-font) !important;
+  color: inherit;
+}
+
+.MuiDivider-root { border-color: var(--jh-line) !important; }
+
+/* --------------------------------------------------------------------------
+   Dashboard app bar / toolbar (10.11 React shell)
+   -------------------------------------------------------------------------- */
+.MuiAppBar-root {
+  background: var(--jh-glass-bg) !important;
+  background-image: none !important;
+  color: var(--jh-text) !important;
+  border-bottom: 1px solid var(--jh-line) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur));
+  backdrop-filter: blur(var(--jh-glass-blur));
+}
+
+.MuiDrawer-paper {
+  background: var(--jh-ink-950) !important;
+  background-image: none !important;
+  color: var(--jh-text-secondary) !important;
+  border-right: 1px solid var(--jh-line-faint) !important;
+}
+
+.MuiListItemButton-root.Mui-selected {
+  background: linear-gradient(90deg, var(--jh-accent-muted), transparent) !important;
+  color: var(--jh-text) !important;
+  border-left: 3px solid var(--jh-accent);
+}
+
+.MuiListItemButton-root.Mui-selected .MuiListItemIcon-root,
+.MuiListItemButton-root.Mui-selected .MuiSvgIcon-root {
+  color: var(--jh-accent) !important;
+}
+
+.MuiListSubheader-root {
+  background: transparent !important;
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-2xs) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Tabs
+   -------------------------------------------------------------------------- */
+.MuiTabs-root { border-bottom: 1px solid var(--jh-line-faint); }
+
+.MuiTab-root {
+  color: var(--jh-text-muted) !important;
+  font-family: var(--jh-font) !important;
+  font-weight: var(--jh-fw-semibold) !important;
+  text-transform: uppercase;
+  letter-spacing: var(--jh-ls-wide);
+  font-size: var(--jh-fs-sm) !important;
+}
+
+.MuiTab-root.Mui-selected { color: var(--jh-text) !important; }
+
+.MuiTabs-indicator {
+  background-color: var(--jh-accent) !important;
+  height: 3px;
+  border-radius: var(--jh-radius-pill) var(--jh-radius-pill) 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   Tables — server logs, activity, users, scheduled tasks, plugin lists
+   -------------------------------------------------------------------------- */
+.detailTable,
+.serverLogsTable,
+.MuiTable-root,
+.tblScheduledTasks {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent !important;
+}
+
+.detailTableHeader,
+.detailTable th,
+.serverLogsTable th,
+.MuiTableHead-root .MuiTableCell-root,
+.MuiDataGrid-columnHeaders {
+  background: var(--jh-ink-900) !important;
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--jh-space-3) var(--jh-space-4) !important;
+  border-bottom: 1px solid var(--jh-line) !important;
+  position: sticky;
+  top: 0;
+  z-index: var(--jh-z-raised);
+}
+
+.detailTable td,
+.serverLogsTable td,
+.MuiTableBody-root .MuiTableCell-root,
+.MuiDataGrid-cell {
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm) !important;
+  padding: var(--jh-space-3) var(--jh-space-4) !important;
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+}
+
+.detailTable tbody tr:hover,
+.MuiTableBody-root .MuiTableRow-root:hover,
+.MuiDataGrid-row:hover {
+  background: var(--jh-surface) !important;
+}
+
+.MuiDataGrid-root {
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-lg) !important;
+  color: var(--jh-text) !important;
+}
+
+.MuiDataGrid-footerContainer,
+.MuiTablePagination-root {
+  border-top: 1px solid var(--jh-line) !important;
+  color: var(--jh-text-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Scheduled tasks
+   -------------------------------------------------------------------------- */
+.tblScheduledTasks .taskProgressOuter {
+  background: var(--jh-ink-600) !important;
+  border-radius: var(--jh-radius-pill);
+  height: 5px;
+  overflow: hidden;
+}
+
+.tblScheduledTasks .taskProgressInner,
+.taskProgressInner {
+  background: var(--jh-accent) !important;
+}
+
+.scheduledTaskStatus-Running,
+.taskRunning { color: var(--jh-accent) !important; }
+.scheduledTaskStatus-Failed  { color: var(--jh-danger) !important; }
+.scheduledTaskStatus-Idle    { color: var(--jh-text-muted) !important; }
+
+/* --------------------------------------------------------------------------
+   Activity log severity
+   -------------------------------------------------------------------------- */
+.activityLogEntry {
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.activityLogEntryError .listItemIcon,
+.activityLogEntry.error { color: var(--jh-danger) !important; }
+
+.activityLogEntryWarn .listItemIcon { color: var(--jh-warn) !important; }
+
+.listItemIcon.activityLogEntryInfo,
+.activityLogEntry .listItemIcon { color: var(--jh-accent) !important; }
+
+/* --------------------------------------------------------------------------
+   Active sessions / now-playing on the dashboard
+   -------------------------------------------------------------------------- */
+.sessionCardFooter,
+.sessionNowPlayingInnerContent {
+  background: linear-gradient(to top, rgba(5, 6, 7, 0.92), transparent) !important;
+}
+
+.sessionNowPlayingTime,
+.sessionTranscodingFramerate,
+.sessionProgress {
+  font-variant-numeric: tabular-nums;
+  color: var(--jh-text-muted) !important;
+}
+
+.playbackProgress .itemProgressBarForeground,
+.transcodingProgress .itemProgressBarForeground {
+  background: var(--jh-accent) !important;
+}
+
+.transcodingProgress .itemProgressBarForeground {
+  background: var(--jh-warn) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Plugin catalogue & config pages
+   Third-party plugin pages ship arbitrary markup, so this layer sets sane
+   inherited defaults rather than trying to enumerate their classes.
+   -------------------------------------------------------------------------- */
+.pluginConfigurationPage,
+#pluginConfigurationPage,
+.configPage,
+.type-interior .content-primary {
+  color: var(--jh-text-secondary);
+  padding-inline: var(--jh-gutter);
+}
+
+.pluginConfigurationPage h1,
+.pluginConfigurationPage h2,
+.pluginConfigurationPage h3,
+.configPage h2,
+.configPage h3 {
+  color: var(--jh-text);
+  letter-spacing: var(--jh-ls-tight);
+}
+
+.pluginConfigurationPage fieldset,
+.configPage fieldset,
+.verticalSection.verticalSection-extrabottompadding fieldset {
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-lg);
+  padding: var(--jh-space-5);
+  margin-bottom: var(--jh-space-5);
+  background: var(--jh-surface);
+}
+
+.pluginConfigurationPage legend,
+.configPage legend {
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding-inline: var(--jh-space-2);
+}
+
+/* Plugin catalogue cards. */
+.card.backdropCard.pluginCard .cardScalable,
+#pluginsPage .card .cardScalable,
+.availablePluginCard .cardScalable {
+  background: var(--jh-surface) !important;
+  border: 1px solid var(--jh-line);
+}
+
+.pluginCardFooter,
+#pluginsPage .cardFooter {
+  background: var(--jh-surface) !important;
+  padding: var(--jh-space-3);
+}
+
+/* Install / update state. */
+.pluginStatus-Active,
+.status-active { color: var(--jh-accent) !important; }
+.pluginStatus-Restart,
+.status-restart { color: var(--jh-warn) !important; }
+.pluginStatus-Malfunctioned,
+.status-error { color: var(--jh-danger) !important; }
+
+/* --------------------------------------------------------------------------
+   Log viewer — monospace on a sunken ground.
+   -------------------------------------------------------------------------- */
+#logPage pre,
+.logContent,
+.serverLogText {
+  font-family: var(--jh-font-mono) !important;
+  font-size: var(--jh-fs-sm);
+  line-height: 1.6;
+  background: var(--jh-ink-1000) !important;
+  color: var(--jh-ink-100) !important;
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-md);
+  padding: var(--jh-space-4);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* --------------------------------------------------------------------------
+   Custom CSS editor — it should be pleasant to edit this very theme in.
+   -------------------------------------------------------------------------- */
+#txtCustomCss,
+textarea#txtCustomCss {
+  min-height: 22rem;
+  font-family: var(--jh-font-mono) !important;
+  font-size: var(--jh-fs-sm);
+  line-height: 1.65;
+  tab-size: 2;
+  background: var(--jh-ink-1000) !important;
+}
+
+
+/* ── 19-tv.css ───────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 19 · TV / 10-foot mode
+   Applies when Jellyfin detects a TV layout (html.layout-tv) or when the
+   user turns it on in the settings panel (html[data-jh-tv="on"]).
+
+   Three things change at 10 feet: everything gets bigger, focus has to be
+   unmissable, and hover-only affordances must also respond to focus — a
+   remote never hovers.
+   ========================================================================== */
+
+html.layout-tv,
+html[data-jh-tv="on"] {
+  font-size: 118%;
+
+  --jh-header-height: var(--jh-header-height-tv);
+  --jh-gutter: clamp(2.5rem, 4vw, 5rem);
+  --jh-rail-gap: 1.25rem;
+  --jh-section-gap: 3.25rem;
+
+  --jh-card-w-portrait: 220px;
+  --jh-card-w-backdrop: 400px;
+  --jh-card-w-square: 232px;
+
+  --jh-rail-title-h: 3.6rem;
+
+  --jh-focus-width: 4px;
+  --jh-focus-offset: 4px;
+  --jh-card-scale: 1.12;
+
+  /* Blur is expensive on TV-class GPUs and browser sticks. */
+  --jh-glass-blur: 0px;
+  --jh-glass-bg: rgba(8, 9, 11, 0.94);
+}
+
+/* --------------------------------------------------------------------------
+   Focus is the cursor. It must be visible across any artwork.
+   -------------------------------------------------------------------------- */
+html.layout-tv .card:focus-within .cardScalable,
+html.layout-tv .card.focused .cardScalable,
+html[data-jh-tv="on"] .card:focus-within .cardScalable {
+  box-shadow:
+    0 0 0 4px var(--jh-accent),
+    0 0 0 8px rgba(5, 6, 7, 0.85),
+    var(--jh-shadow-card-hover);
+  outline: none;
+}
+
+html.layout-tv .emby-button:focus,
+html.layout-tv .listItem:focus,
+html.layout-tv .navMenuOption:focus,
+html.layout-tv .actionSheetMenuItem:focus,
+html.layout-tv .programCell:focus,
+html[data-jh-tv="on"] .emby-button:focus,
+html[data-jh-tv="on"] .listItem:focus,
+html[data-jh-tv="on"] .programCell:focus {
+  outline: var(--jh-focus-width) solid var(--jh-accent);
+  outline-offset: var(--jh-focus-offset);
+  background: var(--jh-surface-hover) !important;
+  color: var(--jh-text) !important;
+}
+
+/* Jellyfin's own remote-focus class. */
+html.layout-tv .focusable:focus,
+.focuscontainer-x > .focusable:focus {
+  outline: var(--jh-focus-width) solid var(--jh-accent);
+  outline-offset: var(--jh-focus-offset);
+}
+
+/* --------------------------------------------------------------------------
+   Hover-only UI must also open on focus. On a TV the "hover" state IS the
+   selected state, so these are promoted rather than duplicated.
+   -------------------------------------------------------------------------- */
+html.layout-tv .card:focus-within .cardOverlayContainer,
+html.layout-tv .card:focus-within .jh-card-info,
+html.layout-tv .card:focus-within .cardOverlayButton,
+html[data-jh-tv="on"] .card:focus-within .cardOverlayContainer,
+html[data-jh-tv="on"] .card:focus-within .jh-card-info {
+  opacity: 1;
+  transform: none;
+}
+
+html.layout-tv .sectionTitleContainer .emby-button,
+html[data-jh-tv="on"] .sectionTitleContainer .emby-button {
+  opacity: 1;
+  transform: none;
+}
+
+/* Rail scroll buttons are useless with a remote — the focus ring scrolls
+   the rail itself. */
+html.layout-tv .emby-scrollbuttons,
+html[data-jh-tv="on"] .emby-scrollbuttons {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Bigger hit targets and text
+   -------------------------------------------------------------------------- */
+html.layout-tv .emby-button,
+html.layout-tv .jh-btn,
+html[data-jh-tv="on"] .emby-button {
+  min-height: 3.1rem;
+  padding-inline: 1.9rem;
+  font-size: var(--jh-fs-lg);
+}
+
+html.layout-tv .paper-icon-button-light,
+html[data-jh-tv="on"] .paper-icon-button-light {
+  width: 3.1rem;
+  height: 3.1rem;
+}
+
+html.layout-tv .cardText,
+html[data-jh-tv="on"] .cardText {
+  font-size: var(--jh-fs-lg);
+}
+
+html.layout-tv .listItem,
+html[data-jh-tv="on"] .listItem {
+  padding: var(--jh-space-4) var(--jh-space-5);
+  min-height: 4.5rem;
+}
+
+html.layout-tv .emby-tab-button,
+html[data-jh-tv="on"] .emby-tab-button {
+  font-size: var(--jh-fs-lg) !important;
+  padding: 1.1rem var(--jh-space-6) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Overscan safety. Many TVs still crop 2–3% of the panel edges; content
+   flush to the edge disappears.
+   -------------------------------------------------------------------------- */
+html.layout-tv body,
+html[data-jh-tv="on"] body {
+  padding: 1.5vh 0;
+}
+
+html.layout-tv .skinHeader,
+html[data-jh-tv="on"] .skinHeader {
+  padding-top: 1.5vh;
+}
+
+/* --------------------------------------------------------------------------
+   Player OSD at 10 feet
+   -------------------------------------------------------------------------- */
+html.layout-tv .videoOsdBottom,
+html[data-jh-tv="on"] .videoOsdBottom {
+  padding-bottom: var(--jh-space-10) !important;
+}
+
+html.layout-tv .osdTitle,
+html[data-jh-tv="on"] .osdTitle {
+  font-size: var(--jh-fs-3xl) !important;
+}
+
+html.layout-tv .mdl-slider__background-flex,
+html[data-jh-tv="on"] .mdl-slider__background-flex {
+  height: 8px !important;
+}
+
+html.layout-tv .mdl-slider::-webkit-slider-thumb,
+html[data-jh-tv="on"] .mdl-slider::-webkit-slider-thumb {
+  transform: scale(1);
+  width: 20px;
+  height: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   Previews are usually the wrong call on a TV: the remote moves focus fast
+   and each move would start a stream. Off unless explicitly enabled.
+   -------------------------------------------------------------------------- */
+html.layout-tv:not([data-jh-previews="on"]) {
+  --jh-preview-display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Spatial-navigation helper. The JS companion sets this on the element it
+   is about to scroll into view so the move reads as deliberate.
+   -------------------------------------------------------------------------- */
+.jh-spatial-target {
+  scroll-margin: calc(var(--jh-header-h) + 2rem) var(--jh-gutter);
+}
+
+
+/* ── 20-responsive.css ───────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 20 · Responsive
+   Jellyfin's web UI is the mobile UI too, so these breakpoints matter.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Tablet
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  :root {
+    --jh-card-w-portrait: 148px;
+    --jh-card-w-backdrop: 264px;
+    --jh-card-w-square: 158px;
+  }
+
+  .detailPagePrimaryContainer {
+    margin-top: clamp(-11rem, -16vh, -6rem);
+  }
+
+  .detailImageContainer { width: clamp(120px, 18vw, 168px); }
+}
+
+/* --------------------------------------------------------------------------
+   Phone
+   -------------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  :root {
+    --jh-header-height: 54px;
+    --jh-gutter: 1rem;
+    --jh-card-w-portrait: 124px;
+    --jh-card-w-backdrop: 208px;
+    --jh-card-w-square: 132px;
+    --jh-section-gap: 1.75rem;
+    --jh-rail-title-h: 2.4rem;
+    /* Touch has no hover; a scale on tap just looks like a mis-tap. */
+    --jh-card-scale: 1;
+    --jh-preview-display: none;
+    --jh-glass-blur: 12px;
+  }
+
+  .sectionTitle,
+  .verticalSection > .sectionTitleContainer .sectionTitle {
+    font-size: var(--jh-fs-xl) !important;
+  }
+
+  /* Rail titles' hover-revealed "see all" has nothing to reveal it on touch. */
+  .sectionTitleContainer .emby-button {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Detail page becomes a single column with the poster centred. */
+  .detailPagePrimaryContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: -5rem;
+    gap: var(--jh-space-4);
+  }
+
+  .detailImageContainer { width: 120px; }
+
+  .itemName { font-size: var(--jh-fs-3xl) !important; }
+
+  .mainDetailButtons { width: 100%; }
+
+  .mainDetailButtons > .detailButton:first-child {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  /* Episode rows stack. */
+  #childrenCollapsible .listItem,
+  .childrenItemsContainer .listItem {
+    flex-direction: column;
+    gap: var(--jh-space-2);
+  }
+
+  #childrenCollapsible .listItemImage,
+  .childrenItemsContainer .listItemImage {
+    width: 100%;
+  }
+
+  /* Overlay buttons on a card are unreachable by touch; the tap opens the
+     item instead, so hide them rather than leave dead pixels. */
+  .cardOverlayContainer,
+  .jh-card-info {
+    display: none;
+  }
+
+  /* Card captions need to be visible without hover on touch. */
+  .cardText { font-size: var(--jh-fs-xs); }
+
+  .searchFieldsInner { max-width: 100%; }
+
+  .nowPlayingBar { padding-inline: var(--jh-space-3); }
+
+  .dashboardSections { grid-template-columns: 1fr; }
+
+  .videoOsdBottom {
+    padding: var(--jh-space-10) var(--jh-space-4) var(--jh-space-4) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Small phone
+   -------------------------------------------------------------------------- */
+@media (max-width: 420px) {
+  :root {
+    --jh-card-w-portrait: 108px;
+    --jh-card-w-backdrop: 176px;
+    --jh-card-w-square: 116px;
+  }
+
+  .itemsContainer.vertical-wrap {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--jh-space-3) var(--jh-space-2);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Very wide displays — cap the grid so cards don't become billboards.
+   -------------------------------------------------------------------------- */
+@media (min-width: 2200px) {
+  :root {
+    --jh-card-w-portrait: 210px;
+    --jh-card-w-backdrop: 380px;
+    --jh-card-w-square: 224px;
+    --jh-gutter: clamp(3.5rem, 5vw, 7rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Landscape phone: the hero eats the whole viewport otherwise.
+   -------------------------------------------------------------------------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .jh-hero { height: 78vh; min-height: 240px; }
+  .jh-hero-overview { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Coarse pointer: no hover states at all, bigger targets.
+   -------------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  .emby-button,
+  .jh-btn,
+  .listItem,
+  .actionSheetMenuItem {
+    min-height: 2.9rem;
+  }
+
+  .paper-icon-button-light { width: 2.9rem; height: 2.9rem; }
+}
+
+/* --------------------------------------------------------------------------
+   Print — occasionally someone prints a library list.
+   -------------------------------------------------------------------------- */
+@media print {
+  .skinHeader,
+  .mainDrawer,
+  .nowPlayingBar,
+  .emby-scrollbuttons,
+  .jh-hero,
+  .cardOverlayContainer,
+  .jh-settings-panel {
+    display: none !important;
+  }
+
+  body,
+  .page {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .cardText,
+  .itemName,
+  .listItemBodyText {
+    color: #000 !important;
+  }
+}
+
+
+/* ── 21-a11y.css ─────────────────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 21 · Accessibility & performance guards
+   Last in the cascade so these always win.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Reduced motion
+   The OS setting is honoured unconditionally. Users who want motion back can
+   still choose it explicitly in the settings panel, which sets
+   data-jh-motion="full" — an explicit opt-in overriding an OS default is
+   the one case where ignoring the media query is correct.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-jh-motion="full"]) *,
+  html:not([data-jh-motion="full"]) *::before,
+  html:not([data-jh-motion="full"]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html:not([data-jh-motion="full"]) {
+    --jh-card-scale: 1;
+    --jh-preview-display: none;
+  }
+
+  html:not([data-jh-motion="full"]) .jh-hero-slide.is-active .jh-hero-backdrop {
+    animation: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Forced colors (Windows high contrast)
+   Drop every decorative gradient and let the OS palette through.
+   -------------------------------------------------------------------------- */
+@media (forced-colors: active) {
+  .cardOverlayContainer,
+  .jh-hero-scrim,
+  .innerCardFooter,
+  #itemBackdrop::after {
+    background: none !important;
+  }
+
+  .cardScalable,
+  .dialog,
+  .actionSheet,
+  .listItem {
+    border: 1px solid CanvasText !important;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight !important;
+  }
+
+  .jh-badge,
+  .indicator {
+    border: 1px solid CanvasText !important;
+    forced-color-adjust: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Increased contrast
+   -------------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+  :root {
+    --jh-text-secondary: #FFFFFF;
+    --jh-text-muted: #D5D9DE;
+    --jh-line: rgba(255, 255, 255, 0.28);
+    --jh-line-faint: rgba(255, 255, 255, 0.18);
+    --jh-line-strong: rgba(255, 255, 255, 0.45);
+    --jh-focus-width: 4px;
+  }
+
+  .cardScalable { box-shadow: 0 0 0 1px var(--jh-line-strong) inset; }
+
+  .cardOverlayContainer {
+    background: rgba(5, 6, 7, 0.86) !important;
+  }
+}
+
+/* Explicit user preference from the settings panel. */
+html[data-jh-contrast="high"] {
+  --jh-text-secondary: #FFFFFF;
+  --jh-text-muted: #D5D9DE;
+  --jh-line: rgba(255, 255, 255, 0.28);
+  --jh-line-faint: rgba(255, 255, 255, 0.18);
+  --jh-line-strong: rgba(255, 255, 255, 0.45);
+  --jh-focus-width: 4px;
+  --jh-glass-bg: rgba(8, 9, 11, 0.97);
+}
+
+/* --------------------------------------------------------------------------
+   Screen-reader-only text used by the JS companion's injected controls.
+   -------------------------------------------------------------------------- */
+.jh-sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — Jellyfin has none; a keyboard user otherwise tabs the whole
+   header on every page. Injected by the JS companion. */
+.jh-skip-link {
+  position: fixed;
+  top: var(--jh-space-2);
+  left: var(--jh-space-2);
+  z-index: var(--jh-z-tooltip);
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--jh-radius-md);
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+  font-weight: var(--jh-fw-bold);
+  transform: translateY(-200%);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-skip-link:focus {
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   Performance guards
+   -------------------------------------------------------------------------- */
+
+/* While a rail or grid is actively scrolling, the JS companion sets
+   .jh-scrolling on <html>. Suspending hover transitions during a scroll
+   keeps a fast flick smooth on a long grid — the pointer sweeps across
+   dozens of cards and each one would otherwise start an animation. */
+html.jh-scrolling .cardScalable,
+html.jh-scrolling .cardOverlayContainer,
+html.jh-scrolling .jh-card-info {
+  transition: none !important;
+}
+
+html.jh-scrolling .card:hover .cardScalable {
+  transform: none;
+}
+
+/* Never leave will-change set on an idle element — it costs memory per
+   layer and, kept permanently, makes things slower rather than faster. */
+.card:not(:hover):not(:focus-within) .cardScalable {
+  will-change: auto;
+}
+
+/* Off-screen rails do no paint work. Rails are wide and short, so a
+   generous intrinsic height avoids scroll-anchoring jumps.
+   The selector is a sibling combinator rather than :not(:first-of-type) —
+   :first-of-type matches on tag name, so it picks the wrong element as soon
+   as anything else (the hero, a notice) shares the container. */
+.verticalSection ~ .verticalSection {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
+}
+
+/* The hero must never be skipped — it is the first thing painted. */
+.jh-hero,
+.verticalSection.jh-no-cv {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
+/* Data-saver: drop previews and blur. */
+@media (prefers-reduced-data: reduce) {
+  :root {
+    --jh-preview-display: none;
+    --jh-glass-blur: 0px;
+    --jh-glass-bg: rgba(11, 12, 15, 0.96);
+  }
+
+  .jh-hero-video { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Transparency preference
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --jh-glass-bg: var(--jh-ink-900);
+    --jh-glass-blur: 0px;
+  }
+
+  .dialog,
+  .actionSheet,
+  .manualLoginForm {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: var(--jh-ink-850) !important;
+  }
+}
+
+
+/* ── 22-settings-panel.css ───────────────────────────────────────── */
+
+/* ==========================================================================
+   JellyHulu — 22 · Settings panel
+   Injected by the JS companion and opened from the Jellyfin user menu.
+   Slides in from the right so it never covers what you're adjusting.
+   ========================================================================== */
+
+.jh-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--jh-z-settings);
+  background: var(--jh-overlay-scrim);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.jh-settings-overlay.is-open { opacity: 1; }
+.jh-settings-overlay[hidden] { display: none !important; }
+
+.jh-settings-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--jh-ink-850);
+  border-left: 1px solid var(--jh-line);
+  box-shadow: var(--jh-shadow-xl);
+  transform: translateX(100%);
+  transition: transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.jh-settings-overlay.is-open .jh-settings-panel { transform: none; }
+
+/* --------------------------------------------------------------------------
+   Header / footer
+   -------------------------------------------------------------------------- */
+.jh-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jh-space-3);
+  padding: var(--jh-space-5) var(--jh-space-5) var(--jh-space-4);
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.jh-settings-title {
+  margin: 0;
+  font-size: var(--jh-fs-xl);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-tight);
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+}
+
+.jh-settings-title::before {
+  content: "";
+  width: 4px;
+  height: 1.1em;
+  border-radius: var(--jh-radius-xs);
+  background: var(--jh-accent);
+}
+
+.jh-settings-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--jh-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--jh-space-6);
+}
+
+.jh-settings-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jh-space-3);
+  padding: var(--jh-space-4) var(--jh-space-5);
+  border-top: 1px solid var(--jh-line-faint);
+  background: var(--jh-ink-900);
+}
+
+/* --------------------------------------------------------------------------
+   Groups & fields
+   -------------------------------------------------------------------------- */
+.jh-settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jh-space-3);
+}
+
+.jh-settings-group-title {
+  margin: 0;
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  color: var(--jh-text-muted);
+}
+
+.jh-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jh-space-2);
+}
+
+.jh-field-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jh-space-4);
+}
+
+.jh-field-label {
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+}
+
+.jh-field-hint {
+  margin: 0.15rem 0 0;
+  font-size: var(--jh-fs-xs);
+  line-height: var(--jh-lh-body);
+  color: var(--jh-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Segmented control
+   -------------------------------------------------------------------------- */
+.jh-seg {
+  display: flex;
+  padding: 3px;
+  gap: 3px;
+  border-radius: var(--jh-radius-pill);
+  background: var(--jh-ink-900);
+  border: 1px solid var(--jh-line-faint);
+}
+
+.jh-seg-item {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--jh-radius-pill);
+  background: transparent;
+  color: var(--jh-text-muted);
+  font-family: var(--jh-font);
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  white-space: nowrap;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-seg-item:hover { color: var(--jh-text); }
+
+.jh-seg-item.is-active {
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Switch
+   -------------------------------------------------------------------------- */
+.jh-switch {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 26px;
+  padding: 3px;
+  border-radius: var(--jh-radius-pill);
+  background: var(--jh-ink-600);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-switch > i {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--jh-ink-200);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-switch[aria-checked="true"] { background: var(--jh-accent); }
+
+.jh-switch[aria-checked="true"] > i {
+  transform: translateX(20px);
+  background: var(--jh-on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Accent swatches
+   -------------------------------------------------------------------------- */
+.jh-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--jh-space-2);
+}
+
+.jh-swatch {
+  /* Overridden inline per swatch by the settings panel. */
+  --jh-swatch-color: var(--jh-accent);
+  appearance: none;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--jh-radius-md);
+  background: var(--jh-swatch-color, var(--jh-accent));
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--jh-line) inset;
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring),
+              border-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-swatch:hover { transform: scale(1.1); }
+
+.jh-swatch.is-active {
+  border-color: var(--jh-text);
+  transform: scale(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   Entry point in Jellyfin's own user menu
+   -------------------------------------------------------------------------- */
+.jh-settings-launcher .actionsheetMenuItemIcon,
+.jh-settings-launcher::before {
+  color: var(--jh-accent) !important;
+}
+
+/* Header shortcut button. */
+.jh-settings-button.is-open {
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Info footer with the theme version
+   -------------------------------------------------------------------------- */
+.jh-settings-version {
+  font-size: var(--jh-fs-xs);
+  color: var(--jh-text-disabled);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .jh-settings-panel {
+    width: 100vw;
+    border-left: 0;
+  }
+}

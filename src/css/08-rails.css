@@ -1,0 +1,166 @@
+/* ==========================================================================
+   JellyHulu — 08 · Horizontal rails
+   Jellyfin renders these as .emby-scroller > .scrollSlider.itemsContainer
+   with a sibling .emby-scrollbuttons.
+   ========================================================================== */
+
+.emby-scroller,
+.itemsContainer.scrollSlider,
+.scrollX {
+  position: relative;
+  /* Vertical room for the hover scale. Without this the scroller clips the
+     top and bottom of an expanded card — see the note in 07-cards. */
+  padding-block: calc((var(--jh-card-scale) - 1) * var(--jh-card-w-portrait) * 0.85);
+  /* Bleed to the viewport edge so a rail visibly continues off-screen. */
+  padding-inline: var(--jh-gutter);
+  margin-inline: 0;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--jh-gutter);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Jellyfin's own focus-scale padding classes double up with ours. */
+.padded-top-focusscale    { padding-top: 0 !important; }
+.padded-bottom-focusscale { padding-bottom: 0 !important; }
+
+.scrollSlider,
+.itemsContainer.scrollSlider {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--jh-rail-gap);
+  padding-block: 0;
+}
+
+/* Jellyfin sizes overflow cards with percentage widths tuned for its own
+   layout. Fixed widths per density give a predictable Hulu rhythm and stop
+   card size drifting between rails. */
+.scrollSlider > .card,
+.itemsContainer.scrollSlider > .card {
+  margin: 0 !important;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.scrollSlider > .overflowPortraitCard,
+.scrollSlider > .portraitCard   { width: var(--jh-card-w-portrait); }
+
+.scrollSlider > .overflowBackdropCard,
+.scrollSlider > .backdropCard,
+.scrollSlider > .overflowSmallBackdropCard { width: var(--jh-card-w-backdrop); }
+
+.scrollSlider > .overflowSquareCard,
+.scrollSlider > .squareCard     { width: var(--jh-card-w-square); }
+
+.scrollSlider > .bannerCard     { width: calc(var(--jh-card-w-backdrop) * 1.6); }
+
+/* Snap is opt-in: it feels great with a trackpad and awful with a mouse
+   wheel on some browsers, so the JS companion enables it per input type. */
+html[data-jh-snap="on"] .emby-scroller,
+html[data-jh-snap="on"] .itemsContainer.scrollSlider {
+  scroll-snap-type: x mandatory;
+}
+
+/* --------------------------------------------------------------------------
+   Scroll buttons — Hulu's are full-height gradient chevrons that only
+   appear while the rail is hovered.
+   -------------------------------------------------------------------------- */
+/* The buttons are absolutely positioned over the rail (their containing
+   block is .verticalSection, see 03-layout). Jellyfin inserts this element
+   either beside the scroller or inside the title row depending on version,
+   so it is anchored to the section rather than to a sibling — that works in
+   both cases. The top padding keeps the gradients clear of the heading. */
+.emby-scrollbuttons {
+  position: absolute;
+  inset: 0;
+  padding-top: var(--jh-rail-title-h) !important;
+  z-index: var(--jh-z-rail-button);
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  padding-inline: 0 !important;
+  margin: 0 !important;
+}
+
+.emby-scrollbuttons .emby-scrollbuttons-button,
+.emby-scrollbuttons .paper-icon-button-light,
+.emby-scrollbuttons button {
+  pointer-events: auto;
+  width: clamp(40px, 3.4vw, 60px);
+  height: 100%;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  /* These buttons carry a Material Icons ligature. If that font hasn't
+     loaded — offline, blocked, or still fetching — the literal word
+     "chevron_left" renders at icon size and overflows the button by a couple
+     of hundred pixels. Overflowing inline content is still hit-testable, so
+     an unclipped button silently swallows hover and clicks across half the
+     rail. Clipping costs nothing and removes the failure mode. */
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  color: var(--jh-text) !important;
+  font-size: 1.9rem;
+  opacity: 0;
+  transform: none;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+  background: linear-gradient(to right, rgba(5, 6, 7, 0.88), rgba(5, 6, 7, 0)) !important;
+}
+
+.emby-scrollbuttons button:last-child,
+.emby-scrollbuttons .scrollButtonsRight {
+  background: linear-gradient(to left, rgba(5, 6, 7, 0.88), rgba(5, 6, 7, 0)) !important;
+}
+
+.verticalSection:hover .emby-scrollbuttons button,
+.emby-scroller:hover ~ .emby-scrollbuttons button,
+.emby-scrollbuttons button:focus-visible {
+  opacity: 1;
+}
+
+.emby-scrollbuttons button:hover {
+  color: var(--jh-accent) !important;
+}
+
+.emby-scrollbuttons button:disabled,
+.emby-scrollbuttons button.hide {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* Touch devices get no buttons — the rail is swipeable. */
+@media (hover: none) {
+  .emby-scrollbuttons { display: none !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Rails our JS builds (Top 10, Because You Watched, Continue Watching).
+   Same skeleton as Jellyfin's so nothing here is a special case.
+   -------------------------------------------------------------------------- */
+.jh-rail {
+  position: relative;
+  margin-bottom: var(--jh-section-gap);
+  contain: layout style;
+}
+
+.jh-rail-track {
+  display: flex;
+  gap: var(--jh-rail-gap);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-inline: var(--jh-gutter);
+  padding-block: calc((var(--jh-card-scale) - 1) * var(--jh-card-w-portrait) * 0.85);
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+}
+
+.jh-rail-track::-webkit-scrollbar { display: none; }
+
+/* Ranked rails breathe a little more so the numerals don't crowd. */
+.jh-rail-top10 .jh-rail-track,
+.jh-rail-top10 .scrollSlider {
+  gap: calc(var(--jh-rail-gap) * 1.6);
+}

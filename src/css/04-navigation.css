@@ -1,0 +1,308 @@
+/* ==========================================================================
+   JellyHulu — 04 · Header, tabs & drawer
+   Hulu's chrome is a translucent bar that is fully transparent over a hero
+   and turns to solid glass the moment you scroll. The JS companion adds
+   .jh-scrolled to <html>; without JS the bar stays glass, which still looks
+   correct — the transparency is progressive enhancement, not a dependency.
+   ========================================================================== */
+
+.skinHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--jh-z-header);
+  min-height: var(--jh-header-height);
+  background: var(--jh-glass-bg) !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  border-bottom: 1px solid var(--jh-line-faint);
+  box-shadow: none;
+  transition: background-color var(--jh-dur-base) var(--jh-ease-out),
+              border-color var(--jh-dur-base) var(--jh-ease-out),
+              box-shadow var(--jh-dur-base) var(--jh-ease-out);
+  contain: layout style;
+}
+
+/* Jellyfin adds .skinHeader-withBackground on scroll for some layouts;
+   .jh-scrolled is ours and covers the rest. */
+html.jh-scrolled .skinHeader,
+.skinHeader.skinHeader-withBackground {
+  background: var(--jh-glass-bg) !important;
+  border-bottom-color: var(--jh-line);
+  box-shadow: var(--jh-shadow-md);
+}
+
+/* Fully transparent while sitting on top of a hero or a detail backdrop. */
+html:not(.jh-scrolled) .skinHeader.jh-over-hero {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 6, 7, 0.85) 0%,
+    rgba(5, 6, 7, 0.45) 55%,
+    rgba(5, 6, 7, 0) 100%
+  ) !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
+.skinHeader.semiTransparent,
+.skinHeader-blurred {
+  background: var(--jh-glass-bg) !important;
+}
+
+.headerTop {
+  padding: 0 var(--jh-gutter);
+  min-height: var(--jh-header-height);
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+}
+
+.headerLeft,
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-1);
+}
+
+.headerLeft { flex: 1 1 auto; min-width: 0; }
+.headerRight { flex: 0 0 auto; }
+
+/* Jellyfin puts the current library's name in the header as an <h3.pageTitle>.
+   The page-title rules in 01-typography would size it like a page heading —
+   and an h3's default 1em margins would then set the header's height from it.
+   Inside the header it is a label, not a heading. */
+.skinHeader .pageTitle,
+.headerTop .pageTitle,
+.skinHeader .pageTitleWithLogo {
+  font-size: var(--jh-fs-xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  line-height: 1.2;
+  margin: 0 0 0 var(--jh-space-2) !important;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Header buttons
+   -------------------------------------------------------------------------- */
+.headerButton,
+.headerRight .paper-icon-button-light,
+.headerLeft .paper-icon-button-light {
+  color: var(--jh-text-secondary) !important;
+  border-radius: var(--jh-radius-pill);
+  transition: color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.headerButton:hover,
+.headerRight .paper-icon-button-light:hover,
+.headerLeft .paper-icon-button-light:hover {
+  color: var(--jh-text) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.headerButton:active {
+  transform: scale(0.94);
+}
+
+/* The Jellyfin logo/home button. Hulu's wordmark is green; recolouring the
+   built-in mark keeps the brand consistent without shipping an image. */
+.headerHomeButton .material-icons,
+.pageTitleWithLogo,
+.pageTitleWithDefaultLogo {
+  color: var(--jh-accent) !important;
+}
+
+.pageTitleWithLogo,
+.pageTitleWithDefaultLogo {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(48%)
+          saturate(1200%) hue-rotate(93deg) brightness(102%) contrast(96%);
+}
+
+/* --------------------------------------------------------------------------
+   Header tabs — the primary nav on library pages.
+   Hulu renders these as flat, wide-tracking uppercase labels with a green
+   underline on the active one.
+   -------------------------------------------------------------------------- */
+.headerTabs,
+.emby-tabs-slider {
+  background: transparent !important;
+}
+
+.headerTabs {
+  padding-inline: var(--jh-gutter);
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.emby-tab-button {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm) !important;
+  font-weight: var(--jh-fw-semibold) !important;
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  padding: 0.85rem var(--jh-space-4) !important;
+  border: 0;
+  position: relative;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.emby-tab-button:hover {
+  color: var(--jh-text) !important;
+}
+
+.emby-tab-button::after {
+  content: "";
+  position: absolute;
+  left: var(--jh-space-4);
+  right: var(--jh-space-4);
+  bottom: 0;
+  height: 3px;
+  border-radius: var(--jh-radius-pill) var(--jh-radius-pill) 0 0;
+  background: var(--jh-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--jh-dur-base) var(--jh-ease-spring);
+}
+
+.emby-tab-button-active,
+.emby-tab-button.is-active {
+  color: var(--jh-text) !important;
+}
+
+.emby-tab-button-active::after,
+.emby-tab-button.is-active::after {
+  transform: scaleX(1);
+}
+
+/* Jellyfin's own sliding indicator is redundant next to ours. */
+.emby-tabs-slider > .emby-tab-button-indicator,
+.emby-tab-indicator {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   User avatar in the header — Hulu shows a rounded-square profile tile.
+   -------------------------------------------------------------------------- */
+.headerUserButton .headerUserButtonRound,
+.headerRight .headerUserButtonRound {
+  border-radius: var(--jh-radius-md) !important;
+  border: 2px solid transparent;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.headerUserButton:hover .headerUserButtonRound {
+  border-color: var(--jh-accent);
+  transform: scale(1.05);
+}
+
+/* --------------------------------------------------------------------------
+   Main drawer (Jellyfin's left nav)
+   -------------------------------------------------------------------------- */
+.mainDrawer,
+.drawer-open .mainDrawer {
+  width: var(--jh-drawer-width);
+  background: var(--jh-ink-950) !important;
+  border-right: 1px solid var(--jh-line-faint);
+  box-shadow: var(--jh-shadow-xl);
+  z-index: var(--jh-z-drawer);
+}
+
+.mainDrawer-scrollContainer {
+  padding-top: var(--jh-space-3);
+}
+
+.navMenuOption,
+.navMenuOption.emby-button {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-3);
+  margin: 2px var(--jh-space-2);
+  padding: 0.7rem var(--jh-space-3) !important;
+  border-radius: var(--jh-radius-md);
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-medium);
+  letter-spacing: var(--jh-ls-snug);
+  position: relative;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              padding-left var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.navMenuOption:hover {
+  background-color: var(--jh-surface) !important;
+  color: var(--jh-text) !important;
+  padding-left: calc(var(--jh-space-3) + 4px) !important;
+}
+
+.navMenuOptionIcon {
+  color: var(--jh-text-muted) !important;
+  font-size: 1.4rem;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.navMenuOption:hover .navMenuOptionIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* Active library / page. */
+.navMenuOption-selected,
+.navMenuOption.navMenuOption-selected {
+  background: linear-gradient(
+    90deg,
+    var(--jh-accent-muted) 0%,
+    transparent 100%
+  ) !important;
+  color: var(--jh-text) !important;
+  font-weight: var(--jh-fw-semibold);
+}
+
+.navMenuOption-selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: var(--jh-radius-pill);
+  background: var(--jh-accent);
+}
+
+.navMenuOption-selected .navMenuOptionIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* Section dividers inside the drawer. */
+.navMenuDivider,
+.mainDrawer .sectionTitle {
+  border-color: var(--jh-line-faint);
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-2xs) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding: var(--jh-space-5) var(--jh-space-4) var(--jh-space-2);
+  margin: 0;
+}
+
+/* Drawer scrim. */
+.mainDrawerHandle,
+.dialogBackdrop,
+.backdrop-visible {
+  background-color: var(--jh-overlay-scrim) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Cast / SyncPlay indicators in the header get the accent when active.
+   -------------------------------------------------------------------------- */
+.headerCastButton.castButton-active,
+.headerSyncButton.syncPlayButton-active,
+.btnCast.is-active {
+  color: var(--jh-accent) !important;
+}

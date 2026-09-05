@@ -1,0 +1,217 @@
+/* ==========================================================================
+   JellyHulu — 14 · Live TV, guide & DVR
+   Hulu is a live-TV product too, so the EPG gets first-class treatment
+   rather than being left as stock Jellyfin.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Guide grid
+   -------------------------------------------------------------------------- */
+.guide-programGrid,
+.programGrid,
+.guideVerticalScroller {
+  background: var(--jh-bg) !important;
+}
+
+/* Timeline header stays pinned while the grid scrolls under it. */
+.timeslotHeaders,
+.guide-headerTimeslots,
+.programGridHeaders {
+  position: sticky;
+  top: 0;
+  z-index: var(--jh-z-raised);
+  background: var(--jh-glass-bg) !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur));
+  backdrop-filter: blur(var(--jh-glass-blur));
+  border-bottom: 1px solid var(--jh-line);
+}
+
+.timeslotHeader {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--jh-line-faint);
+  padding-left: var(--jh-space-2);
+}
+
+/* Channel column. */
+.channelsContainer,
+.guide-channelHeaders {
+  background: var(--jh-ink-950) !important;
+  border-right: 1px solid var(--jh-line);
+}
+
+.channelHeaderCell,
+.guide-channelHeaderCell {
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  padding: var(--jh-space-2) var(--jh-space-3);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.channelHeaderCell:hover,
+.guide-channelHeaderCell:hover {
+  background: var(--jh-surface) !important;
+  color: var(--jh-text) !important;
+}
+
+.guideChannelNumber,
+.channelNumber {
+  color: var(--jh-text-muted) !important;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--jh-fs-xs);
+}
+
+/* --------------------------------------------------------------------------
+   Programme cells
+   -------------------------------------------------------------------------- */
+.programCell,
+.guide-programCell {
+  background: var(--jh-surface) !important;
+  border: 1px solid var(--jh-bg) !important;
+  border-radius: var(--jh-radius-sm);
+  color: var(--jh-text-secondary) !important;
+  padding: var(--jh-space-2) var(--jh-space-3) !important;
+  overflow: hidden;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.programCell:hover,
+.guide-programCell:hover {
+  background: var(--jh-ink-600) !important;
+  color: var(--jh-text) !important;
+}
+
+.programCell:focus-visible {
+  outline: var(--jh-focus-width) solid var(--jh-accent);
+  outline-offset: -2px;
+  z-index: var(--jh-z-raised);
+}
+
+.guideProgramName,
+.programCellInner > .guideProgramName {
+  font-weight: var(--jh-fw-semibold);
+  font-size: var(--jh-fs-sm);
+  color: inherit;
+}
+
+.programSecondaryTitle,
+.guide-programSecondaryInfo {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+}
+
+/* Jellyfin's genre accents — recoloured onto the Hulu ramp. */
+.programAccent-movie   { border-left: 3px solid var(--jh-info) !important; }
+.programAccent-sports  { border-left: 3px solid var(--jh-warn) !important; }
+.programAccent-news    { border-left: 3px solid var(--jh-ink-300) !important; }
+.programAccent-kids    { border-left: 3px solid #B57BFF !important; }
+.programAccent-series  { border-left: 3px solid var(--jh-accent) !important; }
+
+/* Currently airing. */
+.programCell.active,
+.programCell-active,
+.guide-programCell.is-live {
+  background: var(--jh-accent-muted) !important;
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-text) !important;
+}
+
+/* The "now" playhead down the grid. */
+.timeslotHeader.timeslotHeader-current::after,
+.guide-currentTimeIndicator {
+  background: var(--jh-live) !important;
+  width: 2px;
+  box-shadow: 0 0 8px var(--jh-live);
+}
+
+/* Recording indicators. */
+.guide-programTextIcon,
+.programIcon-recording,
+.recordingIcon,
+.timerIcon {
+  color: var(--jh-live) !important;
+}
+
+.programIcon-seriesRecording,
+.seriesTimerIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Guide date tabs
+   -------------------------------------------------------------------------- */
+.guide-date-tab-button,
+.guideDateTabsSlider .emby-button {
+  border-radius: var(--jh-radius-pill);
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  padding: 0.4rem 1rem;
+  border: 1px solid transparent;
+}
+
+.guide-date-tab-button:hover {
+  color: var(--jh-text) !important;
+  border-color: var(--jh-line);
+}
+
+.guide-date-tab-button.emby-tab-button-active {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.guide-date-tab-button.emby-tab-button-active::after { display: none; }
+
+/* --------------------------------------------------------------------------
+   Channel cards on the Live TV home
+   -------------------------------------------------------------------------- */
+.card.channelCard .cardScalable,
+.channelCard .cardImageContainer {
+  background: var(--jh-ink-800) !important;
+  /* Channel logos are usually transparent PNGs designed for light grounds. */
+  padding: var(--jh-space-3);
+}
+
+.card.channelCard .cardImage {
+  object-fit: contain;
+}
+
+/* Live badge on a currently-airing card. */
+.card.jh-live .jh-badge-live::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: jh-live-pulse 2s var(--jh-ease-inout) infinite;
+}
+
+@keyframes jh-live-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* --------------------------------------------------------------------------
+   DVR / recordings & timers
+   -------------------------------------------------------------------------- */
+.recordingFields,
+.recordingButton {
+  color: var(--jh-live) !important;
+}
+
+.recordingFields .emby-button.recordingIcon-active,
+.btnRecord.is-recording {
+  background: var(--jh-live) !important;
+  color: #fff !important;
+}
+
+#liveTvSeriesTimerPage .listItem .listItemIcon,
+.seriesTimerIcon {
+  color: var(--jh-accent) !important;
+}

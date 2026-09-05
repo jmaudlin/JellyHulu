@@ -1,0 +1,312 @@
+/* ==========================================================================
+   JellyHulu — 06 · Buttons
+   One button system, applied to Jellyfin's .emby-button family, the MUI
+   buttons used on 10.10+/10.11 dashboard pages, and our own .jh-btn.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Shared shape
+   -------------------------------------------------------------------------- */
+.jh-btn,
+.emby-button,
+.emby-button.raised,
+.MuiButton-root {
+  --jh-btn-bg: transparent;
+  --jh-btn-fg: var(--jh-text);
+  --jh-btn-border: transparent;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jh-space-2);
+  border: 1px solid var(--jh-btn-border);
+  border-radius: var(--jh-radius-pill);
+  background-color: var(--jh-btn-bg);
+  color: var(--jh-btn-fg);
+  font-family: var(--jh-font);
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-snug);
+  text-transform: none;
+  padding: 0.6rem 1.35rem;
+  min-height: 2.5rem;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.jh-btn:active,
+.emby-button:active,
+.MuiButton-root:active {
+  transform: scale(0.97);
+}
+
+.jh-btn:disabled,
+.emby-button:disabled,
+.emby-button[disabled],
+.MuiButton-root.Mui-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   Primary — Hulu green with near-black text. Used for Play and Submit.
+   -------------------------------------------------------------------------- */
+.jh-btn-primary,
+.emby-button.button-submit,
+.emby-button.raised.button-submit,
+.button-submit,
+.MuiButton-containedPrimary,
+.MuiButton-contained:not(.MuiButton-containedError):not(.MuiButton-containedSecondary) {
+  --jh-btn-bg: var(--jh-accent);
+  --jh-btn-fg: var(--jh-on-accent);
+  --jh-btn-border: transparent;
+  background-color: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  font-weight: var(--jh-fw-bold);
+}
+
+.jh-btn-primary:hover,
+.emby-button.button-submit:hover,
+.button-submit:hover,
+.MuiButton-containedPrimary:hover {
+  background-color: var(--jh-accent-hover) !important;
+  box-shadow: 0 0 20px rgba(28, 231, 131, 0.28);
+}
+
+.jh-btn-primary:active,
+.button-submit:active {
+  background-color: var(--jh-accent-pressed) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Secondary — translucent white fill. Hulu's "More info".
+   -------------------------------------------------------------------------- */
+.jh-btn-secondary,
+.emby-button.raised:not(.button-submit):not(.button-delete):not(.button-cancel):not(.fab) {
+  --jh-btn-bg: rgba(255, 255, 255, 0.14);
+  --jh-btn-fg: var(--jh-text);
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  color: var(--jh-text) !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.jh-btn-secondary:hover,
+.emby-button.raised:not(.button-submit):not(.button-delete):not(.button-cancel):not(.fab):hover {
+  background-color: rgba(255, 255, 255, 0.24) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Ghost / outline
+   -------------------------------------------------------------------------- */
+.jh-btn-ghost,
+.MuiButton-outlined {
+  --jh-btn-bg: transparent;
+  --jh-btn-border: var(--jh-line-strong);
+  --jh-btn-fg: var(--jh-text);
+  border-color: var(--jh-line-strong) !important;
+  color: var(--jh-text) !important;
+  background-color: transparent !important;
+}
+
+.jh-btn-ghost:hover,
+.MuiButton-outlined:hover {
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-accent) !important;
+  background-color: var(--jh-accent-faint) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Flat / text
+   -------------------------------------------------------------------------- */
+.jh-btn-flat,
+.emby-button.button-flat,
+.button-flat,
+.MuiButton-text {
+  background: transparent !important;
+  color: var(--jh-text-secondary) !important;
+  border-color: transparent !important;
+  padding-inline: var(--jh-space-3);
+}
+
+.jh-btn-flat:hover,
+.emby-button.button-flat:hover,
+.MuiButton-text:hover {
+  color: var(--jh-text) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Destructive
+   -------------------------------------------------------------------------- */
+.jh-btn-danger,
+.emby-button.button-delete,
+.button-delete,
+.MuiButton-containedError,
+.MuiButton-colorError {
+  background-color: transparent !important;
+  color: var(--jh-danger) !important;
+  border-color: var(--jh-danger) !important;
+}
+
+.jh-btn-danger:hover,
+.emby-button.button-delete:hover,
+.MuiButton-containedError:hover {
+  background-color: var(--jh-danger) !important;
+  color: #fff !important;
+  border-color: var(--jh-danger) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Icon buttons
+   -------------------------------------------------------------------------- */
+.jh-btn-icon,
+.paper-icon-button-light,
+.MuiIconButton-root {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--jh-text-secondary) !important;
+  border: 0;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.jh-btn-icon:hover,
+.paper-icon-button-light:hover,
+.MuiIconButton-root:hover {
+  background: rgba(255, 255, 255, 0.10) !important;
+  color: var(--jh-text) !important;
+}
+
+.jh-btn-icon:active,
+.paper-icon-button-light:active {
+  transform: scale(0.92);
+}
+
+/* Circular outline icon button — Hulu's "+ watchlist" affordance. */
+.jh-btn-icon-outline {
+  border: 2px solid var(--jh-line-strong);
+  color: var(--jh-text) !important;
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.jh-btn-icon-outline:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Sizes
+   -------------------------------------------------------------------------- */
+.jh-btn-lg {
+  font-size: var(--jh-fs-lg);
+  padding: 0.85rem 2.1rem;
+  min-height: 3rem;
+}
+
+.jh-btn-sm {
+  font-size: var(--jh-fs-sm);
+  padding: 0.4rem 0.9rem;
+  min-height: 2rem;
+}
+
+/* The hero's Play button is the largest affordance in the app. */
+.jh-hero-actions .jh-btn-primary {
+  font-size: var(--jh-fs-lg);
+  font-weight: var(--jh-fw-bold);
+  padding: 0.9rem 2.4rem;
+  min-height: 3.1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Detail-page action buttons (.detailButton) — Jellyfin renders these as
+   large stacked icon+label blocks. Hulu keeps them as pills in a row.
+   -------------------------------------------------------------------------- */
+.mainDetailButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-2);
+  margin: var(--jh-space-5) 0;
+}
+
+.detailButton,
+.emby-button.detailButton {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--jh-text) !important;
+  border-radius: var(--jh-radius-pill);
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.detailButton:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.detailButton-content {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+  padding: 0.6rem 1.2rem;
+  flex-direction: row;
+}
+
+.detailButton-icon { font-size: 1.25rem; }
+
+.detailButton-text {
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-semibold);
+  text-transform: none;
+  letter-spacing: var(--jh-ls-snug);
+  margin: 0;
+}
+
+/* The first detail button is Play — promote it to the accent. */
+.mainDetailButtons > .detailButton:first-child,
+.mainDetailButtons > .btnPlay,
+.btnPlay.detailButton {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.mainDetailButtons > .detailButton:first-child:hover,
+.btnPlay.detailButton:hover {
+  background: var(--jh-accent-hover) !important;
+}
+
+/* Icon-only detail buttons (favourite, watched, more) collapse to circles. */
+.detailButton.jh-icon-only .detailButton-text,
+.btnUserRating .detailButton-text {
+  display: none;
+}
+
+/* Favourite / watched active states. */
+.btnUserRating.ratedButton .material-icons,
+.ratingbutton-icon-withrating,
+.btnUserData[data-favorite="true"] .material-icons {
+  color: var(--jh-danger) !important;
+}
+
+.playstatebutton-icon-played,
+.btnUserData[data-played="true"] .material-icons {
+  color: var(--jh-accent) !important;
+}

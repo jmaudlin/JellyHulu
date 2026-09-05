@@ -1,0 +1,300 @@
+/* Drives the fixture in a real browser and asserts the companion script
+   boots cleanly and does what it claims. */
+import { chromium } from 'playwright';
+import path from 'node:path';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const results = [];
+const check = (name, ok, detail) => {
+  results.push({ name, ok, detail });
+  console.log((ok ? '  ✓ ' : '  ✗ ') + name + (ok || !detail ? '' : ' — ' + detail));
+};
+
+/* Some environments ship a Chromium build that doesn't match the revision
+   Playwright pins. Use an explicit binary when one is actually present, and
+   otherwise let Playwright pick its own — which is what CI wants. */
+function chromiumPath() {
+  const candidates = [
+    process.env.JH_CHROME,
+    '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  ].filter(Boolean);
+  return candidates.find((p) => existsSync(p));
+}
+
+const explicit = chromiumPath();
+const browser = await chromium.launch(explicit ? { executablePath: explicit } : {});
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+const consoleErrors = [];
+const isFixtureNoise = (text) =>
+  // The stub ApiClient hands out /fake/... image URLs that intentionally 404.
+  /ERR_FILE_NOT_FOUND|\/fake\//.test(text);
+page.on('console', (m) => {
+  if (m.type() === 'error' && !isFixtureNoise(m.text())) consoleErrors.push(m.text());
+});
+page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message));
+
+await page.goto('file://' + path.join(ROOT, 'fixture.html'));
+await page.waitForTimeout(900);
+
+// --- boot -------------------------------------------------------------
+check('no console errors or uncaught exceptions',
+  consoleErrors.length === 0, consoleErrors.join(' | '));
+
+check('window.JellyHulu is exposed',
+  await page.evaluate(() => !!(window.JellyHulu && window.JellyHulu.version)));
+
+check('theme marker on <html>',
+  await page.evaluate(() => document.documentElement.classList.contains('jellyhulu')));
+
+check('settings projected as data attributes',
+  await page.evaluate(() => document.documentElement.getAttribute('data-jh-density') === 'comfortable'));
+
+// --- fonts & tokens ---------------------------------------------------
+check('Figtree is the resolved body font',
+  await page.evaluate(() => getComputedStyle(document.body).fontFamily.includes('Figtree')));
+
+check('accent token resolves to Hulu green',
+  await page.evaluate(() => getComputedStyle(document.documentElement)
+    .getPropertyValue('--jh-accent').trim().toLowerCase() === '#1ce783'));
+
+check('app background is the near-black ground',
+  await page.evaluate(() => getComputedStyle(document.body).backgroundColor === 'rgb(11, 12, 15)'));
+
+// --- hero -------------------------------------------------------------
+await page.waitForSelector('.jh-hero', { timeout: 4000 }).catch(() => {});
+check('hero carousel was built from the API', await page.locator('.jh-hero').count() === 1);
+check('hero has one slide per item', await page.locator('.jh-hero-slide').count() === 3);
+check('first slide is active', await page.locator('.jh-hero-slide.is-active').count() === 1);
+check('resume slide shows a Resume button',
+  (await page.locator('.jh-hero-slide.is-active .jh-btn-primary').innerText()).trim() === 'Resume');
+check('resume progress bar is rendered at the right width',
+  await page.evaluate(() => {
+    const i = document.querySelector('.jh-hero-progress > i');
+    return !!i && getComputedStyle(i).width !== '0px';
+  }));
+check('header goes transparent over the hero',
+  await page.evaluate(() => document.querySelector('.skinHeader').classList.contains('jh-over-hero')));
+
+// --- cards ------------------------------------------------------------
+check('cards were enhanced',
+  await page.locator('.card[data-jh-enhanced]').count() >= 3);
+check('Top 10 rail got ranked numerals',
+  await page.locator('.jh-badge-top10').count() === 2);
+check('rank numeral text is correct',
+  (await page.locator('.jh-badge-top10').first().innerText()).trim() === '1');
+check('Recently Added rail got a New badge',
+  await page.locator('.jh-badge-new').count() === 1);
+check('in-card metadata block was injected',
+  await page.locator('.jh-card-info').count() >= 3);
+check('card info reuses the existing title',
+  (await page.locator('.card[data-id="item-1"] .jh-card-info-title').innerText()).trim() === 'The Bear');
+
+// Regression: the numeral used to hang off the left of the tile, where the
+// frame's overflow:hidden clipped it away entirely.
+check('Top 10 numeral is not clipped by the card frame',
+  await page.evaluate(() => {
+    const badge = document.querySelector('.jh-badge-top10');
+    const frame = badge.closest('.cardScalable');
+    const b = badge.getBoundingClientRect();
+    const f = frame.getBoundingClientRect();
+    return b.width > 20 && b.left >= f.left - 1 && b.bottom <= f.bottom + 1;
+  }));
+
+// Regression: .emby-scrollbuttons is position:absolute, and without a
+// positioned ancestor it anchored to the viewport instead of the rail.
+check('rail scroll buttons are anchored to their own section',
+  await page.evaluate(() => {
+    const buttons = document.querySelector('.emby-scrollbuttons');
+    const section = buttons.closest('.verticalSection');
+    const b = buttons.getBoundingClientRect();
+    const s = section.getBoundingClientRect();
+    return b.left >= s.left - 1 && b.right <= s.right + 1 && b.top >= s.top - 1;
+  }));
+
+check('rail scroll buttons clear the section heading',
+  await page.evaluate(() => {
+    const buttons = document.querySelector('.emby-scrollbuttons button');
+    const title = document.querySelector('.verticalSection .sectionTitle');
+    return buttons.getBoundingClientRect().top >= title.getBoundingClientRect().bottom - 2;
+  }));
+
+check('nothing overlays the centre of a rail card',
+  await page.evaluate(() => {
+    const frame = document.querySelector('.card[data-id="item-1"] .cardScalable');
+    const r = frame.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    return !!hit && !!hit.closest('.card[data-id="item-1"]');
+  }));
+
+// --- hover ------------------------------------------------------------
+const card = page.locator('.card[data-id="item-1"]');
+await card.hover();
+// Hovering scrolls the card into view, and .jh-scrolling deliberately
+// suppresses hover transforms while a scroll is in flight. Wait past it.
+await page.waitForTimeout(500);
+check('card scales up on hover',
+  await page.evaluate(() => {
+    const m = new DOMMatrix(getComputedStyle(
+      document.querySelector('.card[data-id="item-1"] .cardScalable')).transform);
+    return m.a > 1.05;
+  }));
+check('overlay becomes visible on hover',
+  await page.evaluate(() => Number(getComputedStyle(
+    document.querySelector('.card[data-id="item-1"] .cardOverlayContainer')).opacity) > 0.9));
+
+// Preview ladder: no local trailer, so it must fall back to trickplay tiles.
+await page.waitForTimeout(1400);
+check('trickplay preview mounts when there is no trailer',
+  await page.locator('.card[data-id="item-1"].jh-preview-playing .jh-card-preview').count() === 1);
+
+await page.mouse.move(5, 5);
+await page.waitForTimeout(250);
+await page.screenshot({ path: path.join(ROOT, 'screenshot-home.png') });
+check('preview is torn down on leave',
+  await page.locator('.jh-card-preview').count() === 0);
+
+// --- settings panel ---------------------------------------------------
+check('settings launcher injected into the header',
+  await page.locator('.headerRight .jh-settings-button').count() === 1);
+
+await page.locator('.jh-settings-button').click();
+await page.waitForTimeout(350);
+check('panel opens', await page.locator('.jh-settings-overlay.is-open').count() === 1);
+
+await page.locator('.jh-seg-item[data-value="cinematic"]').first().click();
+check('density setting applies to <html>',
+  await page.evaluate(() => document.documentElement.getAttribute('data-jh-density') === 'cinematic'));
+check('density setting widens cards',
+  await page.evaluate(() => parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--jh-card-w-portrait'), 10) === 210));
+
+await page.locator('.jh-swatch[data-value="#00E0FF"]').click();
+check('accent swatch recolours the theme',
+  await page.evaluate(() => getComputedStyle(document.documentElement)
+    .getPropertyValue('--jh-accent').trim().toLowerCase() === '#00e0ff'));
+check('on-accent text flips to stay legible',
+  await page.evaluate(() => getComputedStyle(document.documentElement)
+    .getPropertyValue('--jh-on-accent').trim() === '#0B0C0F'));
+
+check('settings persist to localStorage',
+  await page.evaluate(() => {
+    const raw = localStorage.getItem('jellyhulu.settings.v1.user-abc');
+    return !!raw && JSON.parse(raw).density === 'cinematic';
+  }));
+
+await page.locator('.jh-settings-footer .jh-btn-flat').click();
+await page.waitForTimeout(120);
+check('reset restores defaults',
+  await page.evaluate(() => document.documentElement.getAttribute('data-jh-density') === 'comfortable'));
+
+await page.keyboard.press('Escape');
+await page.waitForTimeout(320);
+check('Escape closes the panel',
+  await page.locator('.jh-settings-overlay.is-open').count() === 0);
+
+// --- header measurement -----------------------------------------------
+check('header height is measured onto the offset token',
+  await page.evaluate(() => {
+    const measured = parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--jh-header-h'));
+    const actual = document.querySelector('.skinHeader').getBoundingClientRect().height;
+    return Math.abs(measured - actual) <= 1;
+  }));
+
+// Regression: the measurement used to be written back into the same token the
+// header sizes itself from, so each pass could only ratchet the header taller.
+check('measuring the header does not grow it',
+  await page.evaluate(async () => {
+    const h = () => document.querySelector('.skinHeader').getBoundingClientRect().height;
+    const before = h();
+    for (let i = 0; i < 5; i++) {
+      window.dispatchEvent(new Event('resize'));
+      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 30)));
+    }
+    return Math.abs(h() - before) < 1;
+  }));
+
+// Regression: the header's library-name title inherited page-heading sizing
+// and an h3's default margins, which tripled the header's height.
+check('header stays close to its configured height',
+  await page.evaluate(() => {
+    const configured = parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--jh-header-height'));
+    const actual = document.querySelector('.skinHeader').getBoundingClientRect().height;
+    return actual >= configured - 1 && actual <= configured + 8;
+  }));
+
+check('pages clear the measured header',
+  await page.evaluate(() => {
+    const page = document.querySelector('.page');
+    const headerH = document.querySelector('.skinHeader').getBoundingClientRect().height;
+    // The home page opens with a hero, which deliberately bleeds under the
+    // header, so it is the one page that must NOT be padded.
+    return getComputedStyle(page).paddingTop === '0px' && headerH > 0;
+  }));
+
+// --- a11y -------------------------------------------------------------
+check('skip link is present', await page.locator('.jh-skip-link').count() === 1);
+check('skip link is hidden until focused',
+  await page.evaluate(() => {
+    const l = document.querySelector('.jh-skip-link');
+    return l.getBoundingClientRect().bottom < 0;
+  }));
+check('route announcer live region exists',
+  await page.locator('[role="status"][aria-live="polite"]').count() >= 1);
+
+// --- no layout overflow ----------------------------------------------
+check('page does not scroll horizontally',
+  await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+
+// --- viewport sweep ---------------------------------------------------
+// The theme has to hold up from a small phone to a TV. Horizontal overflow is
+// the failure that actually happens, so every width is checked for it.
+const VIEWPORTS = [
+  { name: 'small phone', width: 380, height: 760 },
+  { name: 'phone',       width: 430, height: 900 },
+  { name: 'tablet',      width: 834, height: 1112 },
+  { name: 'laptop',      width: 1440, height: 900 },
+  { name: 'ultrawide',   width: 2560, height: 1080 },
+];
+
+for (const vp of VIEWPORTS) {
+  await page.setViewportSize({ width: vp.width, height: vp.height });
+  await page.waitForTimeout(220);
+  const overflow = await page.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  check(`no horizontal overflow at ${vp.name} (${vp.width}px)`, overflow <= 1,
+    `overflows by ${overflow}px`);
+}
+
+// TV mode is a whole second layout; make sure it engages and stays contained.
+await page.setViewportSize({ width: 1920, height: 1080 });
+await page.evaluate(() => window.JellyHulu.settings.set('tv', 'on'));
+await page.waitForTimeout(260);
+check('TV mode enlarges the card grid',
+  await page.evaluate(() => parseInt(getComputedStyle(document.documentElement)
+    .getPropertyValue('--jh-card-w-portrait'), 10) === 220));
+check('TV mode drops blur for weak GPUs',
+  await page.evaluate(() => getComputedStyle(document.documentElement)
+    .getPropertyValue('--jh-glass-blur').trim() === '0px'));
+check('no horizontal overflow in TV mode',
+  await page.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1));
+await page.screenshot({ path: path.join(ROOT, 'screenshot-tv.png') });
+
+await page.evaluate(() => window.JellyHulu.settings.set('tv', 'auto'));
+await page.setViewportSize({ width: 430, height: 900 });
+await page.waitForTimeout(260);
+await page.screenshot({ path: path.join(ROOT, 'screenshot-mobile.png') });
+
+await page.setViewportSize({ width: 1440, height: 900 });
+await page.waitForTimeout(220);
+
+await browser.close();
+
+const failed = results.filter((r) => !r.ok);
+console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
+if (failed.length) process.exit(1);

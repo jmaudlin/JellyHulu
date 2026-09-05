@@ -1,0 +1,354 @@
+/* ==========================================================================
+   JellyHulu — 18 · Admin dashboard & plugin pages
+   Jellyfin 10.10+ renders large parts of the dashboard in React + MUI while
+   older pages are still the .emby-* markup, so both are covered here.
+   ========================================================================== */
+
+.dashboardDocument,
+body.dashboardDocument,
+.type-interior {
+  background: var(--jh-bg) !important;
+}
+
+.type-interior,
+.dashboardDocument .page {
+  padding-top: var(--jh-header-h);
+}
+
+/* --------------------------------------------------------------------------
+   Admin drawer
+   -------------------------------------------------------------------------- */
+.adminDrawerLogo {
+  border-bottom: 1px solid var(--jh-line-faint);
+  padding: var(--jh-space-4);
+}
+
+.adminDrawerLogo img,
+.adminDrawerLogo svg {
+  filter: brightness(0) saturate(100%) invert(76%) sepia(48%)
+          saturate(1200%) hue-rotate(93deg) brightness(102%) contrast(96%);
+  max-height: 28px;
+}
+
+/* --------------------------------------------------------------------------
+   Dashboard sections & cards
+   -------------------------------------------------------------------------- */
+.dashboardSections {
+  padding-inline: var(--jh-gutter);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--jh-space-6);
+  align-items: start;
+}
+
+.dashboardSection,
+.MuiCard-root,
+.MuiPaper-root:not(.MuiDialog-paper):not(.MuiMenu-paper):not(.MuiPopover-paper):not(.MuiAppBar-root):not(.MuiDrawer-paper) {
+  background: var(--jh-surface) !important;
+  background-image: none !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-lg) !important;
+  box-shadow: var(--jh-shadow-sm) !important;
+}
+
+.dashboardSection {
+  padding: var(--jh-space-5);
+}
+
+.dashboardSection > h2,
+.MuiCardHeader-title {
+  font-size: var(--jh-fs-lg) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  margin: 0 0 var(--jh-space-3);
+  color: var(--jh-text) !important;
+}
+
+.MuiCardHeader-subheader,
+.MuiTypography-body2 {
+  color: var(--jh-text-muted) !important;
+}
+
+.MuiTypography-root {
+  font-family: var(--jh-font) !important;
+  color: inherit;
+}
+
+.MuiDivider-root { border-color: var(--jh-line) !important; }
+
+/* --------------------------------------------------------------------------
+   Dashboard app bar / toolbar (10.11 React shell)
+   -------------------------------------------------------------------------- */
+.MuiAppBar-root {
+  background: var(--jh-glass-bg) !important;
+  background-image: none !important;
+  color: var(--jh-text) !important;
+  border-bottom: 1px solid var(--jh-line) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur));
+  backdrop-filter: blur(var(--jh-glass-blur));
+}
+
+.MuiDrawer-paper {
+  background: var(--jh-ink-950) !important;
+  background-image: none !important;
+  color: var(--jh-text-secondary) !important;
+  border-right: 1px solid var(--jh-line-faint) !important;
+}
+
+.MuiListItemButton-root.Mui-selected {
+  background: linear-gradient(90deg, var(--jh-accent-muted), transparent) !important;
+  color: var(--jh-text) !important;
+  border-left: 3px solid var(--jh-accent);
+}
+
+.MuiListItemButton-root.Mui-selected .MuiListItemIcon-root,
+.MuiListItemButton-root.Mui-selected .MuiSvgIcon-root {
+  color: var(--jh-accent) !important;
+}
+
+.MuiListSubheader-root {
+  background: transparent !important;
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-2xs) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Tabs
+   -------------------------------------------------------------------------- */
+.MuiTabs-root { border-bottom: 1px solid var(--jh-line-faint); }
+
+.MuiTab-root {
+  color: var(--jh-text-muted) !important;
+  font-family: var(--jh-font) !important;
+  font-weight: var(--jh-fw-semibold) !important;
+  text-transform: uppercase;
+  letter-spacing: var(--jh-ls-wide);
+  font-size: var(--jh-fs-sm) !important;
+}
+
+.MuiTab-root.Mui-selected { color: var(--jh-text) !important; }
+
+.MuiTabs-indicator {
+  background-color: var(--jh-accent) !important;
+  height: 3px;
+  border-radius: var(--jh-radius-pill) var(--jh-radius-pill) 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   Tables — server logs, activity, users, scheduled tasks, plugin lists
+   -------------------------------------------------------------------------- */
+.detailTable,
+.serverLogsTable,
+.MuiTable-root,
+.tblScheduledTasks {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent !important;
+}
+
+.detailTableHeader,
+.detailTable th,
+.serverLogsTable th,
+.MuiTableHead-root .MuiTableCell-root,
+.MuiDataGrid-columnHeaders {
+  background: var(--jh-ink-900) !important;
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  text-align: left;
+  padding: var(--jh-space-3) var(--jh-space-4) !important;
+  border-bottom: 1px solid var(--jh-line) !important;
+  position: sticky;
+  top: 0;
+  z-index: var(--jh-z-raised);
+}
+
+.detailTable td,
+.serverLogsTable td,
+.MuiTableBody-root .MuiTableCell-root,
+.MuiDataGrid-cell {
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm) !important;
+  padding: var(--jh-space-3) var(--jh-space-4) !important;
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+}
+
+.detailTable tbody tr:hover,
+.MuiTableBody-root .MuiTableRow-root:hover,
+.MuiDataGrid-row:hover {
+  background: var(--jh-surface) !important;
+}
+
+.MuiDataGrid-root {
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-lg) !important;
+  color: var(--jh-text) !important;
+}
+
+.MuiDataGrid-footerContainer,
+.MuiTablePagination-root {
+  border-top: 1px solid var(--jh-line) !important;
+  color: var(--jh-text-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Scheduled tasks
+   -------------------------------------------------------------------------- */
+.tblScheduledTasks .taskProgressOuter {
+  background: var(--jh-ink-600) !important;
+  border-radius: var(--jh-radius-pill);
+  height: 5px;
+  overflow: hidden;
+}
+
+.tblScheduledTasks .taskProgressInner,
+.taskProgressInner {
+  background: var(--jh-accent) !important;
+}
+
+.scheduledTaskStatus-Running,
+.taskRunning { color: var(--jh-accent) !important; }
+.scheduledTaskStatus-Failed  { color: var(--jh-danger) !important; }
+.scheduledTaskStatus-Idle    { color: var(--jh-text-muted) !important; }
+
+/* --------------------------------------------------------------------------
+   Activity log severity
+   -------------------------------------------------------------------------- */
+.activityLogEntry {
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.activityLogEntryError .listItemIcon,
+.activityLogEntry.error { color: var(--jh-danger) !important; }
+
+.activityLogEntryWarn .listItemIcon { color: var(--jh-warn) !important; }
+
+.listItemIcon.activityLogEntryInfo,
+.activityLogEntry .listItemIcon { color: var(--jh-accent) !important; }
+
+/* --------------------------------------------------------------------------
+   Active sessions / now-playing on the dashboard
+   -------------------------------------------------------------------------- */
+.sessionCardFooter,
+.sessionNowPlayingInnerContent {
+  background: linear-gradient(to top, rgba(5, 6, 7, 0.92), transparent) !important;
+}
+
+.sessionNowPlayingTime,
+.sessionTranscodingFramerate,
+.sessionProgress {
+  font-variant-numeric: tabular-nums;
+  color: var(--jh-text-muted) !important;
+}
+
+.playbackProgress .itemProgressBarForeground,
+.transcodingProgress .itemProgressBarForeground {
+  background: var(--jh-accent) !important;
+}
+
+.transcodingProgress .itemProgressBarForeground {
+  background: var(--jh-warn) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Plugin catalogue & config pages
+   Third-party plugin pages ship arbitrary markup, so this layer sets sane
+   inherited defaults rather than trying to enumerate their classes.
+   -------------------------------------------------------------------------- */
+.pluginConfigurationPage,
+#pluginConfigurationPage,
+.configPage,
+.type-interior .content-primary {
+  color: var(--jh-text-secondary);
+  padding-inline: var(--jh-gutter);
+}
+
+.pluginConfigurationPage h1,
+.pluginConfigurationPage h2,
+.pluginConfigurationPage h3,
+.configPage h2,
+.configPage h3 {
+  color: var(--jh-text);
+  letter-spacing: var(--jh-ls-tight);
+}
+
+.pluginConfigurationPage fieldset,
+.configPage fieldset,
+.verticalSection.verticalSection-extrabottompadding fieldset {
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-lg);
+  padding: var(--jh-space-5);
+  margin-bottom: var(--jh-space-5);
+  background: var(--jh-surface);
+}
+
+.pluginConfigurationPage legend,
+.configPage legend {
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding-inline: var(--jh-space-2);
+}
+
+/* Plugin catalogue cards. */
+.card.backdropCard.pluginCard .cardScalable,
+#pluginsPage .card .cardScalable,
+.availablePluginCard .cardScalable {
+  background: var(--jh-surface) !important;
+  border: 1px solid var(--jh-line);
+}
+
+.pluginCardFooter,
+#pluginsPage .cardFooter {
+  background: var(--jh-surface) !important;
+  padding: var(--jh-space-3);
+}
+
+/* Install / update state. */
+.pluginStatus-Active,
+.status-active { color: var(--jh-accent) !important; }
+.pluginStatus-Restart,
+.status-restart { color: var(--jh-warn) !important; }
+.pluginStatus-Malfunctioned,
+.status-error { color: var(--jh-danger) !important; }
+
+/* --------------------------------------------------------------------------
+   Log viewer — monospace on a sunken ground.
+   -------------------------------------------------------------------------- */
+#logPage pre,
+.logContent,
+.serverLogText {
+  font-family: var(--jh-font-mono) !important;
+  font-size: var(--jh-fs-sm);
+  line-height: 1.6;
+  background: var(--jh-ink-1000) !important;
+  color: var(--jh-ink-100) !important;
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-md);
+  padding: var(--jh-space-4);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* --------------------------------------------------------------------------
+   Custom CSS editor — it should be pleasant to edit this very theme in.
+   -------------------------------------------------------------------------- */
+#txtCustomCss,
+textarea#txtCustomCss {
+  min-height: 22rem;
+  font-family: var(--jh-font-mono) !important;
+  font-size: var(--jh-fs-sm);
+  line-height: 1.65;
+  tab-size: 2;
+  background: var(--jh-ink-1000) !important;
+}

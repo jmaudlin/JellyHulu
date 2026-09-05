@@ -1,0 +1,406 @@
+/* ==========================================================================
+   JellyHulu — 12 · Forms, dialogs, menus & toasts
+   Covers Jellyfin's own .emby-* controls and the MUI controls used on the
+   React dashboard pages in 10.10+.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Text inputs
+   -------------------------------------------------------------------------- */
+.emby-input,
+.emby-textarea,
+.emby-select,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+textarea,
+select,
+.MuiInputBase-input,
+.MuiOutlinedInput-input {
+  background: var(--jh-ink-700) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-md) !important;
+  font-family: var(--jh-font) !important;
+  font-size: var(--jh-fs-md);
+  padding: 0.65rem 0.85rem;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out),
+              box-shadow var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.emby-input:hover,
+.emby-textarea:hover,
+.emby-select:hover {
+  border-color: var(--jh-line-strong) !important;
+}
+
+.emby-input:focus,
+.emby-textarea:focus,
+.emby-select:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--jh-accent) !important;
+  background: var(--jh-ink-800) !important;
+  box-shadow: 0 0 0 3px var(--jh-accent-faint) !important;
+  outline: none;
+}
+
+.emby-input::placeholder,
+.emby-textarea::placeholder,
+input::placeholder {
+  color: var(--jh-text-disabled);
+}
+
+/* Chrome paints autofilled fields a hard blue. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--jh-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--jh-ink-700) inset;
+  caret-color: var(--jh-accent);
+  transition: background-color 9999s ease-out;
+}
+
+/* MUI's outlined input draws its border in a pseudo-element. */
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--jh-line) !important;
+}
+
+.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--jh-accent) !important;
+  border-width: 1px !important;
+}
+
+/* --------------------------------------------------------------------------
+   Labels & help text
+   -------------------------------------------------------------------------- */
+.inputLabel,
+.selectLabel,
+.textareaLabel,
+.MuiFormLabel-root,
+.MuiInputLabel-root {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.inputLabelFocused,
+.selectLabelFocused,
+.MuiFormLabel-root.Mui-focused {
+  color: var(--jh-accent) !important;
+}
+
+.fieldDescription,
+.MuiFormHelperText-root {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  line-height: var(--jh-lh-body);
+  margin-top: 0.35rem;
+}
+
+.inputContainer,
+.selectContainer,
+.checkboxContainer {
+  margin-bottom: var(--jh-space-5);
+}
+
+/* --------------------------------------------------------------------------
+   Selects
+   -------------------------------------------------------------------------- */
+.emby-select,
+select {
+  appearance: none;
+  padding-right: 2.25rem;
+  /* Chevron drawn with two gradients — no SVG asset needed. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--jh-text-muted) 50%),
+    linear-gradient(135deg, var(--jh-text-muted) 50%, transparent 50%) !important;
+  background-position:
+    calc(100% - 18px) calc(50% + 2px),
+    calc(100% - 12px) calc(50% + 2px) !important;
+  background-size: 6px 6px, 6px 6px !important;
+  background-repeat: no-repeat !important;
+  background-color: var(--jh-ink-700) !important;
+}
+
+.emby-select option,
+select option {
+  background: var(--jh-ink-800);
+  color: var(--jh-text);
+}
+
+.selectArrowContainer,
+.selectArrow { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   Checkboxes & radios
+   -------------------------------------------------------------------------- */
+.emby-checkbox + span,
+.checkboxLabel,
+.MuiFormControlLabel-label {
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-md);
+}
+
+.checkboxOutline {
+  border-color: var(--jh-ink-400) !important;
+  border-radius: var(--jh-radius-xs);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.emby-checkbox:checked + span .checkboxOutline,
+.emby-checkbox:checked + .checkboxOutline {
+  background: var(--jh-accent) !important;
+  border-color: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.emby-checkbox:focus-visible + span .checkboxOutline {
+  box-shadow: 0 0 0 3px var(--jh-accent-faint);
+}
+
+.MuiCheckbox-root.Mui-checked,
+.MuiRadio-root.Mui-checked,
+.MuiSwitch-switchBase.Mui-checked {
+  color: var(--jh-accent) !important;
+}
+
+.MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+  background-color: var(--jh-accent) !important;
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"] {
+  accent-color: var(--jh-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Sliders (settings pages, volume, subtitle size)
+   -------------------------------------------------------------------------- */
+.emby-slider,
+input[type="range"] {
+  accent-color: var(--jh-accent);
+}
+
+.emby-slider-background-lower {
+  background: var(--jh-accent) !important;
+}
+
+.emby-slider-background-upper {
+  background: var(--jh-ink-600) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Dialogs
+   -------------------------------------------------------------------------- */
+.dialog,
+.formDialog,
+.dialogContainer > .dialog,
+.MuiDialog-paper,
+.MuiPaper-root.MuiDialog-paper {
+  background: var(--jh-ink-850) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-xl) !important;
+  box-shadow: var(--jh-shadow-xl) !important;
+  overflow: hidden;
+}
+
+.dialogBackdrop,
+.dialogBackdropOpened,
+.MuiBackdrop-root {
+  background: var(--jh-overlay-scrim) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.formDialogHeader,
+.MuiDialogTitle-root {
+  background: transparent !important;
+  border-bottom: 1px solid var(--jh-line-faint);
+  padding: var(--jh-space-5) var(--jh-space-6) !important;
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-3);
+}
+
+.formDialogHeaderTitle,
+.MuiDialogTitle-root {
+  font-size: var(--jh-fs-xl) !important;
+  font-weight: var(--jh-fw-bold) !important;
+  letter-spacing: var(--jh-ls-tight);
+  margin: 0;
+}
+
+.formDialogContent,
+.MuiDialogContent-root {
+  padding: var(--jh-space-6) !important;
+  background: transparent !important;
+}
+
+.formDialogFooter,
+.MuiDialogActions-root {
+  border-top: 1px solid var(--jh-line-faint);
+  padding: var(--jh-space-4) var(--jh-space-6) !important;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--jh-space-2);
+  background: var(--jh-ink-900) !important;
+}
+
+.formDialogFooterItem {
+  margin: 0 !important;
+  width: auto !important;
+}
+
+/* --------------------------------------------------------------------------
+   Action sheets (the "…" context menus)
+   -------------------------------------------------------------------------- */
+.actionSheet,
+.actionSheetContent,
+.MuiMenu-paper,
+.MuiPopover-paper {
+  background: var(--jh-ink-850) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-lg) !important;
+  box-shadow: var(--jh-shadow-xl) !important;
+  padding: var(--jh-space-2) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.actionSheetTitle {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding: var(--jh-space-2) var(--jh-space-3);
+}
+
+.actionSheetMenuItem,
+.MuiMenuItem-root,
+.MuiListItemButton-root {
+  border-radius: var(--jh-radius-md) !important;
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-md) !important;
+  padding: 0.6rem var(--jh-space-3) !important;
+  margin: 1px 0;
+  transition: background-color var(--jh-dur-instant) var(--jh-ease-out),
+              color var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.actionSheetMenuItem:hover,
+.MuiMenuItem-root:hover,
+.MuiListItemButton-root:hover {
+  background: var(--jh-surface) !important;
+  color: var(--jh-text) !important;
+}
+
+.actionSheetMenuItem.selected,
+.MuiMenuItem-root.Mui-selected {
+  background: var(--jh-accent-muted) !important;
+  color: var(--jh-accent) !important;
+}
+
+.actionsheetMenuItemIcon,
+.MuiListItemIcon-root {
+  color: var(--jh-text-muted) !important;
+  min-width: 2rem;
+}
+
+.actionSheetMenuItem:hover .actionsheetMenuItemIcon {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Toasts & snackbars
+   -------------------------------------------------------------------------- */
+.toast,
+.MuiSnackbarContent-root,
+.MuiAlert-root {
+  background: var(--jh-ink-850) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-left: 3px solid var(--jh-accent) !important;
+  border-radius: var(--jh-radius-md) !important;
+  box-shadow: var(--jh-shadow-lg) !important;
+  font-size: var(--jh-fs-md);
+  padding: var(--jh-space-3) var(--jh-space-4);
+  z-index: var(--jh-z-toast);
+}
+
+.MuiAlert-standardError,
+.MuiAlert-filledError { border-left-color: var(--jh-danger) !important; }
+.MuiAlert-standardWarning,
+.MuiAlert-filledWarning { border-left-color: var(--jh-warn) !important; }
+.MuiAlert-standardInfo,
+.MuiAlert-filledInfo { border-left-color: var(--jh-info) !important; }
+
+.MuiAlert-icon { color: inherit !important; }
+
+/* --------------------------------------------------------------------------
+   Tooltips
+   -------------------------------------------------------------------------- */
+.MuiTooltip-tooltip,
+.tooltip {
+  background: var(--jh-ink-950) !important;
+  color: var(--jh-text) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-sm) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-family: var(--jh-font) !important;
+  padding: 0.35rem 0.6rem !important;
+  box-shadow: var(--jh-shadow-md);
+}
+
+.MuiTooltip-arrow { color: var(--jh-ink-950) !important; }
+
+/* --------------------------------------------------------------------------
+   Chips / tags
+   -------------------------------------------------------------------------- */
+.MuiChip-root {
+  background: var(--jh-surface) !important;
+  color: var(--jh-text-secondary) !important;
+  border: 1px solid var(--jh-line) !important;
+  border-radius: var(--jh-radius-pill) !important;
+  font-family: var(--jh-font) !important;
+  font-size: var(--jh-fs-xs) !important;
+  font-weight: var(--jh-fw-semibold);
+}
+
+.MuiChip-root.MuiChip-colorPrimary {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-color: transparent !important;
+}
+
+.MuiChip-deleteIcon { color: var(--jh-text-muted) !important; }
+
+/* --------------------------------------------------------------------------
+   Progress bars & linear indicators
+   -------------------------------------------------------------------------- */
+.MuiLinearProgress-root {
+  background: var(--jh-ink-600) !important;
+  border-radius: var(--jh-radius-pill);
+  height: 4px;
+}
+
+.MuiLinearProgress-bar,
+.MuiCircularProgress-circle {
+  background-color: var(--jh-accent) !important;
+  color: var(--jh-accent) !important;
+  stroke: var(--jh-accent) !important;
+}

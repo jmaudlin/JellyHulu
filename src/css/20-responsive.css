@@ -1,0 +1,179 @@
+/* ==========================================================================
+   JellyHulu — 20 · Responsive
+   Jellyfin's web UI is the mobile UI too, so these breakpoints matter.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Tablet
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  :root {
+    --jh-card-w-portrait: 148px;
+    --jh-card-w-backdrop: 264px;
+    --jh-card-w-square: 158px;
+  }
+
+  .detailPagePrimaryContainer {
+    margin-top: clamp(-11rem, -16vh, -6rem);
+  }
+
+  .detailImageContainer { width: clamp(120px, 18vw, 168px); }
+}
+
+/* --------------------------------------------------------------------------
+   Phone
+   -------------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  :root {
+    --jh-header-height: 54px;
+    --jh-gutter: 1rem;
+    --jh-card-w-portrait: 124px;
+    --jh-card-w-backdrop: 208px;
+    --jh-card-w-square: 132px;
+    --jh-section-gap: 1.75rem;
+    --jh-rail-title-h: 2.4rem;
+    /* Touch has no hover; a scale on tap just looks like a mis-tap. */
+    --jh-card-scale: 1;
+    --jh-preview-display: none;
+    --jh-glass-blur: 12px;
+  }
+
+  .sectionTitle,
+  .verticalSection > .sectionTitleContainer .sectionTitle {
+    font-size: var(--jh-fs-xl) !important;
+  }
+
+  /* Rail titles' hover-revealed "see all" has nothing to reveal it on touch. */
+  .sectionTitleContainer .emby-button {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Detail page becomes a single column with the poster centred. */
+  .detailPagePrimaryContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: -5rem;
+    gap: var(--jh-space-4);
+  }
+
+  .detailImageContainer { width: 120px; }
+
+  .itemName { font-size: var(--jh-fs-3xl) !important; }
+
+  .mainDetailButtons { width: 100%; }
+
+  .mainDetailButtons > .detailButton:first-child {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  /* Episode rows stack. */
+  #childrenCollapsible .listItem,
+  .childrenItemsContainer .listItem {
+    flex-direction: column;
+    gap: var(--jh-space-2);
+  }
+
+  #childrenCollapsible .listItemImage,
+  .childrenItemsContainer .listItemImage {
+    width: 100%;
+  }
+
+  /* Overlay buttons on a card are unreachable by touch; the tap opens the
+     item instead, so hide them rather than leave dead pixels. */
+  .cardOverlayContainer,
+  .jh-card-info {
+    display: none;
+  }
+
+  /* Card captions need to be visible without hover on touch. */
+  .cardText { font-size: var(--jh-fs-xs); }
+
+  .searchFieldsInner { max-width: 100%; }
+
+  .nowPlayingBar { padding-inline: var(--jh-space-3); }
+
+  .dashboardSections { grid-template-columns: 1fr; }
+
+  .videoOsdBottom {
+    padding: var(--jh-space-10) var(--jh-space-4) var(--jh-space-4) !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Small phone
+   -------------------------------------------------------------------------- */
+@media (max-width: 420px) {
+  :root {
+    --jh-card-w-portrait: 108px;
+    --jh-card-w-backdrop: 176px;
+    --jh-card-w-square: 116px;
+  }
+
+  .itemsContainer.vertical-wrap {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--jh-space-3) var(--jh-space-2);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Very wide displays — cap the grid so cards don't become billboards.
+   -------------------------------------------------------------------------- */
+@media (min-width: 2200px) {
+  :root {
+    --jh-card-w-portrait: 210px;
+    --jh-card-w-backdrop: 380px;
+    --jh-card-w-square: 224px;
+    --jh-gutter: clamp(3.5rem, 5vw, 7rem);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Landscape phone: the hero eats the whole viewport otherwise.
+   -------------------------------------------------------------------------- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .jh-hero { height: 78vh; min-height: 240px; }
+  .jh-hero-overview { display: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Coarse pointer: no hover states at all, bigger targets.
+   -------------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  .emby-button,
+  .jh-btn,
+  .listItem,
+  .actionSheetMenuItem {
+    min-height: 2.9rem;
+  }
+
+  .paper-icon-button-light { width: 2.9rem; height: 2.9rem; }
+}
+
+/* --------------------------------------------------------------------------
+   Print — occasionally someone prints a library list.
+   -------------------------------------------------------------------------- */
+@media print {
+  .skinHeader,
+  .mainDrawer,
+  .nowPlayingBar,
+  .emby-scrollbuttons,
+  .jh-hero,
+  .cardOverlayContainer,
+  .jh-settings-panel {
+    display: none !important;
+  }
+
+  body,
+  .page {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .cardText,
+  .itemName,
+  .listItemBodyText {
+    color: #000 !important;
+  }
+}

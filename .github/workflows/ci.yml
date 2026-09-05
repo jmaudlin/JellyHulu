@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and verify
+        run: npm run check
+
+      - name: dist/ matches src/
+        # dist/ is committed so a clone is installable without a build step;
+        # this makes sure it hasn't drifted from the sources.
+        run: |
+          if ! git diff --quiet -- dist/; then
+            echo "::error::dist/ is out of date — run 'npm run build' and commit the result"
+            git diff --stat -- dist/
+            exit 1
+          fi
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test
+        run: node test/smoke.mjs
+        env:
+          JH_CHROME: ''   # let Playwright use its own download
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: test/screenshot-home.png
+          if-no-files-found: ignore

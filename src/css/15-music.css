@@ -1,0 +1,203 @@
+/* ==========================================================================
+   JellyHulu — 15 · Music, now-playing bar & lyrics
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Now-playing bar — Hulu-flavoured: glass, thin scrub line on top.
+   -------------------------------------------------------------------------- */
+.nowPlayingBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--jh-z-nowplaying);
+  min-height: var(--jh-nowplaying-height);
+  background: var(--jh-glass-bg) !important;
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  backdrop-filter: blur(var(--jh-glass-blur)) saturate(var(--jh-glass-saturate));
+  border-top: 1px solid var(--jh-line);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  padding-inline: var(--jh-gutter);
+  contain: layout style;
+}
+
+.nowPlayingBarTop {
+  align-items: center;
+  gap: var(--jh-space-3);
+}
+
+/* The scrub bar rides the very top edge of the bar. */
+.nowPlayingBarPositionContainer,
+.nowPlayingBar .sliderContainer {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  padding: 0;
+  height: 3px;
+}
+
+.nowPlayingBarPositionSlider,
+.nowPlayingBar .mdl-slider__background-flex {
+  height: 3px !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+.nowPlayingBar .mdl-slider__background-lower {
+  background: var(--jh-accent) !important;
+}
+
+.nowPlayingImage {
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: var(--jh-radius-sm);
+  box-shadow: var(--jh-shadow-md);
+  background-size: cover;
+  flex: 0 0 auto;
+}
+
+.nowPlayingBarText {
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.nowPlayingBarText > div:first-child {
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nowPlayingBarSecondaryText,
+.nowPlayingBarText .secondary {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+}
+
+.nowPlayingBar .paper-icon-button-light {
+  color: var(--jh-text-secondary) !important;
+}
+
+.nowPlayingBar .paper-icon-button-light:hover {
+  color: var(--jh-accent) !important;
+}
+
+.nowPlayingBar .btnPause,
+.nowPlayingBar .btnPlayPause {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.nowPlayingBar .btnPause:hover {
+  background: var(--jh-accent-hover) !important;
+}
+
+/* Repeat / shuffle when engaged. */
+.nowPlayingBar .repeatButton-active,
+.nowPlayingBar .btnShuffleQueue.shuffleQueue-active,
+.nowPlayingBar .buttonActive {
+  color: var(--jh-accent) !important;
+}
+
+/* Anything that scrolls behind the bar needs clearance. */
+body:has(.nowPlayingBar:not(.hide)) .mainAnimatedPages {
+  padding-bottom: var(--jh-nowplaying-height);
+}
+
+/* --------------------------------------------------------------------------
+   Full-screen now-playing page
+   -------------------------------------------------------------------------- */
+#nowPlayingPage,
+.nowPlayingPage {
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(28, 231, 131, 0.10) 0%,
+      transparent 62%
+    ),
+    var(--jh-bg) !important;
+}
+
+.nowPlayingPageImage,
+.nowPlayingPageImageContainer img {
+  border-radius: var(--jh-radius-lg);
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.nowPlayingPageTitle {
+  font-size: var(--jh-fs-3xl);
+  font-weight: var(--jh-fw-black);
+  letter-spacing: var(--jh-ls-tight);
+}
+
+/* --------------------------------------------------------------------------
+   Album / artist pages
+   -------------------------------------------------------------------------- */
+.albumCell,
+.trackList .listItem {
+  border-radius: var(--jh-radius-md);
+}
+
+.listItem .listItemIcon.trackIndex,
+.listItemIndexNumber {
+  color: var(--jh-text-muted);
+}
+
+.listItem:hover .listItemIndexNumber { color: var(--jh-accent); }
+
+/* Disc / album section headers. */
+.trackList .listGroupHeader,
+.albumDiscHeader {
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  padding: var(--jh-space-4) 0 var(--jh-space-2);
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+/* --------------------------------------------------------------------------
+   Lyrics (Jellyfin 10.9+)
+   -------------------------------------------------------------------------- */
+.lyricsContainer,
+#lyricsPage .lyrics {
+  padding-inline: var(--jh-gutter);
+  text-align: center;
+}
+
+.lyricsLine,
+.lyrics .lyric {
+  color: var(--jh-text-disabled);
+  font-size: clamp(1.1rem, 0.8rem + 1vw, 1.75rem);
+  font-weight: var(--jh-fw-semibold);
+  line-height: 1.9;
+  letter-spacing: var(--jh-ls-tight);
+  transition: color var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.lyricsLine.current,
+.lyrics .lyric.current,
+.lyricsLine-current {
+  color: var(--jh-accent) !important;
+  transform: scale(1.03);
+}
+
+/* --------------------------------------------------------------------------
+   Playlists & queue
+   -------------------------------------------------------------------------- */
+.playlistIndexIndicatorImage,
+.playlist .listItem.playing {
+  color: var(--jh-accent) !important;
+}
+
+.queue .listItem[draggable="true"]:hover {
+  background: var(--jh-surface) !important;
+  cursor: grab;
+}
+
+.listItemDragHandle { color: var(--jh-text-disabled) !important; }

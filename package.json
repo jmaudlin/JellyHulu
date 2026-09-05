@@ -1,0 +1,22 @@
+{
+  "name": "jellyhulu",
+  "version": "1.0.0",
+  "description": "A Hulu-inspired theme for Jellyfin: CSS skin plus an optional JavaScript companion.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10",
+    "playwright": "^1.49.1"
+  },
+  "files": [
+    "dist",
+    "fonts",
+    "src",
+    "docs",
+    "scripts"
+  ]
+}

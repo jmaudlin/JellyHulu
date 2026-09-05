@@ -1,0 +1,218 @@
+/* ==========================================================================
+   JellyHulu — 16 · Jellyfin-specific features
+   SyncPlay, collections, playlists, books, photos, subtitle/metadata editors
+   and the plugin surfaces. These are the parts a generic streaming skin
+   usually leaves looking stock.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   SyncPlay
+   -------------------------------------------------------------------------- */
+.syncPlayGroupList .listItem,
+.syncPlaySettings .listItem {
+  border-radius: var(--jh-radius-md);
+}
+
+.syncPlayIcon-active,
+.headerSyncButton.syncPlayIcon-active,
+.btnSyncPlay.is-active .material-icons {
+  color: var(--jh-accent) !important;
+}
+
+/* A visible marker that playback is group-synced. */
+html.jh-syncplay-active .skinHeader {
+  box-shadow: inset 0 -2px 0 0 var(--jh-accent);
+}
+
+.syncPlayGroupName {
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+}
+
+/* --------------------------------------------------------------------------
+   Collections & playlists
+   -------------------------------------------------------------------------- */
+.card.collectionCard .cardScalable,
+.collectionCard .cardImageContainer {
+  /* Collections read as stacks: a hint of the cards behind. */
+  box-shadow:
+    var(--jh-shadow-sm),
+    6px -6px 0 -3px var(--jh-ink-700),
+    12px -12px 0 -6px var(--jh-ink-800);
+}
+
+.card.collectionCard:hover .cardScalable {
+  box-shadow:
+    var(--jh-shadow-card-hover),
+    6px -6px 0 -3px var(--jh-ink-600),
+    12px -12px 0 -6px var(--jh-ink-700);
+}
+
+#collectionsPage .verticalSection,
+#playlistsPage .verticalSection {
+  margin-bottom: var(--jh-section-gap);
+}
+
+/* Playlist reorder affordances. */
+.playlistItemMoveButton,
+.btnPlaylistMove {
+  color: var(--jh-text-muted) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Books
+   -------------------------------------------------------------------------- */
+#bookPlayer,
+.bookPlayerContainer {
+  background: var(--jh-ink-950) !important;
+}
+
+.bookPlayerContainer .epub-container,
+#bookPlayer iframe {
+  background: #F3F0E7;   /* a paper ground reads far better for long text */
+  border-radius: var(--jh-radius-md);
+}
+
+.bookPlayerButton,
+#bookPlayer .paper-icon-button-light {
+  color: var(--jh-text) !important;
+}
+
+.bookProgressBar .itemProgressBarForeground {
+  background: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Photos & slideshow
+   -------------------------------------------------------------------------- */
+.slideshowContainer,
+.slideshowSwiperContainer {
+  background: #000 !important;
+}
+
+.slideshowImage {
+  border-radius: 0;
+}
+
+.slideshowButton,
+.slideshowBottomBar .paper-icon-button-light {
+  color: var(--jh-text) !important;
+  background: rgba(5, 6, 7, 0.5) !important;
+  border-radius: 50%;
+}
+
+.slideshowBottomBar {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent) !important;
+}
+
+/* Photo grids are square and want tighter gaps than media posters. */
+#photosPage .itemsContainer.vertical-wrap,
+.photoGrid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 4px;
+}
+
+#photosPage .cardScalable { border-radius: var(--jh-radius-xs); }
+
+/* --------------------------------------------------------------------------
+   Metadata editor
+   -------------------------------------------------------------------------- */
+.metadataEditorPage .inputContainer,
+#metadataEditorPage .inputContainer {
+  margin-bottom: var(--jh-space-4);
+}
+
+.editorTabs .emby-tab-button { font-size: var(--jh-fs-sm) !important; }
+
+.identifyResult,
+.searchImage,
+.imageEditorCard {
+  border-radius: var(--jh-radius-md);
+  border: 1px solid var(--jh-line);
+  overflow: hidden;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              transform var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.identifyResult:hover,
+.searchImage:hover {
+  border-color: var(--jh-accent);
+  transform: translateY(-2px);
+}
+
+/* Image type labels in the image editor. */
+.imageEditor-imageType,
+.cardFooter .imageType {
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-xs);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------------------------
+   Subtitle editor / download
+   -------------------------------------------------------------------------- */
+.subtitleSearchResult,
+#subtitleResults .listItem {
+  border-radius: var(--jh-radius-md);
+}
+
+.subtitleSearchResult .listItemIcon.downloadedIcon,
+.subtitle-downloaded {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Trickplay & chapter strips on the detail page
+   -------------------------------------------------------------------------- */
+.chapterCard .cardScalable,
+#chaptersContent .card .cardScalable {
+  border-radius: var(--jh-radius-sm);
+}
+
+.chapterCard .cardText { font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------------------
+   Cast / remote-control ("Play on" another device)
+   -------------------------------------------------------------------------- */
+.remoteControlPage .nowPlayingPageImage,
+#remoteControlPage .nowPlayingPageImage {
+  box-shadow: var(--jh-shadow-xl);
+}
+
+.sessionNowPlayingContent,
+.sessionCard {
+  border-radius: var(--jh-radius-lg);
+  border: 1px solid var(--jh-line);
+  background: var(--jh-surface) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Quick Connect
+   -------------------------------------------------------------------------- */
+#quickConnectSettingsPage .quickConnectCode,
+.quickConnectCode {
+  font-family: var(--jh-font-mono) !important;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: 0.28em;
+  color: var(--jh-accent);
+  text-align: center;
+  padding: var(--jh-space-6);
+  background: var(--jh-surface);
+  border: 1px dashed var(--jh-line-strong);
+  border-radius: var(--jh-radius-lg);
+}
+
+/* --------------------------------------------------------------------------
+   User profile pictures & multi-user
+   -------------------------------------------------------------------------- */
+.userProfileImage,
+.userImage,
+#userProfilePage .cardImageContainer {
+  border-radius: var(--jh-radius-md);
+  border: 2px solid var(--jh-line);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.userProfileImage:hover { border-color: var(--jh-accent); }

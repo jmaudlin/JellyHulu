@@ -1,0 +1,260 @@
+/* ==========================================================================
+   JellyHulu — 22 · Settings panel
+   Injected by the JS companion and opened from the Jellyfin user menu.
+   Slides in from the right so it never covers what you're adjusting.
+   ========================================================================== */
+
+.jh-settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--jh-z-settings);
+  background: var(--jh-overlay-scrim);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.jh-settings-overlay.is-open { opacity: 1; }
+.jh-settings-overlay[hidden] { display: none !important; }
+
+.jh-settings-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--jh-ink-850);
+  border-left: 1px solid var(--jh-line);
+  box-shadow: var(--jh-shadow-xl);
+  transform: translateX(100%);
+  transition: transform var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.jh-settings-overlay.is-open .jh-settings-panel { transform: none; }
+
+/* --------------------------------------------------------------------------
+   Header / footer
+   -------------------------------------------------------------------------- */
+.jh-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jh-space-3);
+  padding: var(--jh-space-5) var(--jh-space-5) var(--jh-space-4);
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.jh-settings-title {
+  margin: 0;
+  font-size: var(--jh-fs-xl);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-tight);
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+}
+
+.jh-settings-title::before {
+  content: "";
+  width: 4px;
+  height: 1.1em;
+  border-radius: var(--jh-radius-xs);
+  background: var(--jh-accent);
+}
+
+.jh-settings-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--jh-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--jh-space-6);
+}
+
+.jh-settings-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jh-space-3);
+  padding: var(--jh-space-4) var(--jh-space-5);
+  border-top: 1px solid var(--jh-line-faint);
+  background: var(--jh-ink-900);
+}
+
+/* --------------------------------------------------------------------------
+   Groups & fields
+   -------------------------------------------------------------------------- */
+.jh-settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jh-space-3);
+}
+
+.jh-settings-group-title {
+  margin: 0;
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-bold);
+  letter-spacing: var(--jh-ls-caps);
+  text-transform: uppercase;
+  color: var(--jh-text-muted);
+}
+
+.jh-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jh-space-2);
+}
+
+.jh-field-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jh-space-4);
+}
+
+.jh-field-label {
+  font-size: var(--jh-fs-md);
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+}
+
+.jh-field-hint {
+  margin: 0.15rem 0 0;
+  font-size: var(--jh-fs-xs);
+  line-height: var(--jh-lh-body);
+  color: var(--jh-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Segmented control
+   -------------------------------------------------------------------------- */
+.jh-seg {
+  display: flex;
+  padding: 3px;
+  gap: 3px;
+  border-radius: var(--jh-radius-pill);
+  background: var(--jh-ink-900);
+  border: 1px solid var(--jh-line-faint);
+}
+
+.jh-seg-item {
+  flex: 1;
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--jh-radius-pill);
+  background: transparent;
+  color: var(--jh-text-muted);
+  font-family: var(--jh-font);
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  white-space: nowrap;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-seg-item:hover { color: var(--jh-text); }
+
+.jh-seg-item.is-active {
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Switch
+   -------------------------------------------------------------------------- */
+.jh-switch {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 26px;
+  padding: 3px;
+  border-radius: var(--jh-radius-pill);
+  background: var(--jh-ink-600);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-switch > i {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--jh-ink-200);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-switch[aria-checked="true"] { background: var(--jh-accent); }
+
+.jh-switch[aria-checked="true"] > i {
+  transform: translateX(20px);
+  background: var(--jh-on-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Accent swatches
+   -------------------------------------------------------------------------- */
+.jh-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--jh-space-2);
+}
+
+.jh-swatch {
+  /* Overridden inline per swatch by the settings panel. */
+  --jh-swatch-color: var(--jh-accent);
+  appearance: none;
+  cursor: pointer;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--jh-radius-md);
+  background: var(--jh-swatch-color, var(--jh-accent));
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--jh-line) inset;
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring),
+              border-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-swatch:hover { transform: scale(1.1); }
+
+.jh-swatch.is-active {
+  border-color: var(--jh-text);
+  transform: scale(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   Entry point in Jellyfin's own user menu
+   -------------------------------------------------------------------------- */
+.jh-settings-launcher .actionsheetMenuItemIcon,
+.jh-settings-launcher::before {
+  color: var(--jh-accent) !important;
+}
+
+/* Header shortcut button. */
+.jh-settings-button.is-open {
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Info footer with the theme version
+   -------------------------------------------------------------------------- */
+.jh-settings-version {
+  font-size: var(--jh-fs-xs);
+  color: var(--jh-text-disabled);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 480px) {
+  .jh-settings-panel {
+    width: 100vw;
+    border-left: 0;
+  }
+}

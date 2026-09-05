@@ -1,0 +1,366 @@
+/* ==========================================================================
+   JellyHulu — 05 · Hero carousel
+
+   Jellyfin has no hero on the home page, so the JS companion builds one from
+   Continue Watching / Next Up / Recently Added and injects this markup:
+
+     .jh-hero
+       .jh-hero-slides
+         .jh-hero-slide[.is-active]
+           .jh-hero-media  > img.jh-hero-backdrop, video.jh-hero-video
+           .jh-hero-scrim
+           .jh-hero-content
+             .jh-hero-eyebrow / .jh-hero-logo | .jh-hero-title
+             .jh-hero-meta > span
+             .jh-hero-overview
+             .jh-hero-actions > .jh-btn
+             .jh-hero-progress > i[style="--jh-pct:…"]
+       .jh-hero-dots > .jh-hero-dot[.is-active] > i
+       .jh-hero-nav.jh-hero-prev / .jh-hero-next
+
+   Everything below degrades to a single static slide if JS is absent.
+   ========================================================================== */
+
+.jh-hero {
+  display: var(--jh-hero-display);
+  position: relative;
+  width: 100%;
+  height: var(--jh-hero-height);
+  min-height: 320px;
+  margin-bottom: var(--jh-section-gap);
+  overflow: hidden;
+  background: var(--jh-ink-950);
+  isolation: isolate;
+  contain: layout paint style;
+}
+
+/* --------------------------------------------------------------------------
+   Slides — cross-faded, never translated. A slide is only composited while
+   it is active or leaving, so a 10-slide hero costs one layer, not ten.
+   -------------------------------------------------------------------------- */
+.jh-hero-slides {
+  position: absolute;
+  inset: 0;
+}
+
+.jh-hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--jh-dur-hero) var(--jh-ease-out),
+              visibility 0s linear var(--jh-dur-hero);
+}
+
+.jh-hero-slide.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity var(--jh-dur-hero) var(--jh-ease-out),
+              visibility 0s;
+  z-index: 1;
+}
+
+.jh-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.jh-hero-backdrop,
+.jh-hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+}
+
+/* A very slow push-in while a slide is on screen. Two frames of transform,
+   no layout, so it stays on the compositor. */
+.jh-hero-slide.is-active .jh-hero-backdrop {
+  animation: jh-hero-drift 18s var(--jh-ease-inout) both;
+}
+
+@keyframes jh-hero-drift {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.10); }
+}
+
+/* Trailer layer sits over the still and fades in once it can actually play. */
+.jh-hero-video {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--jh-dur-slow) var(--jh-ease-out);
+}
+
+.jh-hero-slide.jh-preview-playing .jh-hero-video { opacity: 1; }
+.jh-hero-slide.jh-preview-playing .jh-hero-backdrop { opacity: 0; }
+
+/* --------------------------------------------------------------------------
+   Scrim — two gradients: a left-to-right wash for the text column and a
+   bottom fade that blends the hero into the first rail.
+   -------------------------------------------------------------------------- */
+.jh-hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      to right,
+      rgba(5, 6, 7, 0.95) 0%,
+      rgba(5, 6, 7, 0.80) 28%,
+      rgba(5, 6, 7, 0.25) 62%,
+      rgba(5, 6, 7, 0.05) 100%
+    ),
+    linear-gradient(
+      to top,
+      var(--jh-bg) 0%,
+      rgba(11, 12, 15, 0.85) 12%,
+      rgba(11, 12, 15, 0) 45%
+    );
+}
+
+/* --------------------------------------------------------------------------
+   Content column
+   -------------------------------------------------------------------------- */
+.jh-hero-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--jh-space-3);
+  padding: 0 var(--jh-gutter) clamp(2rem, 6vh, 4.5rem);
+  max-width: min(46rem, 58%);
+}
+
+.jh-hero-slide.is-active .jh-hero-content > * {
+  animation: jh-hero-rise var(--jh-dur-slow) var(--jh-ease-out) both;
+}
+
+/* Staggered entrance, cheapest possible: no JS timers, just delays. */
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(1) { animation-delay: 60ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(2) { animation-delay: 120ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(3) { animation-delay: 180ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(4) { animation-delay: 240ms; }
+.jh-hero-slide.is-active .jh-hero-content > *:nth-child(5) { animation-delay: 300ms; }
+
+@keyframes jh-hero-rise {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+.jh-hero-eyebrow {
+  color: var(--jh-accent);
+  margin: 0;
+}
+
+.jh-hero-logo {
+  max-width: min(24rem, 70%);
+  max-height: clamp(70px, 13vh, 150px);
+  object-fit: contain;
+  object-position: left bottom;
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.7));
+}
+
+.jh-hero-title {
+  margin: 0;
+  font-size: var(--jh-fs-hero);
+  font-weight: var(--jh-fw-black);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+}
+
+.jh-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-3);
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text-secondary);
+  letter-spacing: var(--jh-ls-wide);
+}
+
+/* Dot separators without extra elements. */
+.jh-hero-meta > span + span::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-right: var(--jh-space-3);
+  vertical-align: 0.22em;
+  border-radius: 50%;
+  background: var(--jh-ink-400);
+}
+
+.jh-hero-meta .jh-hero-rating,
+.jh-hero-meta .jh-rating-chip {
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--jh-line-strong);
+  border-radius: var(--jh-radius-xs);
+  font-size: var(--jh-fs-2xs);
+  letter-spacing: var(--jh-ls-caps);
+}
+
+.jh-hero-overview {
+  margin: 0;
+  font-size: var(--jh-fs-lg);
+  line-height: var(--jh-lh-body);
+  color: var(--jh-text-secondary);
+  letter-spacing: 0;
+  max-width: 42rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+.jh-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jh-space-3);
+  margin-top: var(--jh-space-2);
+}
+
+/* Resume bar for a Continue Watching hero slide. */
+.jh-hero-progress {
+  width: min(22rem, 60%);
+  height: 4px;
+  border-radius: var(--jh-radius-pill);
+  background: rgba(255, 255, 255, 0.22);
+  overflow: hidden;
+}
+
+.jh-hero-progress > i {
+  display: block;
+  height: 100%;
+  width: var(--jh-pct, 0%);
+  background: var(--jh-accent);
+  border-radius: inherit;
+}
+
+/* --------------------------------------------------------------------------
+   Pagination dots. The active dot stretches into a bar that fills over the
+   dwell time — Hulu's tell that the carousel is about to advance.
+   -------------------------------------------------------------------------- */
+.jh-hero-dots {
+  position: absolute;
+  z-index: 3;
+  right: var(--jh-gutter);
+  bottom: clamp(2rem, 6vh, 4.5rem);
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+}
+
+.jh-hero-dot {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  width: 10px;
+  height: 4px;
+  border-radius: var(--jh-radius-pill);
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+  transition: width var(--jh-dur-base) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.jh-hero-dot:hover { background: rgba(255, 255, 255, 0.5); }
+
+.jh-hero-dot.is-active {
+  width: 44px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.jh-hero-dot > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--jh-accent);
+}
+
+.jh-hero-dot.is-active > i {
+  animation: jh-hero-dot-fill var(--jh-hero-dwell, 9s) linear both;
+}
+
+/* Pausing the carousel (hover, focus, tab hidden) freezes the fill too. */
+.jh-hero.is-paused .jh-hero-dot.is-active > i {
+  animation-play-state: paused;
+}
+
+@keyframes jh-hero-dot-fill {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* --------------------------------------------------------------------------
+   Prev / next affordances — invisible until the hero is hovered.
+   -------------------------------------------------------------------------- */
+.jh-hero-nav {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  width: clamp(48px, 5vw, 76px);
+  border: 0;
+  cursor: pointer;
+  color: var(--jh-text);
+  background: linear-gradient(to right, rgba(5, 6, 7, 0.6), transparent);
+  opacity: 0;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+  display: grid;
+  place-items: center;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.jh-hero-prev { left: 0; }
+.jh-hero-next {
+  right: 0;
+  background: linear-gradient(to left, rgba(5, 6, 7, 0.6), transparent);
+}
+
+.jh-hero:hover .jh-hero-nav,
+.jh-hero:focus-within .jh-hero-nav {
+  opacity: 1;
+}
+
+.jh-hero-nav:hover { color: var(--jh-accent); }
+
+/* --------------------------------------------------------------------------
+   Narrow viewports: centre the content and let the image sit behind it.
+   -------------------------------------------------------------------------- */
+@media (max-width: 800px) {
+  .jh-hero {
+    height: clamp(300px, 48vh, 420px);
+  }
+  .jh-hero-content {
+    max-width: 100%;
+    text-align: left;
+    padding-bottom: var(--jh-space-6);
+  }
+  .jh-hero-overview { -webkit-line-clamp: 2; line-clamp: 2; }
+  .jh-hero-scrim {
+    background: linear-gradient(
+      to top,
+      var(--jh-bg) 0%,
+      rgba(11, 12, 15, 0.9) 30%,
+      rgba(11, 12, 15, 0.3) 75%,
+      rgba(11, 12, 15, 0.15) 100%
+    );
+  }
+  .jh-hero-nav { display: none; }
+  .jh-hero-dots { left: var(--jh-gutter); right: auto; bottom: var(--jh-space-3); }
+}

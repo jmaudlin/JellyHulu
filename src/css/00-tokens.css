@@ -1,0 +1,324 @@
+/* ==========================================================================
+   JellyHulu — 00 · Design Tokens
+   The single source of truth. Every other module reads from here; nothing
+   else should hard-code a colour, radius, duration or z-index.
+
+   Admins can override any token by adding their own :root block AFTER the
+   @import of this theme. The JS companion writes user overrides onto
+   <html data-jh-*> attributes and inline custom properties.
+   ========================================================================== */
+
+:root {
+  /* ---------------------------------------------------------------------
+     1 · Brand ramp — Hulu green
+     --------------------------------------------------------------------- */
+  --jh-green-100: #E6FFF3;
+  --jh-green-200: #A8F7D0;
+  --jh-green-300: #62F0AC;
+  --jh-green-400: #1CE783;  /* Hulu's signature green */
+  --jh-green-500: #17C46F;
+  --jh-green-600: #12A15B;
+  --jh-green-700: #0C7642;
+
+  /* Accent is aliased so the settings panel can recolour the whole UI by
+     rewriting three variables instead of hunting through the stylesheet. */
+  --jh-accent:         var(--jh-green-400);
+  --jh-accent-hover:   var(--jh-green-300);
+  --jh-accent-pressed: var(--jh-green-500);
+  --jh-accent-muted:   rgba(28, 231, 131, 0.16);
+  --jh-accent-faint:   rgba(28, 231, 131, 0.08);
+  /* Text that sits ON the accent. Hulu always pairs green with near-black. */
+  --jh-on-accent: #0B0C0F;
+
+  /* ---------------------------------------------------------------------
+     2 · Neutral ramp — the near-black Hulu ground
+     --------------------------------------------------------------------- */
+  --jh-ink-1000: #050607;
+  --jh-ink-950:  #08090B;
+  --jh-ink-900:  #0B0C0F;    /* app background */
+  --jh-ink-850:  #101216;
+  --jh-ink-800:  #151719;    /* raised surface / card */
+  --jh-ink-700:  #1C1E21;    /* card hover, input field */
+  --jh-ink-600:  #26292E;    /* borders on solids, dividers */
+  --jh-ink-500:  #3A3E45;
+  --jh-ink-400:  #565C66;
+  --jh-ink-300:  #7C838E;
+  --jh-ink-200:  #A9AFB8;
+  --jh-ink-100:  #D5D9DE;
+  --jh-ink-0:    #FFFFFF;
+
+  /* ---------------------------------------------------------------------
+     3 · Semantic surfaces
+     --------------------------------------------------------------------- */
+  --jh-bg:               var(--jh-ink-900);
+  --jh-bg-elevated:      var(--jh-ink-850);
+  --jh-surface:          var(--jh-ink-800);
+  --jh-surface-hover:    var(--jh-ink-700);
+  --jh-surface-active:   var(--jh-ink-600);
+  --jh-surface-sunken:   var(--jh-ink-950);
+  --jh-overlay-scrim:    rgba(5, 6, 7, 0.72);
+  --jh-overlay-scrim-hi: rgba(5, 6, 7, 0.90);
+
+  /* Glass surfaces — used for the header and floating chrome. The blur
+     radius is a token so the low-power path can zero it out. */
+  --jh-glass-bg:   rgba(11, 12, 15, 0.72);
+  --jh-glass-blur: 18px;
+  --jh-glass-saturate: 140%;
+
+  /* ---------------------------------------------------------------------
+     4 · Semantic text
+     --------------------------------------------------------------------- */
+  --jh-text:           var(--jh-ink-0);
+  --jh-text-secondary: var(--jh-ink-100);
+  --jh-text-muted:     var(--jh-ink-300);
+  --jh-text-disabled:  var(--jh-ink-400);
+  --jh-text-inverse:   var(--jh-ink-900);
+
+  /* ---------------------------------------------------------------------
+     5 · Lines
+     --------------------------------------------------------------------- */
+  --jh-line:        rgba(255, 255, 255, 0.10);
+  --jh-line-strong: rgba(255, 255, 255, 0.18);
+  --jh-line-faint:  rgba(255, 255, 255, 0.06);
+  --jh-line-accent: var(--jh-accent);
+
+  /* ---------------------------------------------------------------------
+     6 · Status
+     --------------------------------------------------------------------- */
+  --jh-success: #1CE783;
+  --jh-info:    #4DA3FF;
+  --jh-warn:    #FFB020;
+  --jh-danger:  #FF4D4F;
+  --jh-danger-hover: #FF6B6D;
+  --jh-live:    #FF3B5C;   /* Live TV "on air" red */
+
+  /* ---------------------------------------------------------------------
+     7 · Typography
+     Hulu's Graphik is proprietary; Figtree is the closest OFL-licensed
+     geometric grotesque (wide apertures, tall x-height, tight caps).
+     --------------------------------------------------------------------- */
+  --jh-font-stack: "Figtree", "Graphik", "Inter", -apple-system,
+                   BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+                   Arial, "Noto Sans", sans-serif;
+  --jh-font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono",
+                  Menlo, Consolas, monospace;
+  --jh-font: var(--jh-font-stack);
+
+  --jh-fw-light:     300;
+  --jh-fw-regular:   400;
+  --jh-fw-medium:    500;
+  --jh-fw-semibold:  600;
+  --jh-fw-bold:      700;
+  --jh-fw-black:     800;
+
+  /* Fluid type scale. clamp() keeps headings readable from a phone to a TV
+     without a stack of breakpoints. */
+  --jh-fs-2xs: 0.6875rem;                              /* 11px  badges */
+  --jh-fs-xs:  0.75rem;                                /* 12px  meta */
+  --jh-fs-sm:  0.8125rem;                              /* 13px  captions */
+  --jh-fs-md:  0.875rem;                               /* 14px  body */
+  --jh-fs-lg:  1rem;                                   /* 16px  emphasis */
+  --jh-fs-xl:  clamp(1.0625rem, 0.95rem + 0.4vw, 1.25rem);
+  --jh-fs-2xl: clamp(1.25rem, 1.05rem + 0.8vw, 1.625rem);   /* rail titles */
+  --jh-fs-3xl: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);     /* page titles */
+  --jh-fs-4xl: clamp(1.875rem, 1.1rem + 3.4vw, 3.5rem);     /* item titles */
+  --jh-fs-hero: clamp(2.25rem, 1.1rem + 5.2vw, 5rem);       /* hero */
+
+  --jh-lh-tight: 1.1;
+  --jh-lh-snug:  1.3;
+  --jh-lh-body:  1.55;
+  --jh-lh-loose: 1.7;
+
+  /* Hulu sets rail titles and buttons slightly tight; body stays neutral. */
+  --jh-ls-tight: -0.02em;
+  --jh-ls-snug:  -0.01em;
+  --jh-ls-wide:  0.04em;
+  --jh-ls-caps:  0.08em;
+
+  /* ---------------------------------------------------------------------
+     8 · Space — 4px base, named so intent survives refactors
+     --------------------------------------------------------------------- */
+  --jh-space-1:  0.25rem;
+  --jh-space-2:  0.5rem;
+  --jh-space-3:  0.75rem;
+  --jh-space-4:  1rem;
+  --jh-space-5:  1.25rem;
+  --jh-space-6:  1.5rem;
+  --jh-space-8:  2rem;
+  --jh-space-10: 2.5rem;
+  --jh-space-12: 3rem;
+  --jh-space-16: 4rem;
+  --jh-space-20: 5rem;
+
+  /* Horizontal page inset. Hulu keeps content flush-ish to the edge on
+     desktop so rails can bleed off-screen and imply "more to the right". */
+  --jh-gutter: clamp(1rem, 0.4rem + 2.2vw, 3.5rem);
+  --jh-rail-gap: clamp(0.5rem, 0.25rem + 0.6vw, 0.875rem);
+  --jh-section-gap: clamp(1.75rem, 1rem + 2vw, 3rem);
+
+  /* ---------------------------------------------------------------------
+     9 · Radii — Hulu is mostly square with a small softening
+     --------------------------------------------------------------------- */
+  --jh-radius-xs:   2px;
+  --jh-radius-sm:   4px;
+  --jh-radius-md:   6px;
+  --jh-radius-lg:   10px;
+  --jh-radius-xl:   16px;
+  --jh-radius-pill: 999px;
+  --jh-radius-card: var(--jh-radius-sm);
+
+  /* ---------------------------------------------------------------------
+     10 · Elevation
+     --------------------------------------------------------------------- */
+  --jh-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --jh-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --jh-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --jh-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.65);
+  --jh-shadow-card-hover: 0 16px 40px rgba(0, 0, 0, 0.7);
+  --jh-glow-accent: 0 0 0 2px var(--jh-accent),
+                    0 0 20px rgba(28, 231, 131, 0.35);
+
+  /* ---------------------------------------------------------------------
+     11 · Motion
+     Two durations and two curves cover the whole theme. Keeping the set
+     this small is what makes the interactions feel like one system.
+     --------------------------------------------------------------------- */
+  --jh-dur-instant: 90ms;
+  --jh-dur-fast:    160ms;
+  --jh-dur-base:    240ms;
+  --jh-dur-slow:    400ms;
+  --jh-dur-hero:    700ms;
+
+  --jh-ease-out:   cubic-bezier(0.22, 0.61, 0.36, 1);
+  --jh-ease-inout: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --jh-ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+
+  /* Hover-expand geometry. --jh-card-scale is re-declared per density. */
+  --jh-card-scale: 1.14;
+  --jh-card-hover-delay: 260ms;
+  --jh-preview-delay: 900ms;   /* before a trailer starts */
+
+  /* How long the hero holds each slide. The JS companion rewrites this from
+     the user's setting; the default keeps the animation correct without JS. */
+  --jh-hero-dwell: 9s;
+  /* Fill fraction for progress bars, set per element. */
+  --jh-pct: 0%;
+
+  /* ---------------------------------------------------------------------
+     12 · Focus — must read at 10 feet as well as 10 inches
+     --------------------------------------------------------------------- */
+  --jh-focus-width: 3px;
+  --jh-focus-color: var(--jh-accent);
+  --jh-focus-offset: 3px;
+  --jh-focus-ring: 0 0 0 var(--jh-focus-width) var(--jh-focus-color);
+
+  /* ---------------------------------------------------------------------
+     13 · Layout metrics
+     --------------------------------------------------------------------- */
+  /* --jh-header-height is the configured minimum, and is what the header
+     sizes itself from. --jh-header-h is what everything else offsets by: the
+     companion measures the rendered header and writes it here, so a tab row
+     or a wrapped toolbar is accounted for exactly. They must stay separate —
+     writing a measurement into the value the header sizes from is a loop. */
+  --jh-header-height: 62px;
+  --jh-header-height-tv: 88px;
+  --jh-header-h: var(--jh-header-height);
+  --jh-drawer-width: 260px;
+  --jh-nowplaying-height: 74px;
+  /* Height of a rail's heading row — the scroll buttons start below it. */
+  --jh-rail-title-h: 2.9rem;
+  --jh-hero-height: clamp(360px, 56vh, 720px);
+  --jh-hero-height-compact: clamp(280px, 42vh, 460px);
+
+  /* Card widths per density. 09-grids/06-cards read these. */
+  --jh-card-w-portrait: 168px;
+  --jh-card-w-backdrop: 300px;
+  --jh-card-w-square:   180px;
+
+  /* ---------------------------------------------------------------------
+     14 · Z-index — one ordered scale, no magic numbers elsewhere
+     --------------------------------------------------------------------- */
+  --jh-z-base:        0;
+  --jh-z-raised:      10;
+  --jh-z-card-hover:  60;
+  --jh-z-rail-button: 70;
+  --jh-z-header:      1000;
+  --jh-z-drawer:      1050;
+  --jh-z-nowplaying:  1100;
+  --jh-z-dialog:      1200;
+  --jh-z-toast:       1300;
+  --jh-z-settings:    1400;
+  --jh-z-tooltip:     1500;
+
+  /* ---------------------------------------------------------------------
+     15 · Feature switches
+     Booleans-as-display-values, so a single attribute flip in the settings
+     panel can hide a whole feature without a second stylesheet.
+     --------------------------------------------------------------------- */
+  --jh-hero-display: block;
+  --jh-preview-display: block;
+  --jh-badge-display: flex;
+}
+
+/* --------------------------------------------------------------------------
+   Density presets — written by the settings panel onto <html data-jh-density>
+   -------------------------------------------------------------------------- */
+html[data-jh-density="compact"] {
+  --jh-card-w-portrait: 132px;
+  --jh-card-w-backdrop: 236px;
+  --jh-card-w-square:   140px;
+  --jh-rail-gap: 0.5rem;
+  --jh-section-gap: 1.5rem;
+  --jh-card-scale: 1.10;
+  --jh-hero-height: var(--jh-hero-height-compact);
+}
+
+html[data-jh-density="cinematic"] {
+  --jh-card-w-portrait: 210px;
+  --jh-card-w-backdrop: 380px;
+  --jh-card-w-square:   224px;
+  --jh-rail-gap: 1rem;
+  --jh-section-gap: 3.5rem;
+  --jh-card-scale: 1.18;
+}
+
+/* --------------------------------------------------------------------------
+   Motion levels
+   -------------------------------------------------------------------------- */
+html[data-jh-motion="subtle"] {
+  --jh-card-scale: 1.04;
+  --jh-dur-base: 140ms;
+  --jh-dur-slow: 200ms;
+  --jh-preview-display: none;
+}
+
+html[data-jh-motion="off"],
+html[data-jh-motion="none"] {
+  --jh-card-scale: 1;
+  --jh-dur-instant: 1ms;
+  --jh-dur-fast: 1ms;
+  --jh-dur-base: 1ms;
+  --jh-dur-slow: 1ms;
+  --jh-dur-hero: 1ms;
+  --jh-preview-display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Low-power mode. Auto-engaged by the JS companion on weak devices, and
+   selectable by hand. Drops every compositing-expensive effect.
+   -------------------------------------------------------------------------- */
+html[data-jh-power="low"] {
+  --jh-glass-blur: 0px;
+  --jh-glass-bg: rgba(11, 12, 15, 0.96);
+  --jh-shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.6);
+  --jh-shadow-xl: var(--jh-shadow-lg);
+  --jh-card-scale: 1.06;
+  --jh-preview-display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Feature toggles from the settings panel
+   -------------------------------------------------------------------------- */
+html[data-jh-hero="off"]     { --jh-hero-display: none; }
+html[data-jh-previews="off"] { --jh-preview-display: none; }
+html[data-jh-badges="off"]   { --jh-badge-display: none; }

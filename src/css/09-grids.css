@@ -1,0 +1,240 @@
+/* ==========================================================================
+   JellyHulu — 09 · Library grids, filters & pagination
+   This is where a large library is won or lost: the grid is the only view
+   that can hold thousands of cards at once.
+   ========================================================================== */
+
+.itemsContainer.vertical-wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--jh-card-w-portrait), 1fr));
+  gap: clamp(1rem, 0.6rem + 1vw, 1.75rem) var(--jh-rail-gap);
+  align-items: start;
+  /* Room for the hover scale, sized from the same formula the rails use, so
+     a scaled card at the top or bottom row isn't clipped by the section. A
+     flat 1rem is not enough at cinematic density. */
+  padding-block: calc((var(--jh-card-scale) - 1) * var(--jh-card-w-portrait) * 0.85);
+}
+
+/* Shape-specific column sizing. Jellyfin sets a class on the container for
+   the dominant card shape in the view. */
+.itemsContainer.vertical-wrap:has(> .backdropCard),
+.itemsContainer.vertical-wrap:has(> .overflowBackdropCard) {
+  grid-template-columns: repeat(auto-fill, minmax(var(--jh-card-w-backdrop), 1fr));
+}
+
+.itemsContainer.vertical-wrap:has(> .squareCard),
+.itemsContainer.vertical-wrap:has(> .overflowSquareCard) {
+  grid-template-columns: repeat(auto-fill, minmax(var(--jh-card-w-square), 1fr));
+}
+
+/* Jellyfin gives grid cards percentage widths and margins for its own
+   float-ish layout; grid supersedes both. */
+.itemsContainer.vertical-wrap > .card {
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Off-screen work avoidance.
+   `content-visibility: auto` lets the browser skip layout and paint for
+   cards outside the viewport. `contain-intrinsic-size` supplies a placeholder
+   height so the scrollbar doesn't jump as they're skipped.
+
+   Only applied in grids, and only above a size where it pays for itself —
+   in a short rail the bookkeeping costs more than it saves.
+   -------------------------------------------------------------------------- */
+.itemsContainer.vertical-wrap > .card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
+/* A hovered card must be fully rendered, and its scaled overflow must not be
+   clipped by its own containment. */
+.itemsContainer.vertical-wrap > .card:hover,
+.itemsContainer.vertical-wrap > .card:focus-within {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+}
+
+html[data-jh-power="low"] .itemsContainer.vertical-wrap > .card {
+  contain-intrinsic-size: auto 260px;
+}
+
+/* --------------------------------------------------------------------------
+   Vertical list views (episodes, playlist items, search results)
+   -------------------------------------------------------------------------- */
+.itemsContainer.vertical-list,
+.paperList,
+.itemsContainer.vertical-list.paperList {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: var(--jh-radius-lg);
+  overflow: hidden;
+}
+
+.listItem,
+.listItem-border {
+  background: transparent !important;
+  border-bottom: 1px solid var(--jh-line-faint) !important;
+  padding: var(--jh-space-3) var(--jh-space-4);
+  border-radius: var(--jh-radius-md);
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.listItem:hover,
+.listItem.focusable:hover {
+  background: var(--jh-surface) !important;
+}
+
+.listItem:last-child { border-bottom: 0 !important; }
+
+.listItemImage,
+.listItemImage-large {
+  border-radius: var(--jh-radius-sm);
+  background-color: var(--jh-surface);
+}
+
+.listItemBodyText {
+  color: var(--jh-text);
+  font-size: var(--jh-fs-md);
+  line-height: var(--jh-lh-snug);
+}
+
+.listItemBodyText.secondary {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+}
+
+.listItemIndexNumber {
+  color: var(--jh-text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--jh-fw-semibold);
+  min-width: 2.2ch;
+}
+
+.listItem.playlistIndexIndicatorImage,
+.listItem .playedIndicator { background: var(--jh-accent) !important; }
+
+/* Currently-playing row in a queue or album. */
+.listItem.playing,
+.listItem.is-playing .listItemBodyText {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Filter / sort bar
+   -------------------------------------------------------------------------- */
+.filterButton,
+.btnFilter,
+.btnSort,
+.btnSelectView,
+.paging .emby-button {
+  border-radius: var(--jh-radius-pill);
+  border: 1px solid var(--jh-line);
+  background: transparent !important;
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  padding: 0.4rem 0.9rem;
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.filterButton:hover,
+.btnFilter:hover,
+.btnSort:hover,
+.btnSelectView:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+  background: var(--jh-accent-faint) !important;
+}
+
+/* Jellyfin marks an active filter with .filterButton-active or a dot. */
+.filterButton.filterButton-active,
+.btnFilter.filterActive {
+  border-color: var(--jh-accent);
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.filterActiveIndicator {
+  background: var(--jh-accent) !important;
+}
+
+/* Alpha picker down the right edge of a large library. */
+.alphaPicker,
+.alphaPicker-vertical {
+  background: transparent;
+}
+
+.alphaPickerButton {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-xs);
+  font-weight: var(--jh-fw-semibold);
+  padding: 0.08rem 0.3rem;
+  border-radius: var(--jh-radius-xs);
+  transition: color var(--jh-dur-instant) var(--jh-ease-out),
+              background-color var(--jh-dur-instant) var(--jh-ease-out);
+}
+
+.alphaPickerButton:hover {
+  color: var(--jh-on-accent) !important;
+  background: var(--jh-accent) !important;
+}
+
+.alphaPickerButton-selected,
+.alphaPickerButton.selected {
+  color: var(--jh-accent) !important;
+  font-weight: var(--jh-fw-bold);
+}
+
+/* --------------------------------------------------------------------------
+   Pagination — a large library leans on this constantly.
+   -------------------------------------------------------------------------- */
+.paging,
+.listPaging {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--jh-space-2);
+  padding: var(--jh-space-4) var(--jh-gutter);
+  color: var(--jh-text-muted);
+  font-size: var(--jh-fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.paging .btnPreviousPage,
+.paging .btnNextPage {
+  border-radius: 50%;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--jh-line);
+}
+
+.paging .btnPreviousPage:hover,
+.paging .btnNextPage:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Multi-select mode (bulk-editing a big library)
+   -------------------------------------------------------------------------- */
+.itemSelectionPanel {
+  border: 2px solid var(--jh-accent) !important;
+  border-radius: var(--jh-radius-card);
+  background: rgba(28, 231, 131, 0.10) !important;
+}
+
+.chkItemSelect:checked + .checkboxOutline,
+.selectionCommandsPanel {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+}
+
+.selectionCommandsPanel {
+  border-radius: var(--jh-radius-pill);
+  box-shadow: var(--jh-shadow-lg);
+}

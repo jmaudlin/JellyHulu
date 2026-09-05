@@ -1,0 +1,86 @@
+/* ==========================================================================
+   JellyHulu — 13 · Search
+   Hulu's search is a single wide field pinned under the header, with results
+   grouped into labelled rails.
+   ========================================================================== */
+
+#searchPage { padding-top: var(--jh-header-h) !important; }
+
+.searchFields {
+  position: sticky;
+  top: var(--jh-header-h);
+  z-index: var(--jh-z-raised);
+  padding: var(--jh-space-4) var(--jh-gutter);
+  background: var(--jh-glass-bg);
+  -webkit-backdrop-filter: blur(var(--jh-glass-blur));
+  backdrop-filter: blur(var(--jh-glass-blur));
+  border-bottom: 1px solid var(--jh-line-faint);
+}
+
+.searchFieldsInner {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-3);
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 var(--jh-space-4);
+  background: var(--jh-ink-700);
+  border: 1px solid var(--jh-line);
+  border-radius: var(--jh-radius-pill);
+  transition: border-color var(--jh-dur-fast) var(--jh-ease-out),
+              box-shadow var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.searchFieldsInner:focus-within {
+  border-color: var(--jh-accent);
+  box-shadow: 0 0 0 3px var(--jh-accent-faint);
+}
+
+.searchfields-icon,
+.searchFieldsInner .material-icons {
+  color: var(--jh-text-muted);
+  font-size: 1.4rem;
+}
+
+.searchFieldsInner:focus-within .searchfields-icon { color: var(--jh-accent); }
+
+.searchfields-txtSearch,
+.searchFields .emby-input {
+  flex: 1;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  font-size: var(--jh-fs-xl);
+  font-weight: var(--jh-fw-medium);
+  padding: 0.85rem 0 !important;
+}
+
+.searchfields-txtSearch:focus {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Result groups reuse the rail treatment from 08. */
+#searchResults .verticalSection,
+.searchResults .verticalSection {
+  margin-bottom: var(--jh-section-gap);
+}
+
+.searchSuggestions,
+.searchSuggestionsList {
+  padding-inline: var(--jh-gutter);
+}
+
+.searchSuggestions .emby-button,
+.searchSuggestionItem {
+  border-radius: var(--jh-radius-pill);
+  border: 1px solid var(--jh-line);
+  color: var(--jh-text-secondary) !important;
+  font-size: var(--jh-fs-sm);
+  margin: 0.2rem;
+}
+
+.searchSuggestions .emby-button:hover {
+  border-color: var(--jh-accent);
+  color: var(--jh-accent) !important;
+}

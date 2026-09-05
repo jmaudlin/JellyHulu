@@ -1,0 +1,222 @@
+/* ==========================================================================
+   JellyHulu — 02 · Base & global surfaces
+   Repaints Jellyfin's ground, scrollbars, selection and the page shell.
+   Custom CSS is appended last by Jellyfin, so most of this wins on source
+   order; !important appears only where a built-in theme sets the same
+   property with equal-or-higher specificity.
+   ========================================================================== */
+
+html {
+  background-color: var(--jh-bg);
+  color-scheme: dark;
+  scrollbar-color: var(--jh-ink-500) transparent;
+  scrollbar-width: thin;
+  /* Anchors sticky headers below the app header when jumping to a section. */
+  scroll-padding-top: calc(var(--jh-header-h) + var(--jh-space-4));
+}
+
+body,
+.skinBody,
+.backgroundContainer,
+.backgroundContainer.withBackdrop {
+  background-color: var(--jh-bg) !important;
+  color: var(--jh-text);
+}
+
+/* Jellyfin paints a blurred item backdrop behind the whole app on detail
+   pages. Hulu's equivalent is a tighter, darker vignette, so the built-in
+   one is dimmed here and re-created deliberately in 09-detail. */
+.backdropContainer,
+.backgroundContainer.withBackdrop::before {
+  opacity: 0.28;
+}
+
+.backdropImage {
+  filter: saturate(115%) contrast(104%);
+}
+
+/* The page canvas itself. */
+.mainAnimatedPages,
+.mainAnimatedPage,
+.page,
+.libraryPage {
+  background-color: transparent;
+  color: var(--jh-text);
+}
+
+/* Jellyfin pads every page for its own header. Ours is a different height
+   and the hero needs to bleed under it, so the inset is re-declared. */
+.mainAnimatedPages {
+  padding-top: 0 !important;
+}
+
+.page {
+  padding-top: var(--jh-header-h);
+}
+
+/* Library pages add a tab row inside the fixed header, which makes it taller
+   than --jh-header-height. The companion measures the header and rewrites
+   that token exactly; this :has() rule is the no-JS fallback and covers the
+   common case on its own. */
+body:has(.skinHeader .headerTabs:not(.hide)) .page:not(.jh-has-hero) {
+  padding-top: calc(var(--jh-header-h) + 3.25rem);
+}
+
+/* Pages that open with a full-bleed hero or backdrop must start at y=0.
+   The header floats over them as translucent glass. */
+.page.jh-has-hero,
+#indexPage,
+#itemDetailPage,
+#videoOsdPage,
+#loginPage,
+#selectServerPage {
+  padding-top: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Selection & caret
+   -------------------------------------------------------------------------- */
+::selection {
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+}
+
+input,
+textarea {
+  caret-color: var(--jh-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbars
+   Thin, dark, and only visibly coloured on hover — Hulu never draws
+   attention to a scrollbar.
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--jh-ink-600);
+  border-radius: var(--jh-radius-pill);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--jh-ink-400);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Horizontal rails hide their scrollbar entirely — navigation is by the
+   arrow buttons, drag, or the keyboard. */
+.emby-scroller,
+.itemsContainer.scrollSlider,
+.scrollSlider,
+.scrollX {
+  scrollbar-width: none;
+}
+
+.emby-scroller::-webkit-scrollbar,
+.itemsContainer.scrollSlider::-webkit-scrollbar,
+.scrollX::-webkit-scrollbar {
+  height: 0;
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Focus
+   Jellyfin removes outlines in several places. Restore one ring, everywhere,
+   keyboard-only — then 19-tv makes it bigger for the couch.
+   -------------------------------------------------------------------------- */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: var(--jh-focus-width) solid var(--jh-focus-color);
+  outline-offset: var(--jh-focus-offset);
+  border-radius: var(--jh-radius-sm);
+}
+
+/* Jellyfin's own "focused by remote/keyboard" class. */
+.focusable:focus-visible,
+.emby-button:focus-visible,
+.card:focus-visible .cardBox {
+  outline: var(--jh-focus-width) solid var(--jh-focus-color);
+  outline-offset: var(--jh-focus-offset);
+}
+
+/* --------------------------------------------------------------------------
+   Images
+   Jellyfin lazy-loads card art; fading it in removes the "pop" that reads as
+   jank on a long grid.
+   -------------------------------------------------------------------------- */
+.cardImage,
+.listItemImage,
+.detailImageContainer .card,
+.blurhash-canvas + img {
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+}
+
+img.lazy-image-fadein-fast,
+img.lazy-image-fadein {
+  animation-duration: var(--jh-dur-base) !important;
+}
+
+/* Blurhash placeholders are Jellyfin's own; soften the handoff. */
+.blurhash-canvas {
+  transition: opacity var(--jh-dur-slow) var(--jh-ease-out);
+  filter: saturate(120%);
+}
+
+/* --------------------------------------------------------------------------
+   Dividers & rules
+   -------------------------------------------------------------------------- */
+hr,
+.paperList > .listItem + .listItem,
+.detailSection + .detailSection {
+  border-color: var(--jh-line);
+}
+
+/* --------------------------------------------------------------------------
+   Loading indicators — repainted from Jellyfin's blue-grey to Hulu green.
+   -------------------------------------------------------------------------- */
+.docspinner .mdl-spinner__layer-1,
+.docspinner .mdl-spinner__layer-2,
+.docspinner .mdl-spinner__layer-3,
+.docspinner .mdl-spinner__layer-4,
+.mdl-spinner__layer {
+  border-color: var(--jh-accent) !important;
+}
+
+.mdlProgress,
+progress {
+  accent-color: var(--jh-accent);
+}
+
+/* A calmer full-page loading state than the default centred spinner. */
+.docspinner {
+  filter: drop-shadow(0 0 12px rgba(28, 231, 131, 0.35));
+}
+
+/* --------------------------------------------------------------------------
+   Text-selection-free chrome. Dragging a rail shouldn't highlight titles.
+   -------------------------------------------------------------------------- */
+.skinHeader,
+.mainDrawer,
+.sectionTitleContainer,
+.emby-scrollbuttons,
+.cardOverlayContainer,
+.videoOsdBottom {
+  -webkit-user-select: none;
+  user-select: none;
+}

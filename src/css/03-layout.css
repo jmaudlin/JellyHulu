@@ -1,0 +1,190 @@
+/* ==========================================================================
+   JellyHulu — 03 · App shell & layout
+   Page rhythm, gutters, section spacing and the containers Jellyfin uses to
+   lay out every view.
+   ========================================================================== */
+
+/* Jellyfin's default page padding is generous on the left and stops content
+   from bleeding. Hulu runs rails to the viewport edge, so the gutter is
+   applied per-section instead of once on the page. */
+.padded-left   { padding-left: var(--jh-gutter) !important; }
+.padded-right  { padding-right: var(--jh-gutter) !important; }
+.padded-top    { padding-top: var(--jh-space-6) !important; }
+.padded-bottom { padding-bottom: var(--jh-space-6) !important; }
+
+.readOnlyContent,
+.detailPageContent,
+.dashboardSections,
+.padded-left.padded-right {
+  max-width: 1720px;
+}
+
+/* --------------------------------------------------------------------------
+   Vertical sections (each rail or grid block on the home page)
+   -------------------------------------------------------------------------- */
+.verticalSection {
+  position: relative;   /* containing block for the rail's scroll buttons */
+  margin-bottom: var(--jh-section-gap);
+  /* Paint/layout containment: a home page with 15 rails re-layouts far less
+     when a card animates inside one of them. */
+  contain: layout style;
+}
+
+.verticalSection:last-child {
+  margin-bottom: var(--jh-space-16);
+}
+
+.sectionTitleContainer {
+  display: flex;
+  align-items: baseline;
+  gap: var(--jh-space-3);
+  padding-inline: var(--jh-gutter);
+  margin-bottom: var(--jh-space-3);
+  min-height: 2rem;
+}
+
+/* Hulu puts a small green tick to the left of every rail heading. */
+.verticalSection > .sectionTitleContainer .sectionTitle::before,
+.verticalSection > .sectionTitle::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 0.85em;
+  margin-right: 0.6rem;
+  vertical-align: -0.03em;
+  border-radius: var(--jh-radius-xs);
+  background: var(--jh-accent);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transform-origin: center;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-spring);
+}
+
+.verticalSection:hover > .sectionTitleContainer .sectionTitle::before,
+.verticalSection:focus-within > .sectionTitleContainer .sectionTitle::before,
+.verticalSection:hover > .sectionTitle::before,
+.verticalSection:focus-within > .sectionTitle::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* "See all" style links that sit beside a rail title. */
+.sectionTitleContainer .emby-button,
+.sectionTitleContainer .sectionTitleIconButton,
+.sectionTitleTextButton {
+  color: var(--jh-text-muted) !important;
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out),
+              color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.verticalSection:hover .sectionTitleContainer .emby-button,
+.verticalSection:focus-within .sectionTitleContainer .emby-button,
+.sectionTitleContainer .emby-button:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.sectionTitleContainer .emby-button:hover {
+  color: var(--jh-accent) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Content wrappers
+   -------------------------------------------------------------------------- */
+.itemsContainer.padded-left.padded-right,
+.itemsContainer.vertical-wrap {
+  padding-inline: var(--jh-gutter);
+}
+
+/* Jellyfin's "no items" empty states. */
+.noItemsMessage,
+.centerMessage {
+  color: var(--jh-text-muted);
+  text-align: center;
+  padding: var(--jh-space-16) var(--jh-gutter);
+  font-size: var(--jh-fs-lg);
+}
+
+.noItemsMessage::before {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--jh-space-4);
+  border-radius: var(--jh-radius-lg);
+  background: var(--jh-surface);
+  border: 1px solid var(--jh-line);
+  /* A film-frame glyph, drawn rather than shipped as an asset. */
+  background-image:
+    linear-gradient(var(--jh-ink-600) 0 0),
+    linear-gradient(var(--jh-ink-600) 0 0);
+  background-size: 10px 10px, 10px 10px;
+  background-position: 10px 16px, 10px 38px;
+  background-repeat: repeat-y, repeat-y;
+}
+
+/* --------------------------------------------------------------------------
+   Floating action button (Jellyfin uses one for "add" on several pages)
+   -------------------------------------------------------------------------- */
+.fab,
+.emby-button.fab {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  box-shadow: var(--jh-shadow-lg);
+  transition: transform var(--jh-dur-fast) var(--jh-ease-spring),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.fab:hover {
+  background: var(--jh-accent-hover) !important;
+  transform: scale(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   Page transitions. Jellyfin animates page swaps; a short fade-and-rise
+   reads more like a streaming app than the default slide.
+   -------------------------------------------------------------------------- */
+.mainAnimatedPage {
+  animation: jh-page-in var(--jh-dur-base) var(--jh-ease-out) both;
+}
+
+@keyframes jh-page-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Skeleton shimmer, used by the JS companion while a rail's data loads.
+   -------------------------------------------------------------------------- */
+.jh-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--jh-surface);
+  border-radius: var(--jh-radius-card);
+}
+
+.jh-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  animation: jh-shimmer 1.4s var(--jh-ease-inout) infinite;
+}
+
+@keyframes jh-shimmer {
+  to { transform: translateX(100%); }
+}

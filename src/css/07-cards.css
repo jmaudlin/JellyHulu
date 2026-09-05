@@ -1,0 +1,472 @@
+/* ==========================================================================
+   JellyHulu — 07 · Cards
+
+   Design note on the hover-expand: the card scales in place with
+   `transform` and an overlay fades in *inside* it. Nothing below the card
+   moves. The alternative — an expanded panel that pushes siblings — reflows
+   the whole rail on every hover and is the single biggest cause of jank in
+   Netflix-style themes, so it is deliberately avoided.
+
+   Clipping: rails are `overflow-x: auto`, and CSS forbids `overflow-y:
+   visible` on a scroll container, so the scaled card is given room by
+   padding the scroller (see 08-rails). Cards at the first/last position
+   would still be cut off horizontally, so the JS companion tags them
+   .jh-edge-start / .jh-edge-end and the transform-origin shifts to that
+   side. Without JS, cards simply scale from the centre.
+   ========================================================================== */
+
+.card {
+  position: relative;
+  contain: layout style;
+}
+
+.cardBox,
+.cardBox-bottompadded {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   The scalable frame — everything visual lives here.
+   -------------------------------------------------------------------------- */
+.cardScalable {
+  position: relative;
+  border-radius: var(--jh-radius-card);
+  overflow: hidden;
+  background: var(--jh-surface);
+  box-shadow: 0 0 0 1px var(--jh-line-faint) inset;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: transform var(--jh-dur-base) var(--jh-ease-out),
+              box-shadow var(--jh-dur-base) var(--jh-ease-out),
+              border-radius var(--jh-dur-base) var(--jh-ease-out);
+  /* `paint` keeps the preview video and overlay from spilling; it also lets
+     the browser skip painting off-screen cards in long grids. */
+  contain: paint;
+}
+
+.cardImageContainer,
+.cardContent,
+.cardContent-shadow {
+  background-color: var(--jh-surface) !important;
+  border-radius: inherit;
+  box-shadow: none !important;
+}
+
+.cardImage {
+  border-radius: inherit;
+  transition: transform var(--jh-dur-slow) var(--jh-ease-out),
+              filter var(--jh-dur-base) var(--jh-ease-out);
+}
+
+/* Placeholder art for items with no image. */
+.cardImageContainer > .cardImageIcon,
+.cardImageIcon {
+  color: var(--jh-ink-500) !important;
+  font-size: 3rem;
+}
+
+/* --------------------------------------------------------------------------
+   Hover / focus state
+   -------------------------------------------------------------------------- */
+.card:hover,
+.card:focus-within,
+.card.jh-card-open {
+  z-index: var(--jh-z-card-hover);
+}
+
+.card:hover .cardScalable,
+.card:focus-within .cardScalable,
+.card.jh-card-open .cardScalable {
+  transform: scale(var(--jh-card-scale));
+  border-radius: var(--jh-radius-md);
+  box-shadow: var(--jh-shadow-card-hover), 0 0 0 1px var(--jh-line-strong) inset;
+  /* Promoted only while hovered, so a 500-card grid keeps one extra layer
+     rather than five hundred. */
+  will-change: transform;
+}
+
+.card:hover .cardImage,
+.card:focus-within .cardImage {
+  filter: brightness(0.92);
+}
+
+/* Keyboard/remote focus draws the accent ring on the frame, not the anchor. */
+.card:focus-visible .cardScalable,
+.card .itemAction:focus-visible ~ .cardScalable,
+.card.jh-focused .cardScalable {
+  box-shadow: var(--jh-shadow-card-hover), var(--jh-glow-accent);
+  outline: none;
+}
+
+/* Edge cards scale inward so the rail never clips them. */
+.card.jh-edge-start .cardScalable { transform-origin: left center; }
+.card.jh-edge-end   .cardScalable { transform-origin: right center; }
+
+/* --------------------------------------------------------------------------
+   Hover preview video (injected by the JS companion)
+   -------------------------------------------------------------------------- */
+.jh-card-preview {
+  display: var(--jh-preview-display);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--jh-dur-slow) var(--jh-ease-out);
+  z-index: 1;
+}
+
+.card.jh-preview-playing .jh-card-preview { opacity: 1; }
+.card.jh-preview-playing .cardImage { opacity: 0; }
+
+/* A muted-audio hint, mirroring Hulu's speaker toggle on previews. */
+.jh-preview-mute {
+  position: absolute;
+  top: var(--jh-space-2);
+  right: var(--jh-space-2);
+  z-index: 4;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: none;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--jh-line-strong);
+  background: rgba(5, 6, 7, 0.6);
+  color: var(--jh-text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.card.jh-preview-playing .jh-preview-mute { display: grid; }
+.jh-preview-mute:hover { border-color: var(--jh-accent); color: var(--jh-accent); }
+
+/* --------------------------------------------------------------------------
+   Overlay — Jellyfin's own .cardOverlayContainer, restyled into Hulu's
+   bottom-gradient action strip.
+   -------------------------------------------------------------------------- */
+.cardOverlayContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: linear-gradient(
+    to top,
+    rgba(5, 6, 7, 0.94) 0%,
+    rgba(5, 6, 7, 0.66) 34%,
+    rgba(5, 6, 7, 0.08) 62%,
+    transparent 100%
+  ) !important;
+  opacity: 0;
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.card:hover .cardOverlayContainer,
+.card:focus-within .cardOverlayContainer,
+.card.jh-card-open .cardOverlayContainer {
+  opacity: 1;
+}
+
+.cardOverlayButton-br,
+.cardOverlayButton {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-radius: 50% !important;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--jh-shadow-md);
+  transform: translate3d(0, 8px, 0) scale(0.85);
+  opacity: 0;
+  transition: transform var(--jh-dur-base) var(--jh-ease-spring),
+              opacity var(--jh-dur-fast) var(--jh-ease-out),
+              background-color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.card:hover .cardOverlayButton,
+.card:focus-within .cardOverlayButton {
+  transform: none;
+  opacity: 1;
+}
+
+.cardOverlayButton:hover {
+  background: var(--jh-accent-hover) !important;
+}
+
+/* Secondary overlay buttons (favourite, mark played, menu) stay ghosted so
+   only Play carries the accent. */
+.cardOverlayButton.cardOverlayButton-hover:not(.cardOverlayButton-br),
+.cardOverlayButtonIcon:not(.cardOverlayButtonIcon-play) {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: var(--jh-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   In-card metadata (injected by JS) — title, year, rating, quick actions
+   revealed with the overlay.
+   -------------------------------------------------------------------------- */
+.jh-card-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  padding: var(--jh-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  opacity: 0;
+  transform: translate3d(0, 10px, 0);
+  transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+              transform var(--jh-dur-base) var(--jh-ease-out);
+  pointer-events: none;
+}
+
+.card:hover .jh-card-info,
+.card:focus-within .jh-card-info {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.jh-card-info-title {
+  font-size: var(--jh-fs-sm);
+  font-weight: var(--jh-fw-bold);
+  line-height: var(--jh-lh-snug);
+  color: var(--jh-text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.jh-card-info-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-semibold);
+  letter-spacing: var(--jh-ls-wide);
+  color: var(--jh-ink-200);
+  text-transform: uppercase;
+}
+
+.jh-card-info-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jh-space-2);
+  margin-top: 0.15rem;
+}
+
+.jh-card-info-actions .jh-btn-icon {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--jh-line-strong);
+  background: rgba(5, 6, 7, 0.5);
+  font-size: 1rem;
+}
+
+/* Small cards can't fit the metadata block; hide it rather than crush it. */
+html[data-jh-density="compact"] .jh-card-info-meta,
+.card.smallBackdropCard .jh-card-info-meta {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Badges — Top 10, New, Live, 4K. `--jh-badge-display` lets the settings
+   panel switch the whole set off.
+   -------------------------------------------------------------------------- */
+.jh-badge {
+  display: var(--jh-badge-display);
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--jh-radius-xs);
+  background: var(--jh-accent);
+  color: var(--jh-on-accent);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.jh-badge-corner {
+  position: absolute;
+  top: var(--jh-space-2);
+  left: var(--jh-space-2);
+  z-index: 3;
+}
+
+.jh-badge-new  { background: var(--jh-accent); }
+.jh-badge-live { background: var(--jh-live); color: #fff; }
+.jh-badge-4k   { background: rgba(5, 6, 7, 0.78); color: var(--jh-text);
+                 border: 1px solid var(--jh-line-strong); }
+.jh-badge-hd   { background: rgba(5, 6, 7, 0.78); color: var(--jh-text-muted);
+                 border: 1px solid var(--jh-line); }
+
+/* The oversized outlined numeral on a ranked rail.
+   It sits *inside* the tile rather than hanging off its left edge: the card
+   frame is `overflow: hidden` (it has to be, to clip the preview video and
+   the rounded corners), so anything positioned outside it is simply cut off. */
+.jh-badge-top10 {
+  position: absolute;
+  left: 0.04em;
+  bottom: 0;
+  z-index: 3;
+  display: var(--jh-badge-display);
+  font-size: clamp(3.5rem, 5.5vw, 6rem);
+  font-weight: var(--jh-fw-black);
+  line-height: 0.8;
+  letter-spacing: -0.08em;
+  color: transparent;
+  -webkit-text-stroke: 3px rgba(255, 255, 255, 0.92);
+  paint-order: stroke fill;
+  pointer-events: none;
+  /* Keeps the outline readable over bright artwork. */
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.85));
+  transition: -webkit-text-stroke-color var(--jh-dur-base) var(--jh-ease-out);
+}
+
+.card:hover .jh-badge-top10 {
+  -webkit-text-stroke-color: var(--jh-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Indicators — Jellyfin's unplayed count, played tick, episode count.
+   -------------------------------------------------------------------------- */
+.cardIndicators {
+  top: var(--jh-space-2);
+  right: var(--jh-space-2);
+  z-index: 3;
+  gap: 0.3rem;
+}
+
+.indicator,
+.countIndicator,
+.playedIndicator {
+  background: var(--jh-accent) !important;
+  color: var(--jh-on-accent) !important;
+  border-radius: var(--jh-radius-pill);
+  font-size: var(--jh-fs-2xs);
+  font-weight: var(--jh-fw-bold);
+  box-shadow: var(--jh-shadow-sm);
+}
+
+.videoIndicator,
+.missingIndicator {
+  background: var(--jh-ink-700) !important;
+  color: var(--jh-text) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Resume progress bar
+   -------------------------------------------------------------------------- */
+.cardProgressBar,
+.innerCardFooter .itemProgressBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-radius: 0;
+}
+
+.itemProgressBar,
+.itemProgressBarForeground {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 0;
+  height: 3px;
+}
+
+.itemProgressBarForeground,
+.itemProgressBarForeground-recording {
+  background: var(--jh-accent) !important;
+}
+
+.itemProgressBarForeground-recording {
+  background: var(--jh-live) !important;
+}
+
+/* Jellyfin's translucent footer strip inside a card. */
+.innerCardFooter,
+.cardFooter.innerCardFooter {
+  background: linear-gradient(to top, rgba(5, 6, 7, 0.92), transparent) !important;
+  border-radius: 0 0 var(--jh-radius-card) var(--jh-radius-card);
+}
+
+/* --------------------------------------------------------------------------
+   Card text beneath the image
+   -------------------------------------------------------------------------- */
+.cardText {
+  padding: 0.45rem 0.15rem 0 !important;
+  font-size: var(--jh-fs-sm);
+  line-height: var(--jh-lh-snug);
+  letter-spacing: var(--jh-ls-snug);
+  color: var(--jh-text-secondary);
+  text-align: left;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.cardText-first,
+.cardText:first-of-type {
+  font-weight: var(--jh-fw-semibold);
+  color: var(--jh-text);
+}
+
+.cardText-secondary,
+.cardText.cardText-secondary {
+  padding-top: 0.1rem !important;
+  font-size: var(--jh-fs-xs);
+  color: var(--jh-text-muted) !important;
+}
+
+.card:hover .cardText-first {
+  color: var(--jh-accent);
+}
+
+/* Hulu left-aligns card captions; Jellyfin centres them by default. */
+.cardTextCentered { text-align: left !important; }
+
+/* --------------------------------------------------------------------------
+   Card shapes
+   -------------------------------------------------------------------------- */
+.cardPadder-portrait,
+.cardPadder-overflowPortrait { padding-bottom: 150%; }
+
+.cardPadder-backdrop,
+.cardPadder-overflowBackdrop { padding-bottom: 56.25%; }
+
+.cardPadder-square,
+.cardPadder-overflowSquare { padding-bottom: 100%; }
+
+.cardPadder-banner { padding-bottom: 18.5%; }
+
+/* Person / cast cards read better as circles. */
+.card.personCard .cardScalable,
+.card.overflowPortraitCard[data-type="Person"] .cardScalable,
+.personCard .cardImageContainer {
+  border-radius: 50%;
+}
+
+.personCard .cardText { text-align: center !important; }
+
+/* --------------------------------------------------------------------------
+   Reduced motion: no scale, no preview. Keep the overlay so the card is
+   still interactive.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .card:hover .cardScalable,
+  .card:focus-within .cardScalable {
+    transform: none;
+  }
+  .jh-card-preview { display: none; }
+}

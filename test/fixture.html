@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JellyHulu fixture</title>
+<link rel="stylesheet" href="../dist/jellyhulu.css">
+</head>
+<body>
+<!-- A cut-down copy of the DOM jellyfin-web renders, enough to exercise the
+     theme's selectors and the companion script's integration points. -->
+<div class="skinHeader">
+  <div class="headerTop">
+    <div class="headerLeft">
+      <button class="headerButton headerHomeButton paper-icon-button-light"><span class="material-icons">home</span></button>
+      <h3 class="pageTitle">Movies</h3>
+    </div>
+    <div class="headerRight">
+      <button class="headerButton headerSearchButton paper-icon-button-light"><span class="material-icons">search</span></button>
+      <button class="headerButton headerUserButton paper-icon-button-light"><div class="headerUserButtonRound"></div></button>
+    </div>
+  </div>
+</div>
+
+<div class="mainAnimatedPages skinBody">
+  <div class="mainAnimatedPage page homePage libraryPage">
+    <div class="homeSectionsContainer">
+
+      <div class="verticalSection">
+        <div class="sectionTitleContainer"><h2 class="sectionTitle sectionTitle-cards">Top 10 Today</h2>
+          <button class="emby-button">See all</button></div>
+        <div is="emby-scroller" class="emby-scroller scrollX">
+          <div class="scrollSlider itemsContainer focuscontainer-x">
+            <div class="card overflowPortraitCard" data-id="item-1" data-type="Movie">
+              <div class="cardBox cardBox-bottompadded"><div class="cardScalable">
+                <div class="cardPadder cardPadder-overflowPortrait"></div>
+                <a class="cardImageContainer coveredImage cardContent itemAction" href="#/details?id=item-1" style="background-image:url(&quot;data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600'%3E%3Crect width='100%25' height='100%25' fill='%231d3b30'/%3E%3C/svg%3E&quot;);background-size:cover"></a>
+                <div class="cardOverlayContainer itemAction">
+                  <button class="cardOverlayButton cardOverlayButton-br paper-icon-button-light"><span class="material-icons">play_arrow</span></button>
+                </div>
+                <div class="cardProgressBar"><div class="itemProgressBar"><div class="itemProgressBarForeground" style="width:38%"></div></div></div>
+              </div>
+              <div class="cardText cardTextCentered cardText-first"><bdi>The Bear</bdi></div>
+              <div class="cardText cardTextCentered cardText-secondary"><bdi>2024</bdi></div>
+              </div>
+            </div>
+            <div class="card overflowPortraitCard" data-id="item-2" data-type="Series">
+              <div class="cardBox"><div class="cardScalable">
+                <div class="cardPadder cardPadder-overflowPortrait"></div>
+                <a class="cardImageContainer coveredImage cardContent itemAction" href="#/details?id=item-2" style="background-image:url(&quot;data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23412238'/%3E%3C/svg%3E&quot;);background-size:cover"></a>
+              </div>
+              <div class="cardText cardText-first"><bdi>Shogun</bdi></div>
+              <div class="cardText cardText-secondary"><bdi>2024</bdi></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="emby-scrollbuttons">
+          <button class="emby-scrollbuttons-button paper-icon-button-light"><span class="material-icons">chevron_left</span></button>
+          <button class="emby-scrollbuttons-button paper-icon-button-light"><span class="material-icons">chevron_right</span></button>
+        </div>
+      </div>
+
+      <div class="verticalSection">
+        <div class="sectionTitleContainer"><h2 class="sectionTitle">Recently Added</h2></div>
+        <div class="itemsContainer vertical-wrap">
+          <div class="card portraitCard" data-id="item-3" data-type="Movie">
+            <div class="cardBox"><div class="cardScalable">
+              <div class="cardPadder cardPadder-portrait"></div>
+              <a class="cardImageContainer coveredImage cardContent itemAction" href="#/details?id=item-3" style="background-image:url(&quot;data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23243a52'/%3E%3C/svg%3E&quot;);background-size:cover"></a>
+            </div><div class="cardText cardText-first"><bdi>Dune</bdi></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* Deterministic placeholder artwork, so the fixture renders like a real
+   library instead of a wall of broken images. */
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function svg(w, h, bg, label, size, colour, seed) {
+  const n = hash(seed || label || 'x');
+  const a = 'hsl(' + (n % 360) + ' 42% 22%)';
+  const b = 'hsl(' + ((n + 60) % 360) + ' 48% 11%)';
+  const body =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">' +
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+    '<stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/>' +
+    '</linearGradient></defs>' +
+    '<rect width="100%" height="100%" fill="' + (bg === '#0000' ? 'none' : 'url(#g)') + '"/>' +
+    (label ? '<text x="50%" y="55%" text-anchor="middle" font-family="sans-serif" ' +
+      'font-weight="800" font-size="' + size + '" fill="' + colour + '">' + label + '</text>' : '') +
+    '</svg>';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(body);
+}
+
+/* Minimal ApiClient stand-in: same surface the companion actually uses. */
+window.ApiClient = {
+  _uid: 'user-abc',
+  getCurrentUserId() { return this._uid; },
+  serverId() { return 'server-xyz'; },
+  accessToken() { return 'token-123'; },
+  getUrl(path, params) {
+    const q = new URLSearchParams(params || {}).toString();
+    return '/fake/' + path + (q ? '?' + q : '');
+  },
+  getImageUrl(id, opts) {
+    const type = (opts && opts.type) || 'Primary';
+    const names = { 'item-1': 'THE BEAR', 'item-2': 'SHOGUN', 'item-3': 'DUNE' };
+    if (type === 'Logo') return svg(520, 150, '#0000', names[id] || id, 58, '#fff');
+    return svg(1600, 900, null, '', 0, null, id);
+  },
+  getJSON(url) {
+    if (url.includes('Items/Resume')) {
+      return Promise.resolve({ Items: [{
+        Id: 'item-1', Name: 'The Bear', Type: 'Series',
+        Overview: 'A chef returns home to run a sandwich shop.',
+        ProductionYear: 2024, OfficialRating: 'TV-MA',
+        RunTimeTicks: 18000000000, Genres: ['Comedy', 'Drama'],
+        BackdropImageTags: ['tag1'], ImageTags: { Logo: 'logotag' },
+        UserData: { PlayedPercentage: 38 },
+      }] });
+    }
+    if (url.includes('Shows/NextUp')) {
+      return Promise.resolve({ Items: [{
+        Id: 'item-2', Name: 'Episode 3', Type: 'Episode', SeriesName: 'Shogun',
+        ParentIndexNumber: 1, IndexNumber: 3, ProductionYear: 2024,
+        BackdropImageTags: ['tag2'], Overview: 'Blackthorne arrives.',
+      }] });
+    }
+    if (url.includes('Items/Latest')) {
+      return Promise.resolve([{
+        Id: 'item-3', Name: 'Dune: Part Two', Type: 'Movie',
+        ProductionYear: 2024, BackdropImageTags: ['tag3'], Overview: 'Sand.',
+      }]);
+    }
+    if (/Users\/[^/]+\/Items\/item-1/.test(url)) {
+      return Promise.resolve({
+        Id: 'item-1', LocalTrailerCount: 0,
+        Trickplay: { 'src-1': { '320': {
+          Width: 320, Height: 180, TileWidth: 10, TileHeight: 10,
+          ThumbnailCount: 240, Interval: 10000,
+        } } },
+      });
+    }
+    return Promise.resolve({ Items: [] });
+  },
+};
+</script>
+<script src="../dist/jellyhulu.js"></script>
+</body>
+</html>
