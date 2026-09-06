@@ -64,11 +64,15 @@ One line, always current, but every client fetches from jsDelivr — so it needs
 internet access from each device, and it tells jsDelivr who's browsing.
 
 ```css
-@import url('https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@1.0.1.0/dist/jellyhulu.min.css');
+@import url('https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@plugin-v1.0.4.0/dist/jellyhulu.min.css');
 ```
 
 **Pin a release tag**, as above — check the
-[tags](https://github.com/jmaudlin/JellyHulu/tags) for the current one.
+[tags](https://github.com/jmaudlin/JellyHulu/tags) for the current one. The
+`plugin-v` prefix is not a typo: those tags are cut automatically by the
+release workflow, so they always exist and always carry a `dist/` built from
+that exact commit. They contain the stylesheet whether or not you use the
+plugin.
 Two reasons this matters more than it looks:
 
 - `@main` means an upstream change lands on your server unannounced.

@@ -5,25 +5,68 @@
 <title>JellyHulu fixture</title>
 <style>
   /* --- Stand-ins for jellyfin-web's own stylesheet ----------------------
-     The fixture loads only the theme, so layout Jellyfin supplies itself is
-     declared here. Kept minimal and obvious: if the theme starts depending
-     on something Jellyfin does NOT provide, that shows up as a test that
-     only passes because of this block. */
+     Quoted from jellyfin-web 10.11.11, not paraphrased. Every rule below is
+     copied from the file named above it, with only the RTL and transition
+     branches dropped. That matters: an earlier version of this block was
+     written from memory, supplied layout the theme is actually responsible
+     for, and so kept the suite green through two releases while the drawer
+     was broken in the real client.
+
+       src/lib/navdrawer/navdrawer.scss
+       src/styles/librarybrowser.scss
+
+     NavDrawer also does things from JavaScript that no stylesheet shows
+     (src/lib/navdrawer/navdrawer.js): it adds .touch-menu-la to .mainDrawer,
+     sets width and left inline, appends the .tmla-mask div to <body>, and on
+     open() adds .drawer-open plus a translateX. The markup below carries all
+     of that, so the fixture matches an actually-open drawer. */
   .hide { display: none !important; }
 
-  .mainDrawer {
+  /* navdrawer.scss */
+  .tmla-mask,
+  .touch-menu-la {
     position: fixed;
     top: 0;
     bottom: 0;
-    left: 0;
-    z-index: 1050;
-    /* Jellyfin 10.11 lays the drawer out as a flex ROW. Its scroll container
-       is therefore a flex item, and sizes to its content unless told
-       otherwise — which is what left it narrower than the drawer, so a wheel
-       over the remainder hit .mainDrawer (not scrollable) and chained to the
-       page. Reproduced from a real instance. */
+    contain: strict;
+    box-sizing: border-box;
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .touch-menu-la {
+    background-color: #fff;
+    will-change: transform;
     display: flex;
-    flex-direction: row;
+    z-index: 1099;
+  }
+
+  .drawer-open {
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .scrollContainer {
+    flex-grow: 1;
+  }
+
+  /* The mask is a full-viewport overlay one z-index BELOW the drawer, and it
+     closes the drawer when clicked. Any theme rule that puts the drawer under
+     1098 hands it every wheel and click meant for the menu. */
+  .tmla-mask {
+    left: 0;
+    right: 0;
+    opacity: 0;
+    z-index: 1098;
+    will-change: opacity;
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .tmla-mask.backdrop {
+    opacity: 1;
+  }
+
+  /* librarybrowser.scss */
+  .mainDrawer-scrollContainer {
+    padding-bottom: 10vh;
   }
 </style>
 <link rel="stylesheet" href="../dist/jellyhulu.css">
@@ -46,7 +89,8 @@
 
 
 <!-- Drawer, as jellyfin-web 10.11.11 actually emits it -->
-<div class="mainDrawer hide" id="drawerPlain">
+<div class="mainDrawer touch-menu-la hide" id="drawerPlain"
+     style="width: 260px; left: -260px; transform: translateX(260px);">
   <div class="mainDrawer-scrollContainer scrollContainer focuscontainer-y scrollY">
       <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list1">
         <span class="material-icons navMenuOptionIcon">folder</span>
@@ -125,7 +169,8 @@
 
 <!-- Drawer, emby-scroller shape. Not what 10.11 emits, kept as a guard
      that rail styling never reaches a vertical scroller on any version. -->
-<div class="mainDrawer hide" id="drawerScroller">
+<div class="mainDrawer touch-menu-la hide" id="drawerScroller"
+     style="width: 260px; left: -260px; transform: translateX(260px);">
   <div is="emby-scroller" class="emby-scroller scrollY mainDrawer-scrollContainer" data-horizontal="false">
     <div class="scrollSlider">
       <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list1">
@@ -352,6 +397,11 @@ window.ApiClient = {
   },
 };
 </script>
+<!-- NavDrawer appends this to <body> at init and toggles .hide/.backdrop
+     around it in showMask()/hideMask(). It is the element the drawer has to
+     stack above. -->
+<div class="tmla-mask hide"></div>
+
 <script src="../dist/jellyhulu.js"></script>
 </body>
 </html>

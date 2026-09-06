@@ -1,5 +1,5 @@
 /*!
- * JellyHulu v1.0.3 — a Hulu-inspired theme for Jellyfin (stylesheet, fonts embedded)
+ * JellyHulu v1.0.4 — a Hulu-inspired theme for Jellyfin (stylesheet, fonts embedded)
  * https://github.com/jmaudlin/JellyHulu
  * Released under the MIT License.
  * Bundled font: Figtree, SIL Open Font License 1.1.
@@ -247,15 +247,40 @@
 
   /* ---------------------------------------------------------------------
      14 · Z-index — one ordered scale, no magic numbers elsewhere
+
+     The numbers above 900 are not free choices: they have to interleave
+     correctly with jellyfin-web's own, which are (10.11.11):
+
+       999      .skinHeader                       styles/librarybrowser.scss
+       1098     .tmla-mask   — the drawer's scrim  lib/navdrawer/navdrawer.scss
+       1099     .touch-menu-la — .mainDrawer       lib/navdrawer/navdrawer.scss
+       1200     MUI drawer (dashboard)
+       1201     .appFooter                        components/appFooter
+       999998/9 dialogHelper backdrop / dialog
+       9999999  toast, loading
+
+     The pair that matters is 1098/1099. The mask is a full-viewport overlay
+     that closes the drawer when clicked, and it is only ONE below the drawer,
+     so anything that lowers .mainDrawer — a tidier-looking scale, say — puts
+     the whole navigation menu underneath it. It still renders, dimmed by 30%
+     black, which is why this reads as "the drawer is frozen" rather than as a
+     stacking bug: the links are visible, and every click closes the menu.
+
+     So there is deliberately no --jh-z-drawer here. The drawer's stacking is
+     Jellyfin's to own, and it is already correct; the theme not touching it is
+     what keeps this right if those numbers ever move.
      --------------------------------------------------------------------- */
   --jh-z-base:        0;
   --jh-z-raised:      10;
   --jh-z-card-hover:  60;
   --jh-z-rail-button: 70;
+  /* Below the mask, so an open drawer dims the header and the now-playing bar
+     exactly as it does in stock Jellyfin. */
   --jh-z-header:      1000;
-  --jh-z-drawer:      1050;
-  --jh-z-nowplaying:  1100;
+  --jh-z-nowplaying:  1090;
   --jh-z-dialog:      1200;
+  /* Above the drawer: these are ours, and are modal over everything the theme
+     draws. Still below Jellyfin's own dialogs, which should cover them. */
   --jh-z-toast:       1300;
   --jh-z-settings:    1400;
   --jh-z-tooltip:     1500;
@@ -1239,6 +1264,11 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
 /* --------------------------------------------------------------------------
    Main drawer (Jellyfin's left nav)
    -------------------------------------------------------------------------- */
+/* No z-index here, deliberately — see the note on the z-index scale in
+   00-tokens. Jellyfin stacks the drawer at 1099, one above its own
+   full-viewport mask at 1098; setting a lower value put the entire menu
+   underneath that mask, which is what made the drawer unclickable and
+   unscrollable while still looking perfectly normal. */
 .mainDrawer,
 .drawer-open .mainDrawer {
   /* Keeps the scroll inside the container above rather than letting content
@@ -1248,7 +1278,6 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
   background: var(--jh-ink-950) !important;
   border-right: 1px solid var(--jh-line-faint);
   box-shadow: var(--jh-shadow-xl);
-  z-index: var(--jh-z-drawer);
 }
 
 /* The drawer must scroll, and its items must stack. Jellyfin has shipped this
@@ -1362,8 +1391,12 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
   margin: 0;
 }
 
-/* Drawer scrim. */
-.mainDrawerHandle,
+/* Scrims. .tmla-mask is the drawer's — NavDrawer creates it and appends it to
+   <body>, so it is a sibling of everything, not a child of the drawer.
+   .mainDrawerHandle is NOT a scrim despite the name: it is an empty, unstyled
+   div that exists only as a touch target for the edge-swipe gesture, and
+   painting it was a guess about a class that has no styles of its own. */
+.tmla-mask,
 .dialogBackdrop,
 .backdrop-visible {
   background-color: var(--jh-overlay-scrim) !important;
