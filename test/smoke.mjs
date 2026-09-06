@@ -251,7 +251,16 @@ check('Escape closes the panel',
   await ctx.waitForTimeout(500);
 
   for (const id of ['drawerPlain', 'drawerScroller']) {
-    await ctx.evaluate((n) => document.getElementById(n).classList.remove('hide'), id);
+    // Exactly what NavDrawer.open() does: show the drawer, mark it open, and
+    // raise the mask. Testing the drawer without the mask tests a state the
+    // client is never in.
+    await ctx.evaluate((n) => {
+      document.getElementById(n).classList.remove('hide');
+      document.getElementById(n).classList.add('drawer-open');
+      const mask = document.querySelector('.tmla-mask');
+      mask.classList.remove('hide');
+      mask.classList.add('backdrop');
+    }, id);
     await ctx.waitForTimeout(120);
 
     const r = await ctx.evaluate((n) => {
@@ -270,6 +279,20 @@ check('Escape closes the panel',
         fills: bb.width >= db.width - 1 && bb.height >= db.height - 1,
         cw: Math.round(bb.width), chh: Math.round(bb.height),
         dw: Math.round(db.width), dh: Math.round(db.height),
+        // Where a click and a wheel actually land. The mask is a full-viewport
+        // overlay at z-index 1098 that closes the drawer when clicked, so if
+        // the drawer stacks below it every gesture meant for the menu hits the
+        // mask instead: links do nothing (the drawer just closes) and the
+        // wheel finds nothing scrollable. Hit-testing is the only way to see
+        // this — every box measurement above passes either way.
+        atLink: (() => {
+          const t = document.elementFromPoint(a.left + a.width / 2, a.top + a.height / 2);
+          return t ? (drawer.contains(t) ? 'drawer' : t.className || t.tagName) : 'nothing';
+        })(),
+        atDrawer: (() => {
+          const t = document.elementFromPoint(db.left + db.width / 2, db.top + db.height / 2);
+          return t ? (drawer.contains(t) ? 'drawer' : t.className || t.tagName) : 'nothing';
+        })(),
       };
     }, id);
 
@@ -282,8 +305,18 @@ check('Escape closes the panel',
     // though its scrollbar is right there.
     check(`${id}: the scroll container fills the drawer`, r.fills,
       `container ${r.cw}x${r.chh} vs drawer ${r.dw}x${r.dh}`);
+    check(`${id}: a click on a nav link reaches the drawer`, r.atLink === 'drawer',
+      `hit ${r.atLink}`);
+    check(`${id}: a wheel over the drawer reaches the drawer`, r.atDrawer === 'drawer',
+      `hit ${r.atDrawer}`);
 
-    await ctx.evaluate((n) => document.getElementById(n).classList.add('hide'), id);
+    await ctx.evaluate((n) => {
+      document.getElementById(n).classList.add('hide');
+      document.getElementById(n).classList.remove('drawer-open');
+      const mask = document.querySelector('.tmla-mask');
+      mask.classList.add('hide');
+      mask.classList.remove('backdrop');
+    }, id);
   }
 
   await ctx.close();

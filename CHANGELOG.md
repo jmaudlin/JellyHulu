@@ -5,6 +5,55 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
+## [1.0.4] — 2026-09-06
+
+Published as plugin **1.0.4.0**.
+
+### Fixed
+
+- **The navigation drawer was unusable: no scrolling, and none of its links
+  worked.** Neither 1.0.2 nor 1.0.3 fixed it, because both were fixes to the
+  wrong thing. The drawer's box was fine by 1.0.3; the drawer was simply
+  underneath something.
+
+  Jellyfin's NavDrawer creates a full-viewport overlay — `.tmla-mask` — at
+  `z-index: 1098`, and stacks the drawer itself at `1099`, one above it. That
+  mask closes the drawer when clicked. The theme assigned `.mainDrawer` a
+  z-index of `1050` from its own tidy scale, which put the whole navigation
+  menu *below* the mask. Every click meant for a link hit the mask and closed
+  the drawer; every wheel found nothing scrollable and chained to the page.
+  The menu still rendered — under 30% black, which reads as the theme's own
+  dimming — so it looked frozen rather than covered.
+
+  The theme no longer sets a z-index on the drawer at all. Jellyfin's is
+  already correct, and not touching it is what keeps this right if those
+  numbers ever move.
+
+- The now-playing bar sat at `1100`, above the drawer, so it covered the
+  bottom of an open menu. It is now below the mask, dimming with everything
+  else exactly as it does in stock Jellyfin.
+
+- `.mainDrawerHandle` was painted as the drawer's scrim. It isn't one — it is
+  an empty div that exists only as a touch target for the edge-swipe gesture,
+  and it has no styles of its own in jellyfin-web. The scrim rule now targets
+  the real mask.
+
+### Testing
+
+The suite was measuring the drawer's geometry, which was correct, instead of
+asking where a pointer actually lands, which was not. It now hit-tests with
+`elementFromPoint` at a nav link and at the drawer's centre — the two checks
+that fail on 1.0.3 with `hit tmla-mask backdrop` and pass here.
+
+The fixture's jellyfin-web stand-in is now **quoted from jellyfin-web 10.11.11
+source**, file by file, rather than written from memory — including the mask,
+which the fixture had never contained, and the drawer's real `z-index: 1099`,
+where the fixture had been asserting the theme's own 1050. That block had
+already been the reason two releases shipped green against a broken client;
+guessing at it a third time was not worth doing.
+
+76 browser checks (was 72), 33 plugin tests.
+
 ## [1.0.3] — 2026-09-06
 
 Published as plugin **1.0.3.0**.

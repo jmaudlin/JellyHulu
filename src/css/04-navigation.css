@@ -204,6 +204,11 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
 /* --------------------------------------------------------------------------
    Main drawer (Jellyfin's left nav)
    -------------------------------------------------------------------------- */
+/* No z-index here, deliberately — see the note on the z-index scale in
+   00-tokens. Jellyfin stacks the drawer at 1099, one above its own
+   full-viewport mask at 1098; setting a lower value put the entire menu
+   underneath that mask, which is what made the drawer unclickable and
+   unscrollable while still looking perfectly normal. */
 .mainDrawer,
 .drawer-open .mainDrawer {
   /* Keeps the scroll inside the container above rather than letting content
@@ -213,7 +218,6 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
   background: var(--jh-ink-950) !important;
   border-right: 1px solid var(--jh-line-faint);
   box-shadow: var(--jh-shadow-xl);
-  z-index: var(--jh-z-drawer);
 }
 
 /* The drawer must scroll, and its items must stack. Jellyfin has shipped this
@@ -327,8 +331,12 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
   margin: 0;
 }
 
-/* Drawer scrim. */
-.mainDrawerHandle,
+/* Scrims. .tmla-mask is the drawer's — NavDrawer creates it and appends it to
+   <body>, so it is a sibling of everything, not a child of the drawer.
+   .mainDrawerHandle is NOT a scrim despite the name: it is an empty, unstyled
+   div that exists only as a touch target for the edge-swipe gesture, and
+   painting it was a guess about a class that has no styles of its own. */
+.tmla-mask,
 .dialogBackdrop,
 .backdrop-visible {
   background-color: var(--jh-overlay-scrim) !important;
