@@ -30,6 +30,8 @@ function chromiumPath() {
 }
 
 const explicit = chromiumPath();
+const ctx0 = (p, fn) => p.evaluate(fn);
+
 const browser = await chromium.launch(explicit ? { executablePath: explicit } : {});
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
@@ -135,6 +137,31 @@ check('nothing overlays the centre of a rail card',
     return !!hit && !!hit.closest('.card[data-id="item-1"]');
   }));
 
+// Regression: library sections wrap their heading in a link, and styling that
+// link as a hover-revealed "see all" control hid the heading itself.
+check('library section headings are visible at rest',
+  await ctx0(page, () => {
+    const link = document.querySelector('.sectionTitleTextButton');
+    const title = link && link.querySelector('.sectionTitle');
+    if (!title) return false;
+    const cs = getComputedStyle(link);
+    const box = title.getBoundingClientRect();
+    return Number(cs.opacity) === 1 && box.width > 20 && box.height > 8;
+  }));
+
+check('heading is not restyled as a small uppercase control',
+  await ctx0(page, () => {
+    const title = document.querySelector('.sectionTitleTextButton .sectionTitle');
+    const cs = getComputedStyle(title);
+    return cs.textTransform !== 'uppercase' && parseFloat(cs.fontSize) > 16;
+  }));
+
+check('the chevron, not the heading, is what hides until hover',
+  await ctx0(page, () => {
+    const icon = document.querySelector('.sectionTitleTextButton .material-icons');
+    return !!icon && Number(getComputedStyle(icon).opacity) === 0;
+  }));
+
 // --- hover ------------------------------------------------------------
 const card = page.locator('.card[data-id="item-1"]');
 await card.hover();
@@ -200,6 +227,44 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(320);
 check('Escape closes the panel',
   await page.locator('.jh-settings-overlay.is-open').count() === 0);
+
+// --- duplicate hero regression ----------------------------------------
+// Hero.build is async, and one navigation fires the page lifecycle several
+// times (viewshow, hashchange, the mutation observer). If the "do we already
+// have a hero?" check only runs before the await, two builds both pass it and
+// both insert — and because each build overwrites the module's node/timer,
+// only the last one ever animates. That is exactly what a user sees: two
+// heroes, the top one moving, the one below it frozen.
+{
+  const ctx = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => { window.__JH_API_DELAY__ = 400; });
+  await ctx.goto('file://' + path.join(ROOT, 'fixture.html'));
+
+  // Fire more lifecycle events while the first build is still awaiting.
+  await ctx.waitForTimeout(120);
+  await ctx.evaluate(() => {
+    for (let i = 0; i < 3; i++) {
+      document.dispatchEvent(new CustomEvent('viewshow', { bubbles: true }));
+    }
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+  await ctx.waitForTimeout(1600);
+
+  const count = await ctx.locator('.jh-hero').count();
+  check('exactly one hero after concurrent page events', count === 1, `found ${count}`);
+
+  check('the surviving hero is the one that animates',
+    await ctx.evaluate(() => {
+      const heroes = [...document.querySelectorAll('.jh-hero')];
+      // A running carousel is not paused and has an active dot whose fill is
+      // actually animating.
+      return heroes.length === 1
+        && !heroes[0].classList.contains('is-paused')
+        && !!heroes[0].querySelector('.jh-hero-dot.is-active');
+    }));
+
+  await ctx.close();
+}
 
 // --- server defaults (the Jellyfin plugin's route) ---------------------
 // The plugin publishes window.JELLYHULU_DEFAULTS before the bundle loads.

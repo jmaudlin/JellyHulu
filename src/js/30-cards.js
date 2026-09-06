@@ -238,6 +238,13 @@ const Cards = {
   },
 
   mountVideo(card, frame, preview) {
+    // startPreview awaits a lookup, and its post-await guard only checks that
+    // the pointer is still on this card — which is also true if you left and
+    // came back while it waited. Two mounts would then both proceed, and only
+    // the last is tracked, leaving the first playing invisibly forever.
+    // Tearing down first makes mounting idempotent.
+    this.stopPreview(card);
+
     const video = el('video', {
       class: 'jh-card-preview',
       muted: true,
@@ -277,6 +284,8 @@ const Cards = {
      request, no transcoding, and it works on every item that has scrub
      previews generated. */
   mountTrickplay(card, frame, preview) {
+    this.stopPreview(card);   // idempotent, for the reason in mountVideo
+
     const layer = el('div', { class: 'jh-card-preview', 'aria-hidden': 'true' });
     const info = preview.info;
 

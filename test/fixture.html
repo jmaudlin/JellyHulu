@@ -61,7 +61,14 @@
       </div>
 
       <div class="verticalSection">
-        <div class="sectionTitleContainer"><h2 class="sectionTitle">Recently Added</h2></div>
+        <!-- A library section: Jellyfin wraps the heading in a link that also
+             carries a chevron. This is the markup that the theme used to hide. -->
+        <div class="sectionTitleContainer sectionTitleContainer-cards">
+          <a is="emby-linkbutton" href="#/movies.html" class="more button-flat button-flat-mini sectionTitleTextButton emby-button">
+            <h2 class="sectionTitle sectionTitle-cards">Recently Added</h2>
+            <span class="material-icons chevron_right" aria-hidden="true">chevron_right</span>
+          </a>
+        </div>
         <div class="itemsContainer vertical-wrap">
           <div class="card portraitCard" data-id="item-3" data-type="Movie">
             <div class="cardBox"><div class="cardScalable">
@@ -117,6 +124,15 @@ window.ApiClient = {
     return svg(1600, 900, null, '', 0, null, id);
   },
   getJSON(url) {
+    // Tests set window.__JH_API_DELAY__ to widen the await window in
+    // Hero.build, which is where the duplicate-hero race lives.
+    const delay = window.__JH_API_DELAY__ || 0;
+    if (delay) {
+      return new Promise((r) => setTimeout(() => r(this._json(url)), delay));
+    }
+    return this._json(url);
+  },
+  _json(url) {
     if (url.includes('Items/Resume')) {
       return Promise.resolve({ Items: [{
         Id: 'item-1', Name: 'The Bear', Type: 'Series',

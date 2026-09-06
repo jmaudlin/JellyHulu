@@ -634,6 +634,7 @@ const HERO_FIELDS = [
 const Hero = {
   node: null,
   host: null,
+  _building: false,
   slides: [],
   index: 0,
   timer: null,
@@ -668,45 +669,62 @@ const Hero = {
   },
 
   async build(page) {
-    if (this.built && this.node && document.contains(this.node)) return;
     if (!page) return;
 
-    // Only one hero, and only above the first section. The container's class
-    // has moved between Jellyfin releases, so fall back progressively rather
-    // than depending on one name.
-    const anchor = $('.homeSectionsContainer', page) ||
-                   $('.sections', page) ||
-                   $('.homeSectionsContainer') ||
-                   page;
-    if (!anchor || $('.jh-hero', page)) return;
+    // One navigation fires the page lifecycle several times — viewshow,
+    // hashchange, and the mutation observer all land for a single move. This
+    // method awaits an API call in the middle, so a check that only runs
+    // before the await does not prevent a second build starting inside that
+    // window: both pass, both insert, and the page ends up with two heroes.
+    // Worse, each build overwrites node/slides/timer, so only the last one
+    // ever ticks and the others sit frozen in the DOM.
+    //
+    // The flag is set synchronously, before any await, which is what makes it
+    // an actual mutex rather than another racy check.
+    if (this._building) return;
+    if (this.node && document.contains(this.node)) return;
 
-    let items = [];
+    this._building = true;
     try {
-      items = await this.fetchItems();
-    } catch (err) {
-      warn('hero fetch failed', err);
-      return;
+      const anchor = $('.homeSectionsContainer', page) ||
+                     $('.sections', page) ||
+                     $('.homeSectionsContainer') ||
+                     page;
+      if (!anchor || $('.jh-hero')) return;
+
+      let items;
+      try {
+        items = await this.fetchItems();
+      } catch (err) {
+        warn('hero fetch failed', err);
+        return;
+      }
+      if (!items || !items.length) return;
+
+      // Re-check everything that could have changed while we were waiting:
+      // the route may have moved on, and another hero may have appeared.
+      if (Pages.route() !== 'home') return;
+      if (!document.contains(anchor)) return;
+      if ($('.jh-hero')) return;
+
+      const hero = this.render(items);
+      anchor.insertBefore(hero, anchor.firstChild);
+
+      this.node = hero;
+      this.host = page;
+      page.classList.add('jh-has-hero');
+      this.slides = $$('.jh-hero-slide', hero);
+      this.index = 0;
+      this.built = true;
+
+      this.wire();
+      this.show(0);
+      this.resume();
+
+      Chrome.updateHeaderMode();
+    } finally {
+      this._building = false;
     }
-    if (!items.length) return;
-
-    // The page may have navigated away while we were fetching.
-    if (Pages.route() !== 'home') return;
-
-    const hero = this.render(items);
-    anchor.insertBefore(hero, anchor.firstChild);
-
-    this.node = hero;
-    this.host = page;
-    page.classList.add('jh-has-hero');
-    this.slides = $$('.jh-hero-slide', hero);
-    this.index = 0;
-    this.built = true;
-
-    this.wire();
-    this.show(0);
-    this.resume();
-
-    Chrome.updateHeaderMode();
   },
 
   async fetchItems() {
@@ -994,8 +1012,10 @@ const Hero = {
 
   teardown() {
     this.pause();
-    if (this.node && this.node.parentNode) this.node.parentNode.removeChild(this.node);
-    if (this.host) this.host.classList.remove('jh-has-hero');
+    // Every hero, not just the tracked one: an orphan left by an earlier
+    // build would otherwise stay on the page forever, since nothing else
+    // holds a reference to it.
+    $$('.jh-hero').forEach((n) => n.parentNode && n.parentNode.removeChild(n));
     $$('.jh-has-hero').forEach((n) => n.classList.remove('jh-has-hero'));
     this.node = null;
     this.host = null;
@@ -1296,6 +1316,13 @@ const Cards = {
   },
 
   mountVideo(card, frame, preview) {
+    // startPreview awaits a lookup, and its post-await guard only checks that
+    // the pointer is still on this card — which is also true if you left and
+    // came back while it waited. Two mounts would then both proceed, and only
+    // the last is tracked, leaving the first playing invisibly forever.
+    // Tearing down first makes mounting idempotent.
+    this.stopPreview(card);
+
     const video = el('video', {
       class: 'jh-card-preview',
       muted: true,
@@ -1335,6 +1362,8 @@ const Cards = {
      request, no transcoding, and it works on every item that has scrub
      previews generated. */
   mountTrickplay(card, frame, preview) {
+    this.stopPreview(card);   // idempotent, for the reason in mountVideo
+
     const layer = el('div', { class: 'jh-card-preview', 'aria-hidden': 'true' });
     const info = preview.info;
 

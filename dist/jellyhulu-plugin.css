@@ -853,31 +853,87 @@ progress {
   transform: scaleY(1);
 }
 
-/* "See all" style links that sit beside a rail title. */
+/* Section heading affordances.
+   Jellyfin renders a library section's heading *inside* a link that also
+   carries a chevron:
+
+     <a class="... sectionTitleTextButton"><h2 class="sectionTitle">Movies</h2>
+        <span class="material-icons">chevron_right</span></a>
+
+   so styling that link as a small uppercase "see all" control restyles the
+   heading, and hiding it until hover hides the heading outright. Sections
+   with a bare <h2> (Continue Watching, Next Up) were unaffected, which is
+   what made it look like only library sections were broken.
+
+   The heading is therefore never hidden or restyled. Only the chevron
+   animates in. */
 .sectionTitleContainer .emby-button,
 .sectionTitleContainer .sectionTitleIconButton,
 .sectionTitleTextButton {
-  color: var(--jh-text-muted) !important;
-  font-size: var(--jh-fs-sm);
-  font-weight: var(--jh-fw-semibold);
-  letter-spacing: var(--jh-ls-wide);
-  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  min-height: 0;
+  border: 0;
+  background: transparent !important;
+  color: var(--jh-text) !important;
+  text-transform: none;
+  transition: color var(--jh-dur-fast) var(--jh-ease-out);
+}
+
+.sectionTitleContainer .emby-button:hover,
+.sectionTitleTextButton:hover {
+  color: var(--jh-accent) !important;
+}
+
+.sectionTitleContainer .emby-button:hover .sectionTitle,
+.sectionTitleTextButton:hover .sectionTitle {
+  color: var(--jh-accent);
+}
+
+/* The chevron is the hover affordance. */
+.sectionTitleContainer .emby-button .material-icons,
+.sectionTitleTextButton .material-icons {
+  font-size: 1.5rem;
   opacity: 0;
   transform: translateX(-6px);
   transition: opacity var(--jh-dur-base) var(--jh-ease-out),
-              transform var(--jh-dur-base) var(--jh-ease-out),
-              color var(--jh-dur-fast) var(--jh-ease-out);
+              transform var(--jh-dur-base) var(--jh-ease-out);
 }
 
-.verticalSection:hover .sectionTitleContainer .emby-button,
-.verticalSection:focus-within .sectionTitleContainer .emby-button,
-.sectionTitleContainer .emby-button:focus-visible {
+.verticalSection:hover .sectionTitleContainer .material-icons,
+.verticalSection:focus-within .sectionTitleContainer .material-icons,
+.sectionTitleContainer .emby-button:focus-visible .material-icons {
   opacity: 1;
   transform: none;
 }
 
-.sectionTitleContainer .emby-button:hover {
-  color: var(--jh-accent) !important;
+/* A button in the heading row that is *not* the heading is a genuine
+   auxiliary action, and does get the small uppercase treatment plus the
+   hover reveal. Guarded on :has() so a browser without it simply shows the
+   button always — plain-but-visible is a far better failure than invisible,
+   which is the mistake this block replaces. */
+@supports selector(:has(*)) {
+  .sectionTitleContainer .emby-button:not(:has(.sectionTitle)) {
+    color: var(--jh-text-muted) !important;
+    font-size: var(--jh-fs-sm);
+    font-weight: var(--jh-fw-semibold);
+    letter-spacing: var(--jh-ls-wide);
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity var(--jh-dur-base) var(--jh-ease-out),
+                transform var(--jh-dur-base) var(--jh-ease-out),
+                color var(--jh-dur-fast) var(--jh-ease-out);
+  }
+
+  .verticalSection:hover .sectionTitleContainer .emby-button:not(:has(.sectionTitle)),
+  .verticalSection:focus-within .sectionTitleContainer .emby-button:not(:has(.sectionTitle)),
+  .sectionTitleContainer .emby-button:not(:has(.sectionTitle)):focus-visible {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* --------------------------------------------------------------------------
