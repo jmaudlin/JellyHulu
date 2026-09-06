@@ -1,5 +1,5 @@
 /*!
- * JellyHulu v1.0.0 — a Hulu-inspired theme for Jellyfin (companion script)
+ * JellyHulu v1.0.1 — a Hulu-inspired theme for Jellyfin (companion script)
  * https://github.com/jmaudlin/JellyHulu
  * Released under the MIT License.
  * Bundled font: Figtree, SIL Open Font License 1.1.
@@ -26,7 +26,7 @@
    ========================================================================== */
 
 const JH = {
-  version: '1.0.0',
+  version: '1.0.1',
   ready: false,
   modules: [],
 };
