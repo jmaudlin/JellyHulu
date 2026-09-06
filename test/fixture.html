@@ -3,6 +3,26 @@
 <head>
 <meta charset="utf-8">
 <title>JellyHulu fixture</title>
+<style>
+  /* --- Stand-ins for jellyfin-web's own stylesheet ----------------------
+     The fixture loads only the theme, so layout Jellyfin supplies itself is
+     declared here. Kept minimal and obvious: if the theme starts depending
+     on something Jellyfin does NOT provide, that shows up as a test that
+     only passes because of this block. */
+  .hide { display: none !important; }
+
+  .mainDrawer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050;
+  }
+  .mainDrawer-scrollContainer {
+    height: 100%;
+    overflow-y: auto;
+  }
+</style>
 <link rel="stylesheet" href="../dist/jellyhulu.css">
 </head>
 <body>
@@ -17,6 +37,166 @@
     <div class="headerRight">
       <button class="headerButton headerSearchButton paper-icon-button-light"><span class="material-icons">search</span></button>
       <button class="headerButton headerUserButton paper-icon-button-light"><div class="headerUserButtonRound"></div></button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Drawer, plain-container shape -->
+<div class="mainDrawer hide" id="drawerPlain">
+  <div class="mainDrawer-scrollContainer scrollContainer">
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list1">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 1</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list2">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 2</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list3">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 3</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list4">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 4</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list5">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 5</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list6">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 6</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list7">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 7</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list8">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 8</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list9">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 9</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list10">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 10</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list11">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 11</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list12">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 12</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list13">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 13</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list14">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 14</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list15">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 15</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list16">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 16</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list17">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 17</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list18">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 18</span>
+      </a>
+  </div>
+</div>
+
+<!-- Drawer, emby-scroller shape: the scroller is VERTICAL here, which is the
+     case the rail styling used to ignore. -->
+<div class="mainDrawer hide" id="drawerScroller">
+  <div is="emby-scroller" class="emby-scroller scrollY mainDrawer-scrollContainer" data-horizontal="false">
+    <div class="scrollSlider">
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list1">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 1</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list2">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 2</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list3">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 3</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list4">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 4</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list5">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 5</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list6">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 6</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list7">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 7</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list8">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 8</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list9">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 9</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list10">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 10</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list11">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 11</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list12">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 12</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list13">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 13</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list14">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 14</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list15">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 15</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list16">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 16</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list17">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 17</span>
+      </a>
+      <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list18">
+        <span class="material-icons navMenuOptionIcon">folder</span>
+        <span class="navMenuOptionText">Library 18</span>
+      </a>
     </div>
   </div>
 </div>

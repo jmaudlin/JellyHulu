@@ -118,14 +118,15 @@ textarea {
 
 /* Horizontal rails hide their scrollbar entirely — navigation is by the
    arrow buttons, drag, or the keyboard. */
-.emby-scroller,
+.emby-scroller.scrollX,
+.emby-scroller[data-horizontal="true"],
 .itemsContainer.scrollSlider,
-.scrollSlider,
 .scrollX {
   scrollbar-width: none;
 }
 
-.emby-scroller::-webkit-scrollbar,
+.emby-scroller.scrollX::-webkit-scrollbar,
+.emby-scroller[data-horizontal="true"]::-webkit-scrollbar,
 .itemsContainer.scrollSlider::-webkit-scrollbar,
 .scrollX::-webkit-scrollbar {
   height: 0;

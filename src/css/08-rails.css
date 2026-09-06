@@ -4,7 +4,15 @@
    with a sibling .emby-scrollbuttons.
    ========================================================================== */
 
-.emby-scroller,
+/* Scoped to horizontal scrollers only.
+   `emby-scroller` is not a rail component — Jellyfin uses it for vertical
+   containers too, the navigation drawer among them. Matching it bare applied
+   rail geometry to the drawer and, via the .scrollSlider rule below, laid its
+   items out in a row: the drawer then overflowed sideways with nothing to
+   scroll vertically. Horizontal scrollers are the ones carrying .scrollX or
+   data-horizontal="true". */
+.emby-scroller.scrollX,
+.emby-scroller[data-horizontal="true"],
 .itemsContainer.scrollSlider,
 .scrollX {
   position: relative;
@@ -24,7 +32,10 @@
 .padded-top-focusscale    { padding-top: 0 !important; }
 .padded-bottom-focusscale { padding-bottom: 0 !important; }
 
-.scrollSlider,
+/* Only a slider inside a horizontal scroller lays out as a row. A bare
+   .scrollSlider may be the inner element of a vertical scroller. */
+.scrollX > .scrollSlider,
+.emby-scroller[data-horizontal="true"] > .scrollSlider,
 .itemsContainer.scrollSlider {
   display: flex;
   align-items: flex-start;
@@ -56,7 +67,8 @@
 
 /* Snap is opt-in: it feels great with a trackpad and awful with a mouse
    wheel on some browsers, so the JS companion enables it per input type. */
-html[data-jh-snap="on"] .emby-scroller,
+html[data-jh-snap="on"] .emby-scroller.scrollX,
+html[data-jh-snap="on"] .emby-scroller[data-horizontal="true"],
 html[data-jh-snap="on"] .itemsContainer.scrollSlider {
   scroll-snap-type: x mandatory;
 }

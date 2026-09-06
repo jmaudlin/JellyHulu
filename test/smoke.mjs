@@ -100,6 +100,17 @@ check('in-card metadata block was injected',
 check('card info reuses the existing title',
   (await page.locator('.card[data-id="item-1"] .jh-card-info-title').innerText()).trim() === 'The Bear');
 
+// Guards the other direction of the drawer fix: narrowing the rail selectors
+// to horizontal scrollers must not stop an actual rail laying out as a row.
+check('rail cards lay out horizontally',
+  await page.evaluate(() => {
+    const cards = [...document.querySelectorAll('.scrollSlider > .card')];
+    if (cards.length < 2) return false;
+    const a = cards[0].getBoundingClientRect();
+    const b = cards[1].getBoundingClientRect();
+    return b.left > a.left + 20 && Math.abs(b.top - a.top) < 4;
+  }));
+
 // Regression: the numeral used to hang off the left of the tile, where the
 // frame's overflow:hidden clipped it away entirely.
 check('Top 10 numeral is not clipped by the card frame',
@@ -227,6 +238,45 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(320);
 check('Escape closes the panel',
   await page.locator('.jh-settings-overlay.is-open').count() === 0);
+
+// --- drawer scrolling --------------------------------------------------
+// The rail styling matched bare .emby-scroller and .scrollSlider, but
+// Jellyfin uses emby-scroller for VERTICAL containers too — including the
+// navigation drawer. `display: flex` (row by default) laid the drawer's items
+// out sideways, so the container overflowed horizontally and there was
+// nothing to scroll vertically.
+{
+  const ctx = await browser.newPage({ viewport: { width: 1440, height: 700 } });
+  await ctx.goto('file://' + path.join(ROOT, 'fixture.html'));
+  await ctx.waitForTimeout(500);
+
+  for (const id of ['drawerPlain', 'drawerScroller']) {
+    await ctx.evaluate((n) => document.getElementById(n).classList.remove('hide'), id);
+    await ctx.waitForTimeout(120);
+
+    const r = await ctx.evaluate((n) => {
+      const drawer = document.getElementById(n);
+      const items = [...drawer.querySelectorAll('.navMenuOption')];
+      const box = drawer.querySelector('.mainDrawer-scrollContainer');
+      const a = items[0].getBoundingClientRect();
+      const b = items[1].getBoundingClientRect();
+      box.scrollTop = 200;
+      return {
+        stacked: b.top > a.top + 4,
+        overflows: box.scrollHeight > box.clientHeight + 4,
+        scrolled: box.scrollTop > 0,
+      };
+    }, id);
+
+    check(`${id}: nav items stack vertically`, r.stacked);
+    check(`${id}: content overflows vertically`, r.overflows);
+    check(`${id}: the drawer actually scrolls`, r.scrolled);
+
+    await ctx.evaluate((n) => document.getElementById(n).classList.add('hide'), id);
+  }
+
+  await ctx.close();
+}
 
 // --- duplicate hero regression ----------------------------------------
 // Hero.build is async, and one navigation fires the page lifecycle several
