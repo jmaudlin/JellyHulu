@@ -4,7 +4,14 @@
    centred play/pause, and everything else demoted to the edges.
    ========================================================================== */
 
-#videoOsdPage,
+/* Only the player container, never the OSD page. The <video> is inserted as
+   document.body.firstChild — beneath the entire app shell — and is visible
+   only because the OSD sets .transparentDocument on <html> and the shell
+   stops painting. #videoOsdPage carries .mainAnimatedPage, which is
+   position: absolute over the whole viewport, so painting it black covers
+   the picture completely while audio, the controls and the clock carry on
+   exactly as normal. The container itself is behind the video, and black is
+   what Jellyfin puts there too, so it stays. */
 .videoPlayerContainer {
   background: #000 !important;
 }

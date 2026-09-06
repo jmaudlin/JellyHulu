@@ -369,14 +369,21 @@ check('Escape closes the panel',
   check('the video surface is not painted over', visible,
     `centre pixel rgb(${px.r}, ${px.g}, ${px.b}) — expected magenta`);
 
-  // And the pointer has to land on the video too, so the click-to-pause and
-  // seek gestures reach it rather than a pane of theme chrome.
+  // The pointer must land where it does in stock Jellyfin, which is the OSD
+  // page rather than the video: .mainAnimatedPage covers the viewport, and
+  // the OSD is what binds click-to-pause. Verified against a real 10.11.11
+  // client with the theme disabled, where elementFromPoint at the centre of
+  // the screen returns div#videoOsdPage. So the assertion is that no theme
+  // chrome has been interposed, not that the video is on top.
   const hit = await ctx.evaluate(() => {
     const t = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
     if (!t) return 'nothing';
-    return t.closest('.videoPlayerContainer') ? 'video' : `${t.tagName.toLowerCase()}.${(t.className || '').toString().split(' ')[0]}`;
+    if (t.closest('.videoPlayerContainer')) return 'video';
+    if (t.closest('#videoOsdPage')) return 'osd page';
+    return `${t.tagName.toLowerCase()}.${(t.className || '').toString().split(' ')[0]}`;
   });
-  check('the pointer reaches the video', hit === 'video', `hit ${hit}`);
+  check('the pointer lands on the player, not on theme chrome',
+    hit === 'osd page' || hit === 'video', `hit ${hit}`);
 
   await ctx.close();
 }
