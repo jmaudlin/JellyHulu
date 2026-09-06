@@ -9,11 +9,11 @@
     "versions": [
       {
         "version": "1.0.0.0",
-        "changelog": "First release of the JellyHulu plugin.",
+        "changelog": "See https://github.com/jmaudlin/JellyHulu/blob/plugin-v1.0.0.0/CHANGELOG.md",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.0.0/jellyhulu_1.0.0.0.zip",
-        "checksum": "34bbfcd8c29afacc3a9630550641e14e",
-        "timestamp": "2026-09-06T01:20:43Z"
+        "checksum": "66834fb24190981ee28ce41697bdfd35",
+        "timestamp": "2026-09-06T01:46:36Z"
       }
     ],
     "imageUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.0.0/logo.png"

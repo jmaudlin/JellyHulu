@@ -1,0 +1,143 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu.Tests/Jellyfin.Plugin.JellyHulu.Tests.csproj": {}
+  },
+  "projects": {
+    "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu.Tests/Jellyfin.Plugin.JellyHulu.Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu.Tests/Jellyfin.Plugin.JellyHulu.Tests.csproj",
+        "projectName": "Jellyfin.Plugin.JellyHulu.Tests",
+        "projectPath": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu.Tests/Jellyfin.Plugin.JellyHulu.Tests.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu.Tests/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu/Jellyfin.Plugin.JellyHulu.csproj": {
+                "projectPath": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu/Jellyfin.Plugin.JellyHulu.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.11.1, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.2, )"
+            },
+            "xunit.runner.visualstudio": {
+              "target": "Package",
+              "version": "[2.8.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.130/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu/Jellyfin.Plugin.JellyHulu.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu/Jellyfin.Plugin.JellyHulu.csproj",
+        "projectName": "Jellyfin.Plugin.JellyHulu",
+        "projectPath": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu/Jellyfin.Plugin.JellyHulu.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/home/user/JellyHulu/plugin/Jellyfin.Plugin.JellyHulu/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "allWarningsAsErrors": true,
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Jellyfin.Controller": {
+              "target": "Package",
+              "version": "[10.10.3, )"
+            },
+            "Jellyfin.Model": {
+              "target": "Package",
+              "version": "[10.10.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.130/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
