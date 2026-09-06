@@ -62,6 +62,21 @@
     height: 100%;
   }
 
+  /* components/viewManager/viewContainer.scss
+     This is the rule the first version of this fixture was missing, and the
+     whole reason the bug escaped: viewContainer.js adds .mainAnimatedPage to
+     every page it loads, and that makes the page a full-viewport absolutely
+     positioned box directly over the video. A page with auto height, as this
+     fixture had, covers nothing and hides the bug. */
+  .mainAnimatedPage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    contain: layout style size;
+  }
+
   /* librarybrowser.scss */
   .backdropContainer {
     position: fixed;
@@ -136,7 +151,7 @@
 <!-- components/AppBody.tsx -->
 <div class="mainAnimatedPages skinBody">
   <!-- controllers/playback/video/index.html -->
-  <div id="videoOsdPage" data-role="page" class="page libraryPage">
+  <div id="videoOsdPage" data-role="page" class="page libraryPage mainAnimatedPage">
     <div class="videoOsdBottom">
       <div class="osdControls">
         <div class="osdTextContainer osdMainTextContainer">

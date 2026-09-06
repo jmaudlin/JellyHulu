@@ -15,12 +15,35 @@ html {
   scroll-padding-top: calc(var(--jh-header-h) + var(--jh-space-4));
 }
 
+/* .skinBody is deliberately not painted: stock Jellyfin leaves it bare and
+   grounds the app on html and .backgroundContainer, both of which are
+   handled here. It also wraps the page stack that sits over the video
+   player, so painting it is a way to hide video playback. */
 body,
-.skinBody,
 .backgroundContainer,
 .backgroundContainer.withBackdrop {
   background-color: var(--jh-bg) !important;
   color: var(--jh-text);
+}
+
+/* Jellyfin marks <html> .transparentDocument while the video player is open,
+   and its own rule then strips the background from the shell — because the
+   <video> element sits underneath all of it and shows through only if
+   nothing paints. Custom CSS is appended last, so any surface this theme
+   paints with !important would win that fight and black out playback. This
+   hands those surfaces back for the duration.
+
+   Kept as a blanket guard rather than a list of the two rules that caused
+   it: the failure is silent, looks like broken playback rather than a
+   styling bug, and any future opaque surface would reintroduce it. */
+html.transparentDocument body,
+html.transparentDocument .skinBody,
+html.transparentDocument .mainAnimatedPages,
+html.transparentDocument .mainAnimatedPage,
+html.transparentDocument .page,
+html.transparentDocument .backgroundContainer,
+html.transparentDocument .backdropContainer {
+  background: transparent !important;
 }
 
 /* Jellyfin paints a blurred item backdrop behind the whole app on detail

@@ -1,5 +1,5 @@
 /*!
- * JellyHulu v1.0.4 — a Hulu-inspired theme for Jellyfin (stylesheet, fonts embedded)
+ * JellyHulu v1.0.5 — a Hulu-inspired theme for Jellyfin (stylesheet, fonts embedded)
  * https://github.com/jmaudlin/JellyHulu
  * Released under the MIT License.
  * Bundled font: Figtree, SIL Open Font License 1.1.
@@ -598,12 +598,35 @@ html {
   scroll-padding-top: calc(var(--jh-header-h) + var(--jh-space-4));
 }
 
+/* .skinBody is deliberately not painted: stock Jellyfin leaves it bare and
+   grounds the app on html and .backgroundContainer, both of which are
+   handled here. It also wraps the page stack that sits over the video
+   player, so painting it is a way to hide video playback. */
 body,
-.skinBody,
 .backgroundContainer,
 .backgroundContainer.withBackdrop {
   background-color: var(--jh-bg) !important;
   color: var(--jh-text);
+}
+
+/* Jellyfin marks <html> .transparentDocument while the video player is open,
+   and its own rule then strips the background from the shell — because the
+   <video> element sits underneath all of it and shows through only if
+   nothing paints. Custom CSS is appended last, so any surface this theme
+   paints with !important would win that fight and black out playback. This
+   hands those surfaces back for the duration.
+
+   Kept as a blanket guard rather than a list of the two rules that caused
+   it: the failure is silent, looks like broken playback rather than a
+   styling bug, and any future opaque surface would reintroduce it. */
+html.transparentDocument body,
+html.transparentDocument .skinBody,
+html.transparentDocument .mainAnimatedPages,
+html.transparentDocument .mainAnimatedPage,
+html.transparentDocument .page,
+html.transparentDocument .backgroundContainer,
+html.transparentDocument .backdropContainer {
+  background: transparent !important;
 }
 
 /* Jellyfin paints a blurred item backdrop behind the whole app on detail
@@ -3402,7 +3425,14 @@ html[data-jh-power="low"] .itemsContainer.vertical-wrap > .card {
    centred play/pause, and everything else demoted to the edges.
    ========================================================================== */
 
-#videoOsdPage,
+/* Only the player container, never the OSD page. The <video> is inserted as
+   document.body.firstChild — beneath the entire app shell — and is visible
+   only because the OSD sets .transparentDocument on <html> and the shell
+   stops painting. #videoOsdPage carries .mainAnimatedPage, which is
+   position: absolute over the whole viewport, so painting it black covers
+   the picture completely while audio, the controls and the clock carry on
+   exactly as normal. The container itself is behind the video, and black is
+   what Jellyfin puts there too, so it stays. */
 .videoPlayerContainer {
   background: #000 !important;
 }

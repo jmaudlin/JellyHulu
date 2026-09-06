@@ -64,7 +64,7 @@ One line, always current, but every client fetches from jsDelivr — so it needs
 internet access from each device, and it tells jsDelivr who's browsing.
 
 ```css
-@import url('https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@plugin-v1.0.4.0/dist/jellyhulu.min.css');
+@import url('https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@plugin-v1.0.5.0/dist/jellyhulu.min.css');
 ```
 
 **Pin a release tag**, as above — check the

@@ -5,6 +5,57 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
+## [1.0.5] — 2026-09-06
+
+Published as plugin **1.0.5.0**.
+
+### Fixed
+
+- **Video played as a black screen.** Audio, the controls, the clock and the
+  poster before pressing play were all correct; only the picture was missing.
+
+  Jellyfin inserts the `<video>` element as `document.body.firstChild` —
+  underneath the entire app shell — and it is visible only because the OSD
+  calls `setBackdropTransparency(Full)`, which marks `<html>` with
+  `.transparentDocument` so the shell stops painting. Two of this theme's
+  surfaces painted over it anyway, and with `!important`, which beats the
+  transparency rule:
+
+  - `#videoOsdPage { background: #000 !important }`. That page carries
+    `.mainAnimatedPage`, which is `position: absolute` across the whole
+    viewport, so it is a black sheet directly over the video. Removed: only
+    `.videoPlayerContainer`, which sits *behind* the video, is painted now,
+    which is what Jellyfin does too.
+  - `.skinBody { background-color: … !important }`. Stock Jellyfin leaves
+    `.skinBody` bare and grounds the app on `html` and `.backgroundContainer`;
+    it also wraps the page stack that sits over the player. Dropped.
+
+  Both surfaces — and any other the theme paints — are now handed back
+  explicitly whenever `<html>` carries `.transparentDocument`. The blanket
+  guard is deliberate: this failure is silent and looks like broken playback
+  rather than a styling bug, so it should not depend on remembering which
+  rules are dangerous.
+
+### Testing
+
+The suite gained `test/player.html`, which reproduces the player as the client
+builds it — the `insertBefore` that puts the video first in `<body>`, the
+transparency mechanism from `index.html`, and `.mainAnimatedPage`'s
+full-viewport absolute positioning from `components/viewManager/viewContainer.scss`.
+
+The check samples **the pixel actually painted** at the centre of the screen
+over a magenta poster, because nothing else can see this: every geometry
+measurement is correct in the broken state, and `elementFromPoint` returns a
+covering element whether it is opaque or not. Against 1.0.4 it fails with
+`centre pixel rgb(0, 0, 0) — expected magenta`.
+
+The first version of that fixture, written a few hours earlier, **passed** on
+the broken stylesheet — it was missing the one rule that makes the page cover
+the viewport. It was diagnosed from a real client instead, and the fixture
+corrected from the source file.
+
+78 browser checks, 33 plugin tests.
+
 ## [1.0.4] — 2026-09-06
 
 Published as plugin **1.0.4.0**.
