@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - 'plugin-v*'
+  # Also runnable by hand from the Actions tab. Tag-only would be tidier, but
+  # it makes cutting a release impossible for anyone whose credentials can
+  # push branches and not tags — which is a surprisingly common setup, and
+  # leaves you with no way to publish at all.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Plugin version, e.g. 1.0.0.0 (a three-part version gets .0 appended)'
+        required: true
+        default: '1.0.0.0'
 
 permissions:
   contents: write
@@ -25,15 +35,28 @@ jobs:
 
       - run: npm ci
 
-      - name: Derive the version from the tag
+      - name: Derive the version
         id: version
         run: |
-          # plugin-v1.2.3 or plugin-v1.2.3.4 → Jellyfin wants four parts.
-          raw="${GITHUB_REF_NAME#plugin-v}"
-          parts=$(echo "$raw" | awk -F. '{print NF}')
-          if [ "$parts" -eq 3 ]; then raw="$raw.0"; fi
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            raw='${{ inputs.version }}'
+          else
+            raw="${GITHUB_REF_NAME#plugin-v}"
+          fi
+
+          # Jellyfin wants four parts; accept three and append .0.
+          if ! printf '%s' "$raw" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            echo "::error::'$raw' is not a valid version (want 1.2.3 or 1.2.3.4)"
+            exit 1
+          fi
+          if [ "$(printf '%s' "$raw" | awk -F. '{print NF}')" -eq 3 ]; then
+            raw="$raw.0"
+          fi
+
           echo "version=$raw" >> "$GITHUB_OUTPUT"
-          echo "Building $raw"
+          echo "tag=plugin-v$raw" >> "$GITHUB_OUTPUT"
+          echo "Releasing $raw as tag plugin-v$raw"
 
       - name: Build, test and package
         run: |
@@ -41,11 +64,15 @@ jobs:
           dotnet test plugin/Jellyfin.Plugin.JellyHulu.Tests -c Release --nologo
           plugin/package.sh \
             --version "${{ steps.version.outputs.version }}" \
-            --changelog "See https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md"
+            --changelog "See https://github.com/${{ github.repository }}/blob/${{ steps.version.outputs.tag }}/CHANGELOG.md"
 
       - name: Publish the release
         uses: softprops/action-gh-release@v2
         with:
+          # Explicit, so a manual run creates the tag at this commit rather
+          # than needing one to already exist.
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
           files: |
             plugin/artifacts/*.zip
             plugin/artifacts/logo.png
@@ -57,7 +84,7 @@ jobs:
             Dashboard → Plugins → Repositories:
 
             ```
-            https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/manifest.json
+            https://github.com/${{ github.repository }}/releases/latest/download/manifest.json
             ```
 
             Then install **JellyHulu** from the catalogue.
@@ -67,10 +94,23 @@ jobs:
         # it has to be committed from the same run that produced it — a
         # locally generated manifest would not match CI's archive.
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- manifest.json; then
-            git add manifest.json
-            git commit -m "Update the plugin manifest for ${{ github.ref_name }}"
-            git push origin HEAD:${{ github.event.repository.default_branch }}
+
+          if git diff --quiet -- manifest.json; then
+            echo "manifest.json unchanged"
+            exit 0
           fi
+
+          target="${{ github.event.repository.default_branch }}"
+          git add manifest.json
+          git commit -m "Update the plugin manifest for ${{ steps.version.outputs.tag }}"
+
+          # On a manual run the checkout may already be that branch; on a tag
+          # run it is detached. Fetch and rebase so the push is a fast-forward
+          # either way, and never fail the release over this step — the
+          # artifacts are already published by now.
+          git fetch origin "$target" || true
+          git rebase "origin/$target" || { echo "::warning::could not rebase onto $target"; exit 0; }
+          git push origin "HEAD:$target" || echo "::warning::could not push the manifest to $target"
