@@ -5,7 +5,9 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
-## [Unreleased]
+## [1.0.2] — 2026-09-06
+
+Published as plugin **1.0.2.0**.
 
 ### Fixed
 
