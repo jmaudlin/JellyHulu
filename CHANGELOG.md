@@ -5,7 +5,47 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
-## [Unreleased]
+## [1.0.1] — 2026-09-06
+
+Published as plugin **1.0.1.0**. Both of these were found running the theme
+against a real Jellyfin server, and neither could have been caught by the test
+suite as it stood — the fixture carried markup I had assumed rather than
+markup Jellyfin emits.
+
+### Fixed
+
+- **Duplicated hero carousel, with only the topmost one animating.**
+  `Hero.build` is async, and its "do we already have a hero?" check ran only
+  before the await on the API call. One navigation fires the page lifecycle
+  several times — `viewshow`, `hashchange` and the mutation observer all land
+  for a single move — so several builds passed the check inside that window
+  and each inserted its own hero. Every build overwrote the module's
+  node/slides/timer, so only the last was ever ticked and the rest sat frozen.
+  Now guarded by a flag set synchronously before any await, plus a re-check of
+  route, anchor and existing hero afterwards. Teardown removes every
+  `.jh-hero` rather than only the tracked one, so a page already in the broken
+  state repairs itself on the next navigation.
+- **The same race in hover previews.** `startPreview` awaits a lookup, and its
+  post-await guard only checked that the pointer was still on the same card —
+  also true if you left and came back while it waited. Mounting is now
+  idempotent, so a second mount cannot orphan the first playing invisibly.
+- **Library section headings invisible until hover.** Jellyfin nests a library
+  section's heading inside the link that carries its chevron, and the theme
+  styled that link as a hover-revealed "see all" control at `opacity: 0` —
+  hiding the heading itself. Sections with a bare `<h2>` (Continue Watching,
+  Next Up) were unaffected, which is why only library sections looked broken.
+  The heading is never hidden or restyled now; only the chevron animates.
+
+### Testing
+
+- Browser suite 58 → 63 checks. Every new check was verified to fail against
+  the pre-fix code before being accepted — a regression test that passes on
+  the broken version is worse than none.
+- The fixture now mirrors Jellyfin's real library-section header, and can slow
+  its stub API on demand so the hero race is reproducible rather than a matter
+  of timing luck. With a 400 ms delay, the old code produced five heroes.
+
+## [Plugin 1.0.0.0] — 2026-09-06
 
 ### Jellyfin plugin
 

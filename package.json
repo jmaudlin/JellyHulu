@@ -1,6 +1,6 @@
 {
   "name": "jellyhulu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Hulu-inspired theme for Jellyfin: CSS skin plus an optional JavaScript companion.",
   "license": "MIT",
   "type": "module",
