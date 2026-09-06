@@ -4,6 +4,29 @@ import { chromium } from 'playwright';
 import path from 'node:path';
 import fs, { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
+
+// Reads the single pixel out of a 1x1 PNG screenshot. Playwright hands back
+// PNG bytes and there is no image decoder to hand, but a 1x1 image is one
+// zlib stream holding a filter byte and one RGB triple, which is little
+// enough to unpack directly.
+function pixelOf(png) {
+  // The image data can arrive split across several IDAT chunks; they are one
+  // zlib stream between them, so they have to be joined before inflating.
+  const parts = [];
+  for (let off = 8; off + 8 <= png.length; ) {
+    const len = png.readUInt32BE(off);
+    const type = png.toString('ascii', off + 4, off + 8);
+    if (type === 'IDAT') parts.push(png.subarray(off + 8, off + 8 + len));
+    if (type === 'IEND') break;
+    off += 12 + len;
+  }
+  if (!parts.length) throw new Error('no IDAT in screenshot');
+  const raw = zlib.inflateSync(Buffer.concat(parts));
+  // byte 0 is the row filter; a 1px row cannot reference a neighbour, so
+  // every filter type reduces to the raw value here.
+  return { r: raw[1], g: raw[2], b: raw[3] };
+}
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 /* Screenshots are test output, not documentation. They land in an ignored
@@ -318,6 +341,42 @@ check('Escape closes the panel',
       mask.classList.remove('backdrop');
     }, id);
   }
+
+  await ctx.close();
+}
+
+// --- video playback surface -------------------------------------------
+// The video element is document.body.firstChild — beneath the whole app
+// shell — and is visible only because the OSD marks <html> .transparentDocument
+// so the shell stops painting. A theme that paints an opaque background on
+// anything spanning the viewport above it (the .skinBody wrapper, the OSD page
+// itself) hides the picture completely while audio, controls and the clock
+// carry on, which reads as "playback is broken" rather than as a CSS problem.
+//
+// Hit-testing cannot see this: a covering element is returned by
+// elementFromPoint whether it is opaque or transparent. So this samples the
+// pixel that actually got painted.
+{
+  const ctx = await browser.newPage({ viewport: { width: 1440, height: 700 } });
+  await ctx.goto('file://' + path.join(ROOT, 'player.html'));
+  await ctx.waitForTimeout(400);
+
+  const shot = await ctx.screenshot({ clip: { x: 719, y: 349, width: 1, height: 1 } });
+  const px = pixelOf(shot);
+  // The poster is solid magenta. Anything else at the centre of the screen
+  // means something is painted over the video.
+  const visible = px.r > 200 && px.g < 60 && px.b > 200;
+  check('the video surface is not painted over', visible,
+    `centre pixel rgb(${px.r}, ${px.g}, ${px.b}) — expected magenta`);
+
+  // And the pointer has to land on the video too, so the click-to-pause and
+  // seek gestures reach it rather than a pane of theme chrome.
+  const hit = await ctx.evaluate(() => {
+    const t = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+    if (!t) return 'nothing';
+    return t.closest('.videoPlayerContainer') ? 'video' : `${t.tagName.toLowerCase()}.${(t.className || '').toString().split(' ')[0]}`;
+  });
+  check('the pointer reaches the video', hit === 'video', `hit ${hit}`);
 
   await ctx.close();
 }
