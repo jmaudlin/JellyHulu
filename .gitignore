@@ -3,3 +3,15 @@ node_modules/
 *.log
 .cache/
 tmp/
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+plugin/artifacts/
+*.user
+
+# Test output. screenshot-home.png stays tracked because the README embeds it;
+# these two are rewritten by the smoke test on every run and referenced
+# nowhere, so tracking them only churns the diff.
+test/screenshot-mobile.png
+test/screenshot-tv.png
