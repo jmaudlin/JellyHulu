@@ -8,6 +8,14 @@
     "category": "General",
     "versions": [
       {
+        "version": "1.0.5.0",
+        "changelog": "See https://github.com/jmaudlin/JellyHulu/blob/plugin-v1.0.5.0/CHANGELOG.md",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.5.0/jellyhulu_1.0.5.0.zip",
+        "checksum": "b2bc3aba7c104f5c384b7a8242b3a8af",
+        "timestamp": "2026-09-06T06:14:40Z"
+      },
+      {
         "version": "1.0.4.0",
         "changelog": "See https://github.com/jmaudlin/JellyHulu/blob/plugin-v1.0.4.0/CHANGELOG.md",
         "targetAbi": "10.10.0.0",
@@ -48,6 +56,6 @@
         "timestamp": "2026-09-06T01:46:36Z"
       }
     ],
-    "imageUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.4.0/logo.png"
+    "imageUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.5.0/logo.png"
   }
 ]
