@@ -213,8 +213,28 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
   z-index: var(--jh-z-drawer);
 }
 
+/* The drawer must scroll, and its items must stack. Jellyfin has shipped this
+   with and without an emby-scroller wrapper across releases, so rather than
+   depending on the shape it happens to have, both are asserted here. This is
+   deliberate belt-and-braces: the rail rules above are now scoped so they
+   cannot reach the drawer, but a navigation menu you cannot scroll is severe
+   enough to be worth stating outright rather than inferring. */
 .mainDrawer-scrollContainer {
   padding-top: var(--jh-space-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mainDrawer .scrollSlider,
+.mainDrawer-scrollContainer > .scrollSlider {
+  display: block;
+  padding-inline: 0;
+}
+
+.mainDrawer .emby-scroller,
+.mainDrawer-scrollContainer {
+  padding-inline: 0;
 }
 
 .navMenuOption,

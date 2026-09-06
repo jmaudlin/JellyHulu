@@ -676,14 +676,15 @@ textarea {
 
 /* Horizontal rails hide their scrollbar entirely — navigation is by the
    arrow buttons, drag, or the keyboard. */
-.emby-scroller,
+.emby-scroller.scrollX,
+.emby-scroller[data-horizontal="true"],
 .itemsContainer.scrollSlider,
-.scrollSlider,
 .scrollX {
   scrollbar-width: none;
 }
 
-.emby-scroller::-webkit-scrollbar,
+.emby-scroller.scrollX::-webkit-scrollbar,
+.emby-scroller[data-horizontal="true"]::-webkit-scrollbar,
 .itemsContainer.scrollSlider::-webkit-scrollbar,
 .scrollX::-webkit-scrollbar {
   height: 0;
@@ -1247,8 +1248,28 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
   z-index: var(--jh-z-drawer);
 }
 
+/* The drawer must scroll, and its items must stack. Jellyfin has shipped this
+   with and without an emby-scroller wrapper across releases, so rather than
+   depending on the shape it happens to have, both are asserted here. This is
+   deliberate belt-and-braces: the rail rules above are now scoped so they
+   cannot reach the drawer, but a navigation menu you cannot scroll is severe
+   enough to be worth stating outright rather than inferring. */
 .mainDrawer-scrollContainer {
   padding-top: var(--jh-space-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mainDrawer .scrollSlider,
+.mainDrawer-scrollContainer > .scrollSlider {
+  display: block;
+  padding-inline: 0;
+}
+
+.mainDrawer .emby-scroller,
+.mainDrawer-scrollContainer {
+  padding-inline: 0;
 }
 
 .navMenuOption,
@@ -2512,7 +2533,15 @@ html[data-jh-density="compact"] .jh-card-info-meta,
    with a sibling .emby-scrollbuttons.
    ========================================================================== */
 
-.emby-scroller,
+/* Scoped to horizontal scrollers only.
+   `emby-scroller` is not a rail component — Jellyfin uses it for vertical
+   containers too, the navigation drawer among them. Matching it bare applied
+   rail geometry to the drawer and, via the .scrollSlider rule below, laid its
+   items out in a row: the drawer then overflowed sideways with nothing to
+   scroll vertically. Horizontal scrollers are the ones carrying .scrollX or
+   data-horizontal="true". */
+.emby-scroller.scrollX,
+.emby-scroller[data-horizontal="true"],
 .itemsContainer.scrollSlider,
 .scrollX {
   position: relative;
@@ -2532,7 +2561,10 @@ html[data-jh-density="compact"] .jh-card-info-meta,
 .padded-top-focusscale    { padding-top: 0 !important; }
 .padded-bottom-focusscale { padding-bottom: 0 !important; }
 
-.scrollSlider,
+/* Only a slider inside a horizontal scroller lays out as a row. A bare
+   .scrollSlider may be the inner element of a vertical scroller. */
+.scrollX > .scrollSlider,
+.emby-scroller[data-horizontal="true"] > .scrollSlider,
 .itemsContainer.scrollSlider {
   display: flex;
   align-items: flex-start;
@@ -2564,7 +2596,8 @@ html[data-jh-density="compact"] .jh-card-info-meta,
 
 /* Snap is opt-in: it feels great with a trackpad and awful with a mouse
    wheel on some browsers, so the JS companion enables it per input type. */
-html[data-jh-snap="on"] .emby-scroller,
+html[data-jh-snap="on"] .emby-scroller.scrollX,
+html[data-jh-snap="on"] .emby-scroller[data-horizontal="true"],
 html[data-jh-snap="on"] .itemsContainer.scrollSlider {
   scroll-snap-type: x mandatory;
 }

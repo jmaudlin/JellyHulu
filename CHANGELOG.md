@@ -9,6 +9,17 @@ depends on.
 
 ### Fixed
 
+- **The navigation drawer could not be scrolled.** The rail styling matched
+  bare `.emby-scroller` and `.scrollSlider`, but `emby-scroller` is not a rail
+  component — Jellyfin uses it for vertical containers too, the drawer among
+  them. `display: flex` therefore laid the drawer's items out in a row, so it
+  overflowed sideways and had nothing to scroll vertically. On a server with
+  more libraries than fit on screen, that made the lower entries unreachable.
+  Rail rules are now scoped to scrollers actually marked horizontal
+  (`.scrollX` or `data-horizontal="true"`), the drawer's own scrolling is
+  asserted outright, and scrollbar hiding no longer applies to vertical
+  scrollers — a drawer with no scrollbar gives no hint that it scrolls at all.
+
 - **The plugin repository URL no longer depends on GitHub release ordering.**
   It was `releases/latest/download/manifest.json`, which GitHub resolves by
   publish time across *all* releases rather than by relevance. Publishing the
