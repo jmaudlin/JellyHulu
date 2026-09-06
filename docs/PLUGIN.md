@@ -26,17 +26,32 @@ it: a Jellyfin upgrade replaces the web client directory and undoes a manual
 2. Name it `JellyHulu`, and use this URL:
 
    ```
-   https://github.com/jmaudlin/JellyHulu/releases/latest/download/manifest.json
+   https://raw.githubusercontent.com/jmaudlin/JellyHulu/main/manifest.json
    ```
 
 3. **Dashboard → Plugins → Catalogue → JellyHulu → Install**
 4. Restart Jellyfin.
 5. Hard-reload your browser (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>).
 
-   Use that release URL rather than the `manifest.json` at the top of the
-   repository. Each release generates its manifest alongside the archive it
-   describes, so the checksums match; the copy in the repository is the most
-   recent one generated and can be a release behind.
+#### Why this URL, and not `releases/latest/download/manifest.json`
+
+That form looks tidier and was used here originally. It is a trap, and it has
+already broken this project once, so it is worth spelling out.
+
+GitHub resolves `latest` by **publish time across all releases**, not by
+relevance. Publish any unrelated release afterwards — a theme-only tag, say —
+and `latest` moves to it. If that release has no `manifest.json` attached, the
+URL starts returning 404 for everyone who configured it, with no warning and
+no change to the plugin. That is exactly what happened when `1.0.1.0` was
+published twelve minutes after `plugin-v1.0.1.0`.
+
+`main` always carries the current manifest, because the release workflow
+commits it there in the same run that builds the archive it describes — so the
+checksums match, and nothing about release ordering can affect it.
+
+Pinning to a specific release (`releases/download/plugin-v1.0.1.0/…`) resolves
+reliably but is wrong for a different reason: the manifest is *cumulative*, so
+a pinned copy freezes the version list and nobody ever sees an update.
 
 
 ### Serving the manifest from jsDelivr
@@ -52,7 +67,7 @@ because two of them are easy to get wrong:
 
 - **Don't pin a tag.** A Jellyfin plugin repository manifest is *cumulative* —
   it lists every version and the server picks the newest compatible one. Pin
-  it to `@1.0.0` and nobody ever sees 1.1.0, which defeats the point of a
+  it to one version and nobody ever sees the next, which defeats the point of a
   repository URL. This is the opposite of the advice for the stylesheet, where
   pinning is exactly right.
 - **Branch URLs are cached for about 12 hours.** jsDelivr caches tags and
@@ -67,12 +82,11 @@ because two of them are easy to get wrong:
   `claude/some-feature` is read as ref `claude` and the rest as the file path.
   Fine for `main`; a trap for feature branches.
 
-None of that applies to the release URL above, which is served from the same
-release that produced the archive it describes — so the checksums match
-structurally rather than as a matter of timing. And the thing a CDN is good at,
-low-latency delivery to every client, doesn't apply to a manifest fetched
-occasionally by one server. Use jsDelivr for the *stylesheet*, where every
-client fetches it on every page load; see
+The raw URL above has none of those caveats: it is the same file, served
+directly, with no CDN cache window and no ref-parsing quirk. And the thing a
+CDN is good at — low-latency delivery to every client — does not apply to a
+manifest fetched occasionally by one server. Use jsDelivr for the
+*stylesheet*, where every client fetches it on every page load; see
 [INSTALL.md](INSTALL.md) Route C.
 
 ### By hand

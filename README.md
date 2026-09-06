@@ -26,7 +26,7 @@ No shell access, no files to copy, and it survives Jellyfin upgrades.
 1. **Dashboard → Plugins → Repositories → +**, and add:
 
    ```
-   https://github.com/jmaudlin/JellyHulu/releases/latest/download/manifest.json
+   https://raw.githubusercontent.com/jmaudlin/JellyHulu/main/manifest.json
    ```
 
 2. **Dashboard → Plugins → Catalogue → JellyHulu → Install**, then restart Jellyfin.

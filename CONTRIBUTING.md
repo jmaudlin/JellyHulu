@@ -83,6 +83,22 @@ rewrites a real file, and the properties that matter — a byte-identical round
 trip, no duplicate blocks, no write when nothing changed — are exactly the
 ones that are easy to break by accident.
 
+## After cutting a release
+
+```bash
+./scripts/check-install-urls.sh
+```
+
+It fetches the plugin repository manifest, downloads the archive that manifest
+points at, and verifies the checksum Jellyfin will verify — plus every pinned
+jsDelivr URL in the docs.
+
+Worth running because this project has already shipped a documented URL that
+broke with no repository change at all: the plugin repository URL used to be
+`releases/latest/download/manifest.json`, and publishing an unrelated release
+moved GitHub's "latest" onto a release with no manifest attached. No test
+could have caught it, because nothing in the repository was wrong.
+
 ## Tests
 
 `test/smoke.mjs` is a plain script, not a framework. Add a `check(name,
