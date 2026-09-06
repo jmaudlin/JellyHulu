@@ -84,7 +84,7 @@ jobs:
             Dashboard → Plugins → Repositories:
 
             ```
-            https://github.com/${{ github.repository }}/releases/latest/download/manifest.json
+            https://raw.githubusercontent.com/${{ github.repository }}/main/manifest.json
             ```
 
             Then install **JellyHulu** from the catalogue.

@@ -5,6 +5,31 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
+## [Unreleased]
+
+### Fixed
+
+- **The plugin repository URL no longer depends on GitHub release ordering.**
+  It was `releases/latest/download/manifest.json`, which GitHub resolves by
+  publish time across *all* releases rather than by relevance. Publishing the
+  `1.0.1.0` theme release twelve minutes after `plugin-v1.0.1.0` moved
+  `latest` onto a release with no manifest attached, and the documented
+  install URL started returning 404 for everyone — with nothing in the
+  repository having changed. It now points at `manifest.json` on `main`, which
+  the release workflow commits in the same run that builds the archive it
+  describes, so the checksums match and release ordering cannot affect it.
+- The jsDelivr stylesheet pin in `docs/INSTALL.md` referenced tag `1.0.0`,
+  which predates the 1.0.1 fixes — anyone following the CDN route was served
+  the buggy build, and a failed `@import` fails silently. Now pinned to
+  `1.0.1.0`.
+
+### Added
+
+- `scripts/check-install-urls.sh`, which fetches the documented install URLs,
+  downloads the archive the manifest points at, and verifies the checksum
+  Jellyfin verifies. The failure above was invisible to the test suite because
+  nothing in the repository was wrong; this checks the thing that was.
+
 ## [1.0.1] — 2026-09-06
 
 Published as plugin **1.0.1.0**. Both of these were found running the theme
