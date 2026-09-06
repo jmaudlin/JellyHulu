@@ -17,10 +17,13 @@
     bottom: 0;
     left: 0;
     z-index: 1050;
-  }
-  .mainDrawer-scrollContainer {
-    height: 100%;
-    overflow-y: auto;
+    /* Jellyfin 10.11 lays the drawer out as a flex ROW. Its scroll container
+       is therefore a flex item, and sizes to its content unless told
+       otherwise — which is what left it narrower than the drawer, so a wheel
+       over the remainder hit .mainDrawer (not scrollable) and chained to the
+       page. Reproduced from a real instance. */
+    display: flex;
+    flex-direction: row;
   }
 </style>
 <link rel="stylesheet" href="../dist/jellyhulu.css">
@@ -42,9 +45,9 @@
 </div>
 
 
-<!-- Drawer, plain-container shape -->
+<!-- Drawer, as jellyfin-web 10.11.11 actually emits it -->
 <div class="mainDrawer hide" id="drawerPlain">
-  <div class="mainDrawer-scrollContainer scrollContainer">
+  <div class="mainDrawer-scrollContainer scrollContainer focuscontainer-y scrollY">
       <a is="emby-linkbutton" class="navMenuOption emby-button" href="#/list1">
         <span class="material-icons navMenuOptionIcon">folder</span>
         <span class="navMenuOptionText">Library 1</span>
@@ -120,8 +123,8 @@
   </div>
 </div>
 
-<!-- Drawer, emby-scroller shape: the scroller is VERTICAL here, which is the
-     case the rail styling used to ignore. -->
+<!-- Drawer, emby-scroller shape. Not what 10.11 emits, kept as a guard
+     that rail styling never reaches a vertical scroller on any version. -->
 <div class="mainDrawer hide" id="drawerScroller">
   <div is="emby-scroller" class="emby-scroller scrollY mainDrawer-scrollContainer" data-horizontal="false">
     <div class="scrollSlider">

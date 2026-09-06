@@ -5,6 +5,32 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
+## [1.0.3] — 2026-09-06
+
+Published as plugin **1.0.3.0**.
+
+### Fixed
+
+- **The navigation drawer still would not scroll after 1.0.2.** That release
+  made the container scrollable — 1024px of content in a 698px box with
+  `overflow-y: auto` — but Jellyfin 10.11 lays the drawer out as a flex *row*,
+  so the scroll container sized to its content: 173px wide inside a 261px
+  drawer, measured on a real instance. The remaining 88px belongs to
+  `.mainDrawer`, which is not scrollable, so a wheel there chained to the page
+  and the drawer sat frozen with its scrollbar visible but unreachable. The
+  container now fills the drawer, with `min-width`/`min-height: 0` so a flex
+  item can actually shrink below its content.
+
+### Testing
+
+- The drawer fixture was rewritten against a real 10.11.11 DOM. The previous
+  one handed the drawer `height: 100%` and `overflow-y: auto` in its
+  Jellyfin-stand-in block — the very layout the theme is responsible for — so
+  the suite was testing the fixture rather than the theme, and passed while
+  the real drawer stayed broken. The stand-in now provides only what
+  jellyfin-web provides, and a check asserts the scroll container fills the
+  drawer.
+
 ## [1.0.2] — 2026-09-06
 
 Published as plugin **1.0.2.0**.

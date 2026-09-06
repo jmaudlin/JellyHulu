@@ -261,16 +261,27 @@ check('Escape closes the panel',
       const a = items[0].getBoundingClientRect();
       const b = items[1].getBoundingClientRect();
       box.scrollTop = 200;
+      const db = drawer.getBoundingClientRect();
+      const bb = box.getBoundingClientRect();
       return {
         stacked: b.top > a.top + 4,
         overflows: box.scrollHeight > box.clientHeight + 4,
         scrolled: box.scrollTop > 0,
+        fills: bb.width >= db.width - 1 && bb.height >= db.height - 1,
+        cw: Math.round(bb.width), chh: Math.round(bb.height),
+        dw: Math.round(db.width), dh: Math.round(db.height),
       };
     }, id);
 
     check(`${id}: nav items stack vertically`, r.stacked);
     check(`${id}: content overflows vertically`, r.overflows);
     check(`${id}: the drawer actually scrolls`, r.scrolled);
+    // A scroll container narrower or shorter than the drawer leaves a strip
+    // where the wheel lands on .mainDrawer instead — which is not scrollable,
+    // so the gesture chains to the page and the drawer looks frozen even
+    // though its scrollbar is right there.
+    check(`${id}: the scroll container fills the drawer`, r.fills,
+      `container ${r.cw}x${r.chh} vs drawer ${r.dw}x${r.dh}`);
 
     await ctx.evaluate((n) => document.getElementById(n).classList.add('hide'), id);
   }

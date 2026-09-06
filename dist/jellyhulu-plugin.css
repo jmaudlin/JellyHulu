@@ -1,5 +1,5 @@
 /*!
- * JellyHulu v1.0.2 — a Hulu-inspired theme for Jellyfin (stylesheet for the Jellyfin plugin)
+ * JellyHulu v1.0.3 — a Hulu-inspired theme for Jellyfin (stylesheet for the Jellyfin plugin)
  * https://github.com/jmaudlin/JellyHulu
  * Released under the MIT License.
  * Bundled font: Figtree, SIL Open Font License 1.1.
@@ -1241,6 +1241,9 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
    -------------------------------------------------------------------------- */
 .mainDrawer,
 .drawer-open .mainDrawer {
+  /* Keeps the scroll inside the container above rather than letting content
+     spill into a region of the drawer that cannot scroll. */
+  overflow: hidden;
   width: var(--jh-drawer-width);
   background: var(--jh-ink-950) !important;
   border-right: 1px solid var(--jh-line-faint);
@@ -1254,8 +1257,21 @@ html:not(.jh-scrolled) .skinHeader.jh-over-hero {
    deliberate belt-and-braces: the rail rules above are now scoped so they
    cannot reach the drawer, but a navigation menu you cannot scroll is severe
    enough to be worth stating outright rather than inferring. */
+/* Jellyfin 10.11 lays the drawer out as a flex ROW, so the scroll container
+   is a flex item and sizes to its content — measured at 173px inside a 261px
+   drawer. The remaining strip belongs to .mainDrawer, which is not scrollable,
+   so a wheel there chains to the page and the drawer appears frozen with its
+   scrollbar sitting right next to the pointer. Filling the drawer is what
+   makes the gesture land on the thing that scrolls. */
 .mainDrawer-scrollContainer {
   padding-top: var(--jh-space-3);
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  /* Without these a flex item refuses to shrink below its content, so the
+     box never becomes smaller than what it holds and nothing ever overflows. */
+  min-width: 0;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
