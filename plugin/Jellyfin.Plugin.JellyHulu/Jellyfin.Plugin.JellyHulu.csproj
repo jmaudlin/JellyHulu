@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Jellyfin 10.11 runs on .NET 9, which loads a net8.0 assembly fine.
+         Targeting net8.0 keeps one build working on both 10.10 and 10.11. -->
+    <AssemblyName>Jellyfin.Plugin.JellyHulu</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.JellyHulu</RootNamespace>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>Recommended</AnalysisMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="10.10.3" />
+    <PackageReference Include="Jellyfin.Model" Version="10.10.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration\configPage.html" />
+  </ItemGroup>
+
+  <!-- The theme itself is not duplicated into the plugin: the built bundles
+       from dist/ are embedded straight out of the repo, so the plugin can
+       never ship a stale copy of the CSS or the companion script. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\dist\jellyhulu-plugin.min.css">
+      <LogicalName>Jellyfin.Plugin.JellyHulu.Assets.jellyhulu.css</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\dist\jellyhulu.min.js">
+      <LogicalName>Jellyfin.Plugin.JellyHulu.Assets.jellyhulu.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\fonts\figtree-latin.woff2">
+      <LogicalName>Jellyfin.Plugin.JellyHulu.Assets.fonts.figtree-latin.woff2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\fonts\figtree-latin-ext.woff2">
+      <LogicalName>Jellyfin.Plugin.JellyHulu.Assets.fonts.figtree-latin-ext.woff2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\fonts\figtree-italic-latin.woff2">
+      <LogicalName>Jellyfin.Plugin.JellyHulu.Assets.fonts.figtree-italic-latin.woff2</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\fonts\figtree-italic-latin-ext.woff2">
+      <LogicalName>Jellyfin.Plugin.JellyHulu.Assets.fonts.figtree-italic-latin-ext.woff2</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,76 @@
+name: Plugin release
+
+on:
+  push:
+    tags:
+      - 'plugin-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Derive the version from the tag
+        id: version
+        run: |
+          # plugin-v1.2.3 or plugin-v1.2.3.4 → Jellyfin wants four parts.
+          raw="${GITHUB_REF_NAME#plugin-v}"
+          parts=$(echo "$raw" | awk -F. '{print NF}')
+          if [ "$parts" -eq 3 ]; then raw="$raw.0"; fi
+          echo "version=$raw" >> "$GITHUB_OUTPUT"
+          echo "Building $raw"
+
+      - name: Build, test and package
+        run: |
+          npm run check
+          dotnet test plugin/Jellyfin.Plugin.JellyHulu.Tests -c Release --nologo
+          plugin/package.sh \
+            --version "${{ steps.version.outputs.version }}" \
+            --changelog "See https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md"
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            plugin/artifacts/*.zip
+            plugin/artifacts/logo.png
+            manifest.json
+          body: |
+            JellyHulu plugin ${{ steps.version.outputs.version }}.
+
+            **Install:** add this repository URL in Jellyfin under
+            Dashboard → Plugins → Repositories:
+
+            ```
+            https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/manifest.json
+            ```
+
+            Then install **JellyHulu** from the catalogue.
+
+      - name: Commit the updated manifest
+        # The manifest carries the checksum of the zip that was just built, so
+        # it has to be committed from the same run that produced it — a
+        # locally generated manifest would not match CI's archive.
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- manifest.json; then
+            git add manifest.json
+            git commit -m "Update the plugin manifest for ${{ github.ref_name }}"
+            git push origin HEAD:${{ github.event.repository.default_branch }}
+          fi

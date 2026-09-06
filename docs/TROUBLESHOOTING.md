@@ -29,6 +29,13 @@ the Custom CSS box can swallow everything after it. `@import` must also be the
 first thing in the stylesheet — CSS ignores an `@import` that appears after
 any rule. If you have your own overrides, they go *after* the import.
 
+## Using the plugin?
+
+Start at the plugin's own configuration page — **Dashboard → Plugins →
+JellyHulu** — which reports whether the web client is actually themed and why
+not. [PLUGIN.md](PLUGIN.md) covers the plugin-specific cases; the rest of this
+page applies whichever way the theme was installed.
+
 ## The theme applies but the companion doesn't
 
 Symptom: correct colours and type, but no hero, no rank badges, no `tune`

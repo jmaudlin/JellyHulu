@@ -7,16 +7,38 @@ that make Jellyfin *Jellyfin*: Live TV and the DVR, SyncPlay, collections and
 playlists, music and lyrics, books and photos, the metadata and subtitle
 editors, the admin dashboard, and third-party plugin pages.
 
-It ships as two pieces:
+It ships as three pieces, and you need at most two of them:
 
 | Piece | What it is | Required? |
 | --- | --- | --- |
 | `dist/jellyhulu.min.css` | The theme. One stylesheet, no dependencies, no external requests. | Yes |
 | `dist/jellyhulu.min.js` | The companion. Adds the hero carousel, hover previews, rank badges, a per-user settings panel, and TV navigation. | No — the CSS is a complete theme on its own |
+| **The Jellyfin plugin** | Serves both from your server and keeps the web client pointing at them across upgrades. Adds a configuration page. | No — but it's the easiest way to get the other two |
 
 ---
 
 ## Quick start
+
+### With the plugin (recommended)
+
+No shell access, no files to copy, and it survives Jellyfin upgrades.
+
+1. **Dashboard → Plugins → Repositories → +**, and add:
+
+   ```
+   https://github.com/jmaudlin/JellyHulu/releases/latest/download/manifest.json
+   ```
+
+2. **Dashboard → Plugins → Catalogue → JellyHulu → Install**, then restart Jellyfin.
+3. Hard-reload your browser (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>).
+
+One caveat worth knowing up front: the plugin has to write to Jellyfin's own
+web client directory, which is **not** writable on a Debian/Ubuntu package
+install until you `chown` it. It reports the problem clearly instead of
+failing silently, and **[docs/PLUGIN.md](docs/PLUGIN.md)** covers the fix and
+the alternatives.
+
+### By hand
 
 ```bash
 git clone https://github.com/jmaudlin/JellyHulu.git
@@ -30,9 +52,9 @@ Then in Jellyfin: **Dashboard → General → Custom CSS**, add
 @import url('/web/jellyhulu/jellyhulu.min.css');
 ```
 
-and hard-reload your browser (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>).
+and hard-reload.
 
-Only want the CSS? Skip the script — paste the contents of
+Only want the CSS? Skip both — paste the contents of
 `dist/jellyhulu.min.css` straight into the Custom CSS box. Full options,
 including reverse-proxy and Docker setups that survive server upgrades, are in
 **[docs/INSTALL.md](docs/INSTALL.md)**.
@@ -118,6 +140,10 @@ stylesheet. To change something server-wide, redeclare it **after** the
 }
 ```
 
+With the plugin installed there's a configuration page for the same thing —
+accent, density, motion, previews, badges and a Custom CSS box — plus
+server-wide defaults that each user can still override for themselves.
+
 The full token reference, the density and motion presets, and the settings
 the companion script writes are in
 **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)**.
@@ -173,8 +199,16 @@ wraps `src/js/*.js` in a single IIFE, and verifies the result: braces balance,
 every `var(--jh-*)` resolves to a real declaration, the version placeholder is
 substituted, and the JS parses.
 
+The plugin needs the .NET 8 SDK on top of that:
+
+```bash
+dotnet test plugin/Jellyfin.Plugin.JellyHulu.Tests -c Release
+plugin/package.sh --version 1.0.0.0    # → plugin/artifacts/
+```
+
 Layout and architecture are described in
-**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**, and the plugin specifically
+in **[docs/PLUGIN.md](docs/PLUGIN.md)**.
 
 ---
 
@@ -183,7 +217,8 @@ Layout and architecture are described in
 Theme not applying, script not loading, previews not playing, a plugin page
 looking wrong after an upgrade — **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**.
 
-To remove everything:
+To remove everything: uninstall the plugin (it cleans up after itself on
+shutdown), or, for a manual install:
 
 ```bash
 sudo ./scripts/install-jellyhulu.sh --uninstall

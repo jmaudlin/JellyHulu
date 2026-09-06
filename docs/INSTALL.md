@@ -1,5 +1,11 @@
 # Installing JellyHulu
 
+> **Looking for the easy route?** The Jellyfin plugin does everything on this
+> page for you, from the Dashboard, and re-applies itself after a server
+> upgrade — see **[PLUGIN.md](PLUGIN.md)**. This page is the manual path: use
+> it if you'd rather not install a plugin, or if Jellyfin can't write to its
+> own web client directory.
+
 There are two things to install, and the second one is optional:
 
 1. **The stylesheet** — the theme itself. Goes in Jellyfin's Custom CSS box.

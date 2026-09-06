@@ -1,0 +1,21 @@
+[
+  {
+    "guid": "a5af0330-baf3-4ba3-9e2b-097e98f13273",
+    "name": "JellyHulu",
+    "description": "Serves the JellyHulu stylesheet, its companion script and its fonts from the Jellyfin server, and keeps the web client pointing at them across server upgrades.",
+    "overview": "A Hulu-inspired theme for the Jellyfin web client.",
+    "owner": "jmaudlin",
+    "category": "General",
+    "versions": [
+      {
+        "version": "1.0.0.0",
+        "changelog": "First release of the JellyHulu plugin.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.0.0/jellyhulu_1.0.0.0.zip",
+        "checksum": "34bbfcd8c29afacc3a9630550641e14e",
+        "timestamp": "2026-09-06T01:20:43Z"
+      }
+    ],
+    "imageUrl": "https://github.com/jmaudlin/JellyHulu/releases/download/plugin-v1.0.0.0/logo.png"
+  }
+]

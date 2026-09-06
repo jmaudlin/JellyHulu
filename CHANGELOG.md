@@ -5,6 +5,40 @@ All notable changes are recorded here. This project follows
 custom property is removed or renamed, since that's what a customised install
 depends on.
 
+## [Unreleased]
+
+### Jellyfin plugin
+
+- New `plugin/` project: a Jellyfin server plugin that serves the stylesheet,
+  the companion script and the fonts from the server itself, and keeps
+  `jellyfin-web/index.html` pointing at them.
+- Survives Jellyfin upgrades. An upgrade replaces the web client directory,
+  which undoes a manual `index.html` edit; the plugin re-applies on the next
+  start, and removes its tags again on a clean shutdown.
+- Configuration page: enable/disable, whether to serve the stylesheet and the
+  script, server-wide defaults for accent, density, motion, the carousel,
+  previews, badges and dwell time, and a Custom CSS box appended after the
+  theme.
+- Server defaults reach the browser as `window.JELLYHULU_DEFAULTS` and sit
+  between the built-in defaults and each user's own stored choices, so an
+  administrator can set the house style without taking the setting away.
+  "Reset" now returns to the server's defaults rather than the built-in ones.
+- Assets are embedded in the assembly and served with strong ETags — nothing
+  is written to disk, so there is nothing to go stale and nothing to clean up.
+- Injected tags use relative URLs, so the theme works under a reverse-proxy
+  subpath.
+- `plugin/package.sh` builds, tests, packages and regenerates `manifest.json`
+  with the checksum of the archive it just produced.
+- 20 unit tests over the `index.html` rewriting, including a byte-identical
+  round trip, idempotent re-application, insertion before the *last*
+  `</body>`, recovery from an orphaned marker, and not writing when the file
+  is already correct — which is what lets it behave on a read-only web root.
+
+### Theme
+
+- A third stylesheet variant, `dist/jellyhulu-plugin.css`, whose `@font-face`
+  rules use a relative path so the plugin can serve it from any base URL.
+
 ## [1.0.0] — 2026-09-05
 
 First release.

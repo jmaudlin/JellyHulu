@@ -3,3 +3,9 @@ node_modules/
 *.log
 .cache/
 tmp/
+
+# .NET build output
+[Bb]in/
+[Oo]bj/
+plugin/artifacts/
+*.user

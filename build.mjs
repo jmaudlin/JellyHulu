@@ -61,7 +61,7 @@ const UNICODE_RANGES = {
     'U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF',
 };
 
-async function fontFace(face, embed) {
+async function fontFace(face, embed, base) {
   const filePath = path.join(FONTS, face.file);
   if (!existsSync(filePath)) {
     fail(`missing font file: ${face.file}`);
@@ -73,7 +73,7 @@ async function fontFace(face, embed) {
     const bytes = await readFile(filePath);
     src = `url("data:font/woff2;base64,${bytes.toString('base64')}") format("woff2")`;
   } else {
-    src = `url("${FONT_BASE}/${face.file}") format("woff2")`;
+    src = `url("${base}/${face.file}") format("woff2")`;
   }
 
   return [
@@ -88,7 +88,7 @@ async function fontFace(face, embed) {
   ].join('\n');
 }
 
-async function fontLayer(embed) {
+async function fontLayer(embed, base) {
   const header = [
     '/* ==========================================================================',
     '   JellyHulu — Figtree (SIL Open Font License 1.1)',
@@ -96,7 +96,7 @@ async function fontLayer(embed) {
     '   Full licence text: fonts/Figtree-OFL.txt',
     embed
       ? '   Embedded as data URIs so the theme makes no external requests and'
-      : `   Loaded from ${FONT_BASE} — copy the files in fonts/ to that path.`,
+      : `   Loaded from ${base} — the files in fonts/ must be served there.`,
     embed
       ? '   works on a LAN-only or air-gapped server.'
       : '   ',
@@ -105,7 +105,7 @@ async function fontLayer(embed) {
   ].join('\n');
 
   const faces = [];
-  for (const face of FONT_FACES) faces.push(await fontFace(face, embed));
+  for (const face of FONT_FACES) faces.push(await fontFace(face, embed, base));
   return header + faces.filter(Boolean).join('\n\n') + '\n';
 }
 
@@ -136,7 +136,7 @@ function banner(kind) {
   ].join('\n');
 }
 
-async function buildCss({ embedFonts, outName, label }) {
+async function buildCss({ embedFonts, outName, label, fontBase = FONT_BASE }) {
   const modules = await collect(SRC_CSS, '.css');
   if (!modules.length) fail('no CSS modules found');
 
@@ -148,7 +148,7 @@ async function buildCss({ embedFonts, outName, label }) {
   const rest = modules.filter((m) => m !== tokens);
 
   if (tokens) parts.push(tokens.code);
-  parts.push(await fontLayer(embedFonts));
+  parts.push(await fontLayer(embedFonts, fontBase));
   rest.forEach((m) => parts.push(`\n/* ── ${m.name} ${'─'.repeat(Math.max(0, 62 - m.name.length))} */\n`, m.code));
 
   const code = parts.join('\n');
@@ -265,6 +265,17 @@ const light = await buildCss({
   label: 'stylesheet, fonts served from ' + FONT_BASE,
 });
 
+/* The plugin serves this stylesheet from <base>/JellyHulu/jellyhulu.css and
+   the font files from <base>/JellyHulu/fonts/. A relative url() resolves
+   against the stylesheet's own address, so "fonts/..." is correct whatever
+   base path Jellyfin is mounted under — no absolute path to get wrong. */
+const plugin = await buildCss({
+  embedFonts: false,
+  fontBase: 'fonts',
+  outName: 'jellyhulu-plugin',
+  label: 'stylesheet for the Jellyfin plugin',
+});
+
 const js = await buildJs();
 
 await sanity();
@@ -272,6 +283,7 @@ await sanity();
 console.log(`JellyHulu v${VERSION}`);
 console.log(`  dist/jellyhulu.css                ${kb(full.raw)}  →  min ${kb(full.min)}`);
 console.log(`  dist/jellyhulu-linked-fonts.css   ${kb(light.raw)}  →  min ${kb(light.min)}`);
+console.log(`  dist/jellyhulu-plugin.css         ${kb(plugin.raw)}  →  min ${kb(plugin.min)}`);
 console.log(`  dist/jellyhulu.js                 ${kb(js.raw)}  →  min ${kb(js.min)}`);
 
 if (problems.length) {
