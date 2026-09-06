@@ -39,6 +39,42 @@ it: a Jellyfin upgrade replaces the web client directory and undoes a manual
    recent one generated and can be a release behind.
 
 
+### Serving the manifest from jsDelivr
+
+You can point Jellyfin at a jsDelivr copy of `manifest.json` instead:
+
+```
+https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@main/manifest.json
+```
+
+It works, but it is the weaker option here, and the reasons are worth knowing
+because two of them are easy to get wrong:
+
+- **Don't pin a tag.** A Jellyfin plugin repository manifest is *cumulative* —
+  it lists every version and the server picks the newest compatible one. Pin
+  it to `@1.0.0` and nobody ever sees 1.1.0, which defeats the point of a
+  repository URL. This is the opposite of the advice for the stylesheet, where
+  pinning is exactly right.
+- **Branch URLs are cached for about 12 hours.** jsDelivr caches tags and
+  commit SHAs permanently, branches briefly. So for a while after a release,
+  jsDelivr may still serve the previous manifest. That is *benign* rather than
+  broken — the stale copy still lists older versions pointing at release
+  archives whose checksums still match, so nothing fails to install; people
+  just don't see the new version yet. Force it through with
+  `https://purge.jsdelivr.net/gh/jmaudlin/JellyHulu@main/manifest.json`.
+- **A branch name containing `/` cannot be addressed.** jsDelivr parses
+  everything after `@` as `<ref>/<path>`, so a ref like
+  `claude/some-feature` is read as ref `claude` and the rest as the file path.
+  Fine for `main`; a trap for feature branches.
+
+None of that applies to the release URL above, which is served from the same
+release that produced the archive it describes — so the checksums match
+structurally rather than as a matter of timing. And the thing a CDN is good at,
+low-latency delivery to every client, doesn't apply to a manifest fetched
+occasionally by one server. Use jsDelivr for the *stylesheet*, where every
+client fetches it on every page load; see
+[INSTALL.md](INSTALL.md) Route C.
+
 ### By hand
 
 Download `jellyhulu_<version>.zip` from the

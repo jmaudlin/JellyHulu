@@ -64,11 +64,20 @@ One line, always current, but every client fetches from jsDelivr — so it needs
 internet access from each device, and it tells jsDelivr who's browsing.
 
 ```css
-@import url('https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@v1.0.0/dist/jellyhulu.min.css');
+@import url('https://cdn.jsdelivr.net/gh/jmaudlin/JellyHulu@1.0.0/dist/jellyhulu.min.css');
 ```
 
-Pin a tag, as above. Pointing at `@main` means an upstream change lands on
-your server unannounced.
+**Pin a release tag**, as above — check the
+[tags](https://github.com/jmaudlin/JellyHulu/tags) for the current one.
+Two reasons this matters more than it looks:
+
+- `@main` means an upstream change lands on your server unannounced.
+- jsDelivr caches a tag permanently but a branch for only about 12 hours, so a
+  branch URL is both less predictable *and* slower to propagate when you do
+  want a change.
+
+A tag that doesn't exist yet returns a 404 from jsDelivr and the `@import`
+silently does nothing — if the theme doesn't appear, check the tag first.
 
 ### Route D: any web server you already run
 
