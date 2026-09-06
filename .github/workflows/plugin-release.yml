@@ -90,27 +90,41 @@ jobs:
             Then install **JellyHulu** from the catalogue.
 
       - name: Commit the updated manifest
-        # The manifest carries the checksum of the zip that was just built, so
-        # it has to be committed from the same run that produced it — a
-        # locally generated manifest would not match CI's archive.
+        # The manifest carries the checksum of the archive just built, so it
+        # has to be committed from the same run that produced it — a locally
+        # generated manifest would not match CI's archive.
+        #
+        # This deliberately commits into a detached worktree of the target
+        # branch rather than rebasing the release branch onto it. Rebasing
+        # replays *every* commit since the merge base, so pushing the result
+        # would land the whole release branch on the default branch — an
+        # unreviewed merge dressed up as a manifest update. Only manifest.json
+        # may travel here.
         run: |
           set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          target="${{ github.event.repository.default_branch }}"
 
-          if git diff --quiet -- manifest.json; then
-            echo "manifest.json unchanged"
+          if ! git fetch origin "$target"; then
+            echo "::warning::could not fetch $target; manifest not committed"
             exit 0
           fi
 
-          target="${{ github.event.repository.default_branch }}"
+          work="$(mktemp -d)"
+          git worktree add --detach "$work" "origin/$target"
+          cp manifest.json "$work/manifest.json"
+
+          cd "$work"
+          if git diff --quiet -- manifest.json; then
+            echo "manifest.json on $target is already current"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add manifest.json
           git commit -m "Update the plugin manifest for ${{ steps.version.outputs.tag }}"
 
-          # On a manual run the checkout may already be that branch; on a tag
-          # run it is detached. Fetch and rebase so the push is a fast-forward
-          # either way, and never fail the release over this step — the
-          # artifacts are already published by now.
-          git fetch origin "$target" || true
-          git rebase "origin/$target" || { echo "::warning::could not rebase onto $target"; exit 0; }
-          git push origin "HEAD:$target" || echo "::warning::could not push the manifest to $target"
+          # Never fail the run here: the release is already published, and
+          # reporting failure would describe a broken release that succeeded.
+          git push origin "HEAD:$target" \
+            || echo "::warning::could not push the manifest to $target"
