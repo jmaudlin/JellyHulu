@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" class="transparentDocument">
+<head>
+<meta charset="utf-8">
+<title>JellyHulu — video player fixture</title>
+<style>
+  /* --- Stand-ins for jellyfin-web's own stylesheet ----------------------
+     Quoted from jellyfin-web 10.11.11, not paraphrased, from:
+
+       src/index.html                          (the inline transparency style)
+       src/themes/dark/theme.scss
+       src/plugins/htmlVideoPlayer/style.scss
+       src/styles/librarybrowser.scss
+       src/styles/videoosd.scss
+
+     The thing this fixture exists to model is where the <video> sits.
+     htmlVideoPlayer inserts its container with
+
+       document.body.insertBefore(playerDlg, document.body.firstChild)
+
+     so the video is the FIRST child of <body> — underneath the entire app
+     shell in paint order. It is visible only because the video OSD calls
+     setBackdropTransparency(Full), which puts .transparentDocument on <html>
+     and .backgroundContainer-transparent on the background, and the rule
+     below then makes the shell see-through.
+
+     That means any opaque background a theme puts on the shell — .skinBody,
+     the OSD page, anything spanning the viewport above body's first child —
+     hides the video completely while audio, controls and the timer carry on
+     as normal. */
+
+  /* index.html, inline <style> */
+  .transparentDocument,
+  .backgroundContainer-transparent:not(.withBackdrop) {
+    background: none !important;
+    background-color: transparent !important;
+  }
+
+  /* themes/dark/theme.scss */
+  .backgroundContainer,
+  .dialog,
+  html {
+    background-color: #101010;
+  }
+
+  /* plugins/htmlVideoPlayer/style.scss */
+  .videoPlayerContainer {
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    background: #000 !important;
+  }
+
+  .htmlvideoplayer {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* librarybrowser.scss */
+  .backdropContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+  }
+
+  .skinHeader {
+    position: fixed;
+    right: 0;
+    left: 0;
+    z-index: 999;
+    top: 0;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* videoosd.scss */
+  .videoOsdBottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: fixed;
+    background: linear-gradient(0deg, rgba(16, 16, 16, 0.75) 0%, rgba(16, 16, 16, 0) 100%);
+    padding-top: 7.5em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    color: #fff;
+    pointer-events: none;
+  }
+
+  .hide { display: none !important; }
+</style>
+<link rel="stylesheet" href="../dist/jellyhulu.css">
+</head>
+<!-- .transparentDocument is what the OSD controller sets on <html> while a
+     video is playing. -->
+<body>
+
+<!-- body.firstChild, exactly as htmlVideoPlayer inserts it. The poster is a
+     solid magenta pixel: the test samples the middle of the screen, so
+     magenta means the video surface is visible and anything else means
+     something is painted over it. A real <video> is used rather than a
+     stand-in div because the poster is drawn by the same box the frames
+     would be. -->
+<div class="videoPlayerContainer" dir="ltr">
+  <video class="htmlvideoplayer" preload="metadata" playsinline
+         poster="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z/AfAAQAAf8iCjrwAAAAAElFTkSuQmCC"></video>
+</div>
+
+<!-- components/Backdrop.tsx -->
+<div class="backdropContainer hide"></div>
+<div class="backgroundContainer backgroundContainer-transparent"></div>
+
+<!-- components/AppHeader.tsx -->
+<div class="mainDrawer hide"><div class="mainDrawer-scrollContainer scrollContainer focuscontainer-y"></div></div>
+<div class="skinHeader focuscontainer-x osdHeader skinHeader-withBackground">
+  <div class="headerTop">
+    <div class="headerLeft">
+      <button class="headerButton headerBackButton paper-icon-button-light"><span class="material-icons">arrow_back</span></button>
+      <h3 class="pageTitle">Some Film</h3>
+    </div>
+  </div>
+</div>
+<div class="mainDrawerHandle"></div>
+
+<!-- components/AppBody.tsx -->
+<div class="mainAnimatedPages skinBody">
+  <!-- controllers/playback/video/index.html -->
+  <div id="videoOsdPage" data-role="page" class="page libraryPage">
+    <div class="videoOsdBottom">
+      <div class="osdControls">
+        <div class="osdTextContainer osdMainTextContainer">
+          <h3 class="osdTitle">Some Film</h3>
+        </div>
+        <div class="sliderContainer osdProgressInner">
+          <input type="range" class="mdl-slider osdPositionSlider" min="0" max="100" value="20">
+        </div>
+        <div class="buttons">
+          <button class="btnPlayPause paper-icon-button-light"><span class="material-icons">pause</span></button>
+          <span class="osdPositionText">0:12</span>
+          <span class="osdDurationText">1:42:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="skinBody"></div>
+
+</body>
+</html>
