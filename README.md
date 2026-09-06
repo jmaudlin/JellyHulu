@@ -117,7 +117,7 @@ throughout, and rank badges that reach screen readers as text.
 
 ## Screens
 
-![The home page: hero carousel, ranked rail, Hulu green accents](test/screenshot-home.png)
+![The home page: hero carousel, ranked rail, Hulu green accents](docs/screenshot-home.png)
 
 *Rendered by the test fixture in `test/` — placeholder artwork, real theme.*
 

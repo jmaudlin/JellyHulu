@@ -2,10 +2,16 @@
    boots cleanly and does what it claims. */
 import { chromium } from 'playwright';
 import path from 'node:path';
-import { existsSync } from 'node:fs';
+import fs, { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+/* Screenshots are test output, not documentation. They land in an ignored
+   directory because browser rendering is not byte-deterministic — writing
+   them next to tracked files meant every single test run dirtied the repo.
+   The one the README embeds lives in docs/ and is regenerated deliberately. */
+const OUT = path.join(ROOT, 'output');
+fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 const check = (name, ok, detail) => {
   results.push({ name, ok, detail });
@@ -152,7 +158,7 @@ check('trickplay preview mounts when there is no trailer',
 
 await page.mouse.move(5, 5);
 await page.waitForTimeout(250);
-await page.screenshot({ path: path.join(ROOT, 'screenshot-home.png') });
+await page.screenshot({ path: path.join(OUT, 'screenshot-home.png') });
 check('preview is torn down on leave',
   await page.locator('.jh-card-preview').count() === 0);
 
@@ -324,12 +330,12 @@ check('TV mode drops blur for weak GPUs',
 check('no horizontal overflow in TV mode',
   await page.evaluate(() =>
     document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1));
-await page.screenshot({ path: path.join(ROOT, 'screenshot-tv.png') });
+await page.screenshot({ path: path.join(OUT, 'screenshot-tv.png') });
 
 await page.evaluate(() => window.JellyHulu.settings.set('tv', 'auto'));
 await page.setViewportSize({ width: 430, height: 900 });
 await page.waitForTimeout(260);
-await page.screenshot({ path: path.join(ROOT, 'screenshot-mobile.png') });
+await page.screenshot({ path: path.join(OUT, 'screenshot-mobile.png') });
 
 await page.setViewportSize({ width: 1440, height: 900 });
 await page.waitForTimeout(220);
