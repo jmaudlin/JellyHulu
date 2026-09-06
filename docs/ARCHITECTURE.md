@@ -9,9 +9,15 @@ fonts/            Figtree (variable, OFL) + licence
 build.mjs         concatenate, generate @font-face, minify, verify
 dist/             built output — committed, so a clone is ready to install
 scripts/          install/uninstall the companion into jellyfin-web
+plugin/           the Jellyfin server plugin (C#) and its tests
 test/             a mock Jellyfin DOM plus a browser-driven smoke test
 docs/             this and its neighbours
+manifest.json     the plugin repository manifest, regenerated per release
 ```
+
+The plugin is a distribution mechanism, not a second implementation: it
+embeds the same `dist/` bundles the manual install uses, so there is exactly
+one theme and one companion script. `docs/PLUGIN.md` covers its internals.
 
 ## The CSS cascade, on purpose
 
@@ -148,6 +154,17 @@ mount/teardown, the settings panel round-tripping through `localStorage`, and
 a set of regression checks for layout bugs that have actually happened —
 numerals clipped by the card frame, rail buttons anchored to the viewport,
 and rail chrome covering a card's hit area.
+
+## The three build variants of the stylesheet
+
+The same modules produce three files, differing only in how the font is
+reached:
+
+| File | `@font-face src` | For |
+| --- | --- | --- |
+| `jellyhulu.css` | `data:` URIs | Pasting into Custom CSS, or self-hosting one file. Self-contained, no external requests. |
+| `jellyhulu-linked-fonts.css` | `/web/jellyhulu/fonts/…` | A manual install that copies the fonts into the web root |
+| `jellyhulu-plugin.css` | `fonts/…` — relative | The plugin, which serves the stylesheet at `<base>/JellyHulu/jellyhulu.css`. A relative `url()` resolves against the stylesheet's own address, so it is correct under any base path. |
 
 ## Adding a surface
 

@@ -1,0 +1,56 @@
+name: Plugin
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'plugin/**'
+      - 'dist/**'
+      - 'fonts/**'
+      - '.github/workflows/plugin.yml'
+  pull_request:
+    paths:
+      - 'plugin/**'
+      - 'dist/**'
+      - 'fonts/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the theme
+        # The plugin embeds dist/, so the theme has to be current before the
+        # plugin is compiled — otherwise CI would happily build a plugin
+        # around a stale stylesheet.
+        run: npm run check
+
+      - name: Build the plugin
+        run: dotnet build plugin/Jellyfin.Plugin.JellyHulu.sln -c Release --nologo
+
+      - name: Test the plugin
+        run: dotnet test plugin/Jellyfin.Plugin.JellyHulu.Tests -c Release --no-build --nologo
+
+      - name: Package
+        run: plugin/package.sh
+
+      - name: Upload the plugin package
+        uses: actions/upload-artifact@v4
+        with:
+          name: jellyhulu-plugin
+          path: |
+            plugin/artifacts/*.zip
+            plugin/artifacts/logo.png

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>JellyHulu</title>
+</head>
+<body>
+<div id="JellyHuluConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+  <div data-role="content">
+    <div class="content-primary">
+
+      <form id="JellyHuluConfigForm">
+
+        <div id="jhStatus" class="verticalSection" style="margin-bottom:1.5em"></div>
+
+        <div class="verticalSection">
+          <h2 class="sectionTitle">Injection</h2>
+
+          <div class="checkboxContainer checkboxContainer-withDescription">
+            <label class="emby-checkbox-label">
+              <input is="emby-checkbox" type="checkbox" id="Enabled" />
+              <span>Enable JellyHulu</span>
+            </label>
+            <div class="fieldDescription checkboxFieldDescription">
+              Turn this off to leave the web client untouched, without uninstalling.
+              The quickest way to check whether a problem is the theme's.
+            </div>
+          </div>
+
+          <div class="checkboxContainer checkboxContainer-withDescription">
+            <label class="emby-checkbox-label">
+              <input is="emby-checkbox" type="checkbox" id="InjectStylesheet" />
+              <span>Serve the stylesheet</span>
+            </label>
+            <div class="fieldDescription checkboxFieldDescription">
+              Adds the theme to the web client. Leave off if you would rather paste
+              the CSS into Dashboard &rarr; General &rarr; Custom CSS yourself.
+            </div>
+          </div>
+
+          <div class="checkboxContainer checkboxContainer-withDescription">
+            <label class="emby-checkbox-label">
+              <input is="emby-checkbox" type="checkbox" id="InjectScript" />
+              <span>Serve the companion script</span>
+            </label>
+            <div class="fieldDescription checkboxFieldDescription">
+              Adds the hero carousel, hover previews, rank badges and the per-user
+              settings panel. The stylesheet is a complete theme without it.
+            </div>
+          </div>
+        </div>
+
+        <div class="verticalSection">
+          <h2 class="sectionTitle">Defaults for new users</h2>
+          <p class="fieldDescription" style="margin-bottom:1em">
+            Starting points, not policy &mdash; anyone can change these for themselves
+            in the theme's settings panel, and their choice is remembered per user.
+          </p>
+
+          <div class="inputContainer">
+            <label class="inputLabel inputLabelUnfocused" for="DefaultAccent">Accent colour</label>
+            <input is="emby-input" type="text" id="DefaultAccent" pattern="#[0-9A-Fa-f]{6}" />
+            <div class="fieldDescription">
+              A hex colour. Hulu green is <code>#1CE783</code>. Text drawn on the accent
+              flips between near-black and white automatically to stay legible.
+            </div>
+          </div>
+
+          <div class="selectContainer">
+            <label class="selectLabel" for="DefaultDensity">Card density</label>
+            <select is="emby-select" id="DefaultDensity" class="emby-select-withcolor emby-select">
+              <option value="compact">Compact</option>
+              <option value="comfortable">Comfortable</option>
+              <option value="cinematic">Cinematic</option>
+            </select>
+          </div>
+
+          <div class="selectContainer">
+            <label class="selectLabel" for="DefaultMotion">Animation</label>
+            <select is="emby-select" id="DefaultMotion" class="emby-select-withcolor emby-select">
+              <option value="full">Full</option>
+              <option value="subtle">Subtle</option>
+              <option value="off">Off</option>
+            </select>
+            <div class="fieldDescription">
+              A viewer's operating-system "reduce motion" setting is always honoured,
+              whatever is chosen here.
+            </div>
+          </div>
+
+          <div class="checkboxContainer">
+            <label class="emby-checkbox-label">
+              <input is="emby-checkbox" type="checkbox" id="DefaultHero" />
+              <span>Featured carousel on the home page</span>
+            </label>
+          </div>
+
+          <div class="checkboxContainer checkboxContainer-withDescription">
+            <label class="emby-checkbox-label">
+              <input is="emby-checkbox" type="checkbox" id="DefaultPreviews" />
+              <span>Hover previews</span>
+            </label>
+            <div class="fieldDescription checkboxFieldDescription">
+              Plays a local trailer where one exists, otherwise animates the scrub
+              thumbnails from Generate Trickplay Images. Off automatically on weak
+              devices and on touch.
+            </div>
+          </div>
+
+          <div class="checkboxContainer">
+            <label class="emby-checkbox-label">
+              <input is="emby-checkbox" type="checkbox" id="DefaultBadges" />
+              <span>Rank and "new" badges</span>
+            </label>
+          </div>
+
+          <div class="inputContainer">
+            <label class="inputLabel inputLabelUnfocused" for="HeroDwellSeconds">Carousel dwell (seconds)</label>
+            <input is="emby-input" type="number" id="HeroDwellSeconds" min="3" max="60" step="1" />
+          </div>
+        </div>
+
+        <div class="verticalSection">
+          <h2 class="sectionTitle">Custom CSS</h2>
+          <div class="inputContainer">
+            <label class="inputLabel inputLabelUnfocused" for="CustomCss">Overrides</label>
+            <textarea is="emby-textarea" id="CustomCss" rows="10" spellcheck="false"
+                      style="font-family:monospace"></textarea>
+            <div class="fieldDescription">
+              Appended after the theme, so it always wins. Redeclare any of the theme's
+              tokens here &mdash; for example
+              <code>:root { --jh-accent: #FF4D8D; --jh-radius-card: 10px; }</code>.
+              Putting overrides here rather than in the server's Custom CSS box avoids
+              the ordering trap where a rule above an <code>&#64;import</code> is
+              overridden by it.
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+            <span>Save</span>
+          </button>
+          <button is="emby-button" type="button" id="jhReapply" class="raised block emby-button">
+            <span>Re-apply to the web client</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    (function () {
+      var pluginId = 'a5af0330-baf3-4ba3-9e2b-097e98f13273';
+
+      function renderStatus(status) {
+        var box = document.querySelector('#JellyHuluConfigPage #jhStatus');
+        if (!box) { return; }
+
+        var ok = status.Status === 'Injected';
+        var idle = status.Status === 'Removed' && !status.Enabled;
+        var colour = ok ? '#1CE783' : (idle ? '#7C838E' : '#FFB020');
+
+        var heading = ok
+          ? 'The web client is themed.'
+          : (idle ? 'JellyHulu is installed but switched off.' : 'The web client is not themed.');
+
+        var lines = [
+          '<div style="border-left:3px solid ' + colour + ';padding:.75em 1em;background:rgba(255,255,255,.04);border-radius:6px">',
+          '<strong style="color:' + colour + '">' + heading + '</strong>',
+          '<div style="opacity:.75;margin-top:.35em">' + escapeHtml(status.Detail || '') + '</div>'
+        ];
+
+        if (status.IndexPath) {
+          lines.push('<div style="opacity:.55;margin-top:.35em;font-family:monospace;font-size:.85em">'
+            + escapeHtml(status.IndexPath) + '</div>');
+        }
+
+        if (status.Status === 'NotWritable') {
+          lines.push('<div style="opacity:.75;margin-top:.6em">'
+            + 'Jellyfin cannot write to its own web client directory. Grant the service '
+            + 'account write access to it, or install the companion script with the '
+            + 'repository\'s install script or a reverse-proxy rule instead.</div>');
+        }
+
+        lines.push('<div style="opacity:.55;margin-top:.5em;font-size:.85em">JellyHulu '
+          + escapeHtml(status.Version || '') + '</div>');
+        lines.push('</div>');
+
+        box.innerHTML = lines.join('');
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function loadStatus() {
+        ApiClient.getJSON(ApiClient.getUrl('JellyHulu/Status')).then(renderStatus, function () {
+          // Not fatal: the settings above still save. The status box just
+          // stays empty rather than showing something misleading.
+        });
+      }
+
+      function load(page) {
+        Dashboard.showLoadingMsg();
+        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+          page.querySelector('#Enabled').checked = config.Enabled;
+          page.querySelector('#InjectStylesheet').checked = config.InjectStylesheet;
+          page.querySelector('#InjectScript').checked = config.InjectScript;
+          page.querySelector('#DefaultAccent').value = config.DefaultAccent;
+          page.querySelector('#DefaultDensity').value = config.DefaultDensity;
+          page.querySelector('#DefaultMotion').value = config.DefaultMotion;
+          page.querySelector('#DefaultHero').checked = config.DefaultHero;
+          page.querySelector('#DefaultPreviews').checked = config.DefaultPreviews;
+          page.querySelector('#DefaultBadges').checked = config.DefaultBadges;
+          page.querySelector('#HeroDwellSeconds').value = config.HeroDwellSeconds;
+          page.querySelector('#CustomCss').value = config.CustomCss || '';
+          Dashboard.hideLoadingMsg();
+          loadStatus();
+        });
+      }
+
+      function save(page) {
+        Dashboard.showLoadingMsg();
+        ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+          config.Enabled = page.querySelector('#Enabled').checked;
+          config.InjectStylesheet = page.querySelector('#InjectStylesheet').checked;
+          config.InjectScript = page.querySelector('#InjectScript').checked;
+          config.DefaultAccent = page.querySelector('#DefaultAccent').value.trim() || '#1CE783';
+          config.DefaultDensity = page.querySelector('#DefaultDensity').value;
+          config.DefaultMotion = page.querySelector('#DefaultMotion').value;
+          config.DefaultHero = page.querySelector('#DefaultHero').checked;
+          config.DefaultPreviews = page.querySelector('#DefaultPreviews').checked;
+          config.DefaultBadges = page.querySelector('#DefaultBadges').checked;
+          config.HeroDwellSeconds = parseInt(page.querySelector('#HeroDwellSeconds').value, 10) || 9;
+          config.CustomCss = page.querySelector('#CustomCss').value;
+
+          ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
+            Dashboard.processPluginConfigurationUpdateResult(result);
+            // The server re-injects on configuration change; read back what
+            // actually happened rather than assuming it worked.
+            setTimeout(loadStatus, 400);
+          });
+        });
+      }
+
+      document.querySelector('#JellyHuluConfigPage')
+        .addEventListener('pageshow', function () { load(this); });
+
+      document.querySelector('#JellyHuluConfigForm')
+        .addEventListener('submit', function (e) {
+          e.preventDefault();
+          save(document.querySelector('#JellyHuluConfigPage'));
+          return false;
+        });
+
+      document.querySelector('#jhReapply')
+        .addEventListener('click', function () {
+          Dashboard.showLoadingMsg();
+          ApiClient.ajax({
+            type: 'POST',
+            url: ApiClient.getUrl('JellyHulu/Reapply'),
+            dataType: 'json'
+          }).then(function (status) {
+            Dashboard.hideLoadingMsg();
+            renderStatus(status);
+          }, function () {
+            Dashboard.hideLoadingMsg();
+            Dashboard.alert('Could not re-apply. Check the server log.');
+          });
+        });
+    })();
+  </script>
+</div>
+</body>
+</html>

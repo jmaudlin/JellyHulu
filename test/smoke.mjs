@@ -2,10 +2,16 @@
    boots cleanly and does what it claims. */
 import { chromium } from 'playwright';
 import path from 'node:path';
-import { existsSync } from 'node:fs';
+import fs, { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
+/* Screenshots are test output, not documentation. They land in an ignored
+   directory because browser rendering is not byte-deterministic — writing
+   them next to tracked files meant every single test run dirtied the repo.
+   The one the README embeds lives in docs/ and is regenerated deliberately. */
+const OUT = path.join(ROOT, 'output');
+fs.mkdirSync(OUT, { recursive: true });
 const results = [];
 const check = (name, ok, detail) => {
   results.push({ name, ok, detail });
@@ -152,7 +158,7 @@ check('trickplay preview mounts when there is no trailer',
 
 await page.mouse.move(5, 5);
 await page.waitForTimeout(250);
-await page.screenshot({ path: path.join(ROOT, 'screenshot-home.png') });
+await page.screenshot({ path: path.join(OUT, 'screenshot-home.png') });
 check('preview is torn down on leave',
   await page.locator('.jh-card-preview').count() === 0);
 
@@ -194,6 +200,47 @@ await page.keyboard.press('Escape');
 await page.waitForTimeout(320);
 check('Escape closes the panel',
   await page.locator('.jh-settings-overlay.is-open').count() === 0);
+
+// --- server defaults (the Jellyfin plugin's route) ---------------------
+// The plugin publishes window.JELLYHULU_DEFAULTS before the bundle loads.
+// They must sit between the built-in defaults and a user's own choices.
+{
+  const ctx = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => {
+    window.JELLYHULU_DEFAULTS = {
+      accent: '#FF4D8D',
+      density: 'compact',
+      hero: 'off',
+      bogusKey: 'ignored',
+    };
+  });
+  await ctx.goto('file://' + path.join(ROOT, 'fixture.html'));
+  await ctx.waitForTimeout(700);
+
+  check('server default accent is applied',
+    await ctx.evaluate(() => getComputedStyle(document.documentElement)
+      .getPropertyValue('--jh-accent').trim().toLowerCase() === '#ff4d8d'));
+  check('server default density is applied',
+    await ctx.evaluate(() => document.documentElement.getAttribute('data-jh-density') === 'compact'));
+  check('server default can switch the hero off',
+    await ctx.locator('.jh-hero').count() === 0);
+  check('unknown keys from the server are ignored',
+    await ctx.evaluate(() => !('bogusKey' in window.JellyHulu.settings.all())));
+
+  // A user's own choice must still win over the server's default.
+  await ctx.evaluate(() => window.JellyHulu.settings.set('density', 'cinematic'));
+  await ctx.waitForTimeout(120);
+  check('a user setting overrides the server default',
+    await ctx.evaluate(() => document.documentElement.getAttribute('data-jh-density') === 'cinematic'));
+
+  // ...and reset must return to the server's default, not the built-in one.
+  await ctx.evaluate(() => window.JellyHulu.reset());
+  await ctx.waitForTimeout(120);
+  check('reset returns to the server default, not the built-in one',
+    await ctx.evaluate(() => document.documentElement.getAttribute('data-jh-density') === 'compact'));
+
+  await ctx.close();
+}
 
 // --- header measurement -----------------------------------------------
 check('header height is measured onto the offset token',
@@ -283,12 +330,12 @@ check('TV mode drops blur for weak GPUs',
 check('no horizontal overflow in TV mode',
   await page.evaluate(() =>
     document.documentElement.scrollWidth - document.documentElement.clientWidth <= 1));
-await page.screenshot({ path: path.join(ROOT, 'screenshot-tv.png') });
+await page.screenshot({ path: path.join(OUT, 'screenshot-tv.png') });
 
 await page.evaluate(() => window.JellyHulu.settings.set('tv', 'auto'));
 await page.setViewportSize({ width: 430, height: 900 });
 await page.waitForTimeout(260);
-await page.screenshot({ path: path.join(ROOT, 'screenshot-mobile.png') });
+await page.screenshot({ path: path.join(OUT, 'screenshot-mobile.png') });
 
 await page.setViewportSize({ width: 1440, height: 900 });
 await page.waitForTimeout(220);

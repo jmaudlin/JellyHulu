@@ -1,0 +1,20 @@
+# Descriptor for jprm (Jellyfin Plugin Repository Manager), so this plugin can
+# be built by the community tooling as well as by package.sh.
+name: "JellyHulu"
+guid: "a5af0330-baf3-4ba3-9e2b-097e98f13273"
+version: "1.0.0.0"
+targetAbi: "10.10.0.0"
+framework: "net8.0"
+owner: "jmaudlin"
+category: "General"
+overview: "A Hulu-inspired theme for the Jellyfin web client."
+description: >
+  Serves the JellyHulu stylesheet, its companion script and its fonts directly
+  from the Jellyfin server, and keeps the web client pointing at them across
+  server upgrades. Includes server-wide defaults for accent, density, motion,
+  the featured carousel, hover previews and badges, which each user can still
+  override for themselves.
+artifacts:
+  - "Jellyfin.Plugin.JellyHulu.dll"
+changelog: >
+  First release.

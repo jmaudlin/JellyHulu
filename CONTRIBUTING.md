@@ -57,6 +57,32 @@ method, registered in the list in `99-boot.js`. Subscribe to page changes with
 If it adds UI, style it in `src/css/22-settings-panel.css` or a new module —
 never with inline styles, so it stays themeable.
 
+## Working on the plugin
+
+The plugin lives in `plugin/` and needs the .NET 8 SDK.
+
+```bash
+npm run build                                              # it embeds dist/
+dotnet build plugin/Jellyfin.Plugin.JellyHulu.sln -c Release
+dotnet test plugin/Jellyfin.Plugin.JellyHulu.Tests -c Release
+```
+
+The project builds with `TreatWarningsAsErrors` and the Recommended analyser
+set, so a warning fails the build. That is deliberate: this code edits a file
+users depend on, and the analysers catch a fair amount of it. Suppress a rule
+only where it is genuinely wrong — as with `CA1822` on MVC action methods,
+which ASP.NET Core will not route if they are static — and always with a
+justification saying why.
+
+The plugin embeds `dist/`, so it can never be built around a stale theme:
+`package.sh` rebuilds the bundles first, and CI runs `npm run check` before
+compiling.
+
+Anything touching `WebIndexInjector` needs a test. It is the one part that
+rewrites a real file, and the properties that matter — a byte-identical round
+trip, no duplicate blocks, no write when nothing changed — are exactly the
+ones that are easy to break by accident.
+
 ## Tests
 
 `test/smoke.mjs` is a plain script, not a framework. Add a `check(name,

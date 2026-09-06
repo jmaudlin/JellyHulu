@@ -44,6 +44,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshot
-          path: test/screenshot-home.png
+          name: screenshots
+          path: test/output/*.png
           if-no-files-found: ignore

@@ -137,8 +137,32 @@ const DEFAULTS = {
   heroDwell: 9,               // seconds
 };
 
+/* Server-wide defaults, published by the Jellyfin plugin as
+   window.JELLYHULU_DEFAULTS before this bundle loads. They sit between the
+   built-in defaults and the user's own stored choices, so an administrator
+   can set the house style without taking the setting away from anyone. */
+function serverDefaults() {
+  const supplied = window.JELLYHULU_DEFAULTS;
+  if (!supplied || typeof supplied !== 'object') return {};
+
+  // Only keys the theme actually knows about, so a typo in the plugin
+  // configuration can't inject an arbitrary attribute value onto <html>.
+  const out = {};
+  Object.keys(DEFAULTS).forEach((name) => {
+    if (Object.prototype.hasOwnProperty.call(supplied, name)) {
+      out[name] = supplied[name];
+    }
+  });
+  return out;
+}
+
 const Settings = {
   _cache: null,
+
+  /* Defaults plus whatever the server asked for — what "reset" returns to. */
+  baseline() {
+    return Object.assign({}, DEFAULTS, serverDefaults());
+  },
 
   key() {
     let uid = '';
@@ -156,7 +180,7 @@ const Settings = {
     try {
       stored = JSON.parse(localStorage.getItem(this.key()) || '{}') || {};
     } catch (_) { stored = {}; }
-    this._cache = Object.assign({}, DEFAULTS, stored);
+    this._cache = Object.assign(this.baseline(), stored);
     return this._cache;
   },
 
@@ -176,7 +200,7 @@ const Settings = {
   },
 
   reset() {
-    this._cache = Object.assign({}, DEFAULTS);
+    this._cache = this.baseline();
     try { localStorage.removeItem(this.key()); } catch (_) {}
     this.apply();
     document.dispatchEvent(new CustomEvent('jellyhulu:settingchange', {

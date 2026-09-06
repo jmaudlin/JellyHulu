@@ -60,6 +60,18 @@ Where a modern feature isn't available the theme degrades rather than breaks:
 - **`-webkit-text-stroke`** draws the rank numerals. Without it they render as
   filled white numerals, which still reads correctly.
 
+## The JellyHulu plugin
+
+| Jellyfin | Status |
+| --- | --- |
+| 10.11.x | Supported — .NET 9 loads the net8.0 assembly |
+| 10.10.x | Supported — the build target |
+| 10.9.x and older | Not supported; `IPluginServiceRegistrator` and the hosted-service lifecycle differ |
+
+It needs Jellyfin to be able to write to its own web client directory, which
+is the default in Docker but **not** on a Debian/Ubuntu package install. See
+[PLUGIN.md](PLUGIN.md).
+
 ## Plugins
 
 Known-good with:
